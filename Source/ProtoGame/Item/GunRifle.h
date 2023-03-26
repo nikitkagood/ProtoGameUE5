@@ -1,0 +1,104 @@
+// Nikita Belov, All rights reserved
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "Item/WeaponGun.h"
+
+#include "GunRifle.generated.h"
+
+UCLASS()
+class PROTOGAME_API UGunRifle : public UWeaponGun
+{
+	GENERATED_BODY()
+
+public:
+	UGunRifle();
+
+	virtual bool SetProperties(FDataTableRowHandle handle) override;
+
+	//Equips and and de-equips (by calling GameCharacter)
+	virtual bool OnUse(AActor* caller) override;
+
+	//Inventory interface; This class supports only WeaponAttachment and AmmoBase items
+	//virtual bool MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination) override;
+	//virtual bool MoveItemToInventoryInGrid(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) override;
+	//virtual bool DropItemToWorld(UItemBase* item) override;
+	//virtual bool ReceiveItem(UItemBase* item) override;
+	//virtual void UpdateInventory() override { OnInventoryUpdated.Broadcast(); };
+private:
+	//Not supported
+	virtual bool ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell) override { check(false); return false; };
+
+public: 	
+	//Weapon controls
+
+	bool CycleChargingHandle();
+
+	const UAmmoBase* CheckChamber() const;
+
+	bool Reload();
+
+	//Reload a bit faster but drop the mag
+	bool ReloadFast();
+
+	bool AttachMagazine();
+
+	bool DetachMagazine();
+
+	void ChangeFireMode();
+
+	//UFUNCTION(BlueprintCallable)
+	//bool ChangeSight() const;
+
+	//UFUNCTION(BlueprintCallable)
+	//bool ChangeSightMode() const;
+
+	//UFUNCTION(BlueprintCallable)
+	//bool ChangeSightBrightness();
+
+	//UFUNCTION(BlueprintCallable)
+	//bool ChangeSightSpecialOption();
+
+	//UFUNCTION(BlueprintCallable)
+	//bool ChangeSightRange() const;
+
+	//UFUNCTION(BlueprintCallable)
+	//bool ToggleFunctionalAttachment();
+
+	//UFUNCTION(BlueprintCallable)
+	//bool ChangeFunctionalAttachmentMode();
+
+	virtual void StartFire() override;
+	virtual void EndFire() override;
+
+	//class related
+
+	//Debug
+	void PrintWeaponStats();
+protected:
+	virtual void OnFire();
+private:
+	bool AddAttachment(UWeaponAttachment* attachment);
+
+	//TODO: implement
+	bool AddAttachmentTo(UWeaponAttachment* attachment, TPair<FAttachmentSlot, UWeaponAttachment*>* slot_pair);
+
+	//FTimerHandle OnFireTimerHandle;
+	//FTimerHandle BurstFireTimerHandle;
+
+	//Weapon related
+
+	//UPROPERTY(BlueprintReadWrite, EditAnywhere, NoClear, meta = (AllowPrivateAccess = true))
+	//FGunRifleInfo gun_rifle_info;
+
+	//Class related
+
+	//TArray<TPair<FAttachmentSlot, UWeaponAttachment*>> attachment_slots;
+
+	//Saved for quick access
+	//int32 MagazineAttachmentIdx;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	bool bTestFire = true;
+};

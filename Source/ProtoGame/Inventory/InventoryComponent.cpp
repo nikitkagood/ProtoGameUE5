@@ -1,0 +1,681 @@
+// Nikita Belov, All rights reserved
+
+
+#include "InventoryComponent.h"
+#include "Item/ItemBase.h"
+#include "InvSpecialSlot.h"
+
+#include "GameFramework/Character.h"
+#include "Kismet/KismetSystemLibrary.h"
+
+#include "Profiler/Profiler.h"
+
+constexpr int32 EMPTY_SPACE = -1;
+
+// Sets default values for this component's properties
+UInventoryComponent::UInventoryComponent()
+{
+    SetupDefaults();
+
+    PrimaryComponentTick.bCanEverTick = false;
+    PrimaryComponentTick.TickInterval = 0.04f; //25hz; if we ever need it
+
+    Rows = 1;
+    Columns = 1;
+}
+
+bool UInventoryComponent::AddItemFromWorld(UItemBase* item)
+{
+    if(item == nullptr)
+    {
+        return false;
+    }
+    if(AddItem(item) == false)
+    {
+        return false;
+    }
+
+    //Cast<AItemActor>(item->ItemActor)->Destroy(); //currently items destroy themselves
+
+    return true;
+}
+
+//bool UInventoryComponent::DropItemToWorld(UItemBase* item)
+//{
+//    if(item == nullptr)
+//    {
+//        return false;
+//    }
+//    if(Items.Contains(item) == false)
+//    {
+//        return false;
+//    }
+//    if(item->SpawnItemActor(GetOwner()->GetActorLocation() + GetOwner()->GetActorForwardVector() * DropDistance, GetOwner()->GetActorRotation()) == false)
+//    {
+//        //can't spawn, do not delete from inventory
+//        UKismetSystemLibrary::PrintString(GetWorld(), "Drop to world is blocked", true, true, FLinearColor(130, 5, 255), 4);
+//        return false;
+//    }
+//
+//    RemoveItem(item);
+//
+//    return true;
+//}
+
+bool UInventoryComponent::MoveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell, bool widget_rotation)
+{
+    bool result = false;
+
+    FIntPoint prev_right_left_cell = item->GetLowerRightCell();
+    
+    bool was_rotated = false;
+
+    was_rotated = item->GetRotated() != widget_rotation;
+    if(was_rotated)
+    {
+        item->Rotate();
+    }
+
+    result = CheckSpaceMove(new_upper_left_cell, item, item->GetDimensions());
+
+    if(result == true)
+    {
+        FillSpaceInGrid(item->GetUpperLeftCell(), prev_right_left_cell, EMPTY_SPACE);
+
+        item->SetUpperLeftCell(new_upper_left_cell);
+
+        FillSpaceInGrid(item->GetUpperLeftCell(), item->GetLowerRightCell(), Items[item]);
+    }
+
+    if(was_rotated && result == false)
+    {
+        item->Rotate(); //rotate back
+    }
+
+    return result;
+}
+
+//bool UInventoryComponent::MoveToSpecialSlot(UItemBase* item, UInvSpecialSlotComponent* destination)
+//{
+//    if(Contains(item) == false)
+//    {
+//        UE_LOG(LogTemp, Error, TEXT("The item %s doesn't belong to this inventory!"), *item->GetName());
+//        return false;
+//    }
+//    if(destination->IsOccupied() == false)
+//    {
+//        if(RemoveItem(item))
+//        {
+//            return destination->AddItem(item);
+//        }
+//    }
+//
+//    return false;
+//}
+
+bool UInventoryComponent::RotateItem(UItemBase* item)
+{
+    bool result = false;
+
+    FIntPoint prev_right_left_cell = item->GetLowerRightCell();
+
+    item->Rotate();
+
+    result = CheckSpaceMove(item->GetUpperLeftCell(), item, item->GetDimensions());
+
+    if(result == true)
+    {
+        FillSpaceInGrid(item->GetUpperLeftCell(), prev_right_left_cell, EMPTY_SPACE);
+
+        FillSpaceInGrid(item->GetUpperLeftCell(), item->GetLowerRightCell(), Items[item]);
+    }
+
+    if(result == false)
+    {
+        item->Rotate(); //rotate back
+    }
+
+    return result;
+}
+
+// Called when the game starts
+void UInventoryComponent::BeginPlay()
+{
+    Super::BeginPlay();
+
+    InitializeInventoryGrid(Rows, Columns);
+}
+
+bool UInventoryComponent::AddItem(UItemBase* item)
+{
+    if(item == nullptr)
+    {
+        UE_LOG(LogTemp, Error, TEXT("AddItem: invald item!"));
+        return false;
+    }
+
+    //If stackable
+    if(item->GetMaxStackSize() > 1)
+    {
+        //Check if can be added to an existing stack
+
+        bool item_filled_existing_stacks = false;
+
+        for(auto& i : Items)
+        {
+            if(*i.Key == *item)
+            {
+                i.Key->StackAdd(item);
+
+                if(item->GetCurrentStackSize() == 0)
+                {
+                    item->ConditionalBeginDestroy();
+
+                    item_filled_existing_stacks = true;
+                    return true;
+                }
+            }
+        }
+    }
+
+
+    if(FreeSpaceLeft >= (item->GetRows() * item->GetColumns()))
+    {
+        constexpr int32 NONE = -9999;
+        FIntPoint free_space_coords = FindFreeSpaceInGrid(item);
+
+        bool was_rotated = false;
+
+        if(free_space_coords == NONE) //try rotated
+        {
+            was_rotated = true;
+            item->Rotate();
+
+            free_space_coords = FindFreeSpaceInGrid(item);
+        }
+
+        if(free_space_coords != NONE)
+        {
+            UpdateFreeSpaceLeft(-1 * item->GetRows() * item->GetColumns());
+            int32 idx = GenerateIndex();
+            Items.Add(item, idx);
+
+            item->SetUpperLeftCell(free_space_coords);
+            FillSpaceInGrid(item->GetUpperLeftCell(), item->GetLowerRightCell(), idx);
+
+            item->SetOuterUpstreamInventory(this);
+            item->World = GetWorld();
+      
+
+            OnInventoryUpdated.Broadcast();
+            return true;
+        }
+        else if(was_rotated == true)
+        {
+            item->Rotate(); //rotate back
+            return false;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    return false;
+}
+
+bool UInventoryComponent::AddItemAt(UItemBase* item, FIntPoint new_upper_left_cell)
+{
+    if(item == nullptr)
+    {
+        UE_LOG(LogTemp, Error, TEXT("AddItem: invald item!"));
+        return false;
+    }
+
+    //If stackable
+    if(item->GetMaxStackSize() > 1)
+    {
+        //Check if can be added to an existing stack
+
+        bool item_filled_existing_stacks = false;
+
+        for(auto& i : Items)
+        {
+            if(*i.Key == *item)
+            {
+                i.Key->StackAdd(item);
+
+                if(item->GetCurrentStackSize() == 0)
+                {
+                    item->ConditionalBeginDestroy();
+
+                    item_filled_existing_stacks = true;
+                    return true;
+                }
+            }
+        }
+    }
+
+
+    if(FreeSpaceLeft >= (item->GetRows() * item->GetColumns()))
+    {
+        if(CheckSpace(new_upper_left_cell, item))
+        {
+            UpdateFreeSpaceLeft(-1 * item->GetRows() * item->GetColumns());
+            int32 idx = GenerateIndex();
+            Items.Add(item, idx);
+
+            item->SetUpperLeftCell(new_upper_left_cell);
+            FillSpaceInGrid(item->GetUpperLeftCell(), item->GetLowerRightCell(), idx);
+
+            item->SetOuterUpstreamInventory(this);
+            item->World = GetWorld();
+
+            OnInventoryUpdated.Broadcast();
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool UInventoryComponent::RemoveItem(UItemBase* item)
+{
+    if(item == nullptr)
+    {
+        UE_LOG(LogTemp, Error, TEXT("RemoveItem: invald item!"));
+        return false;
+    }
+    if(Items.Num() == 0)
+    {
+        UE_LOG(LogTemp, Error, TEXT("RemoveItem: there is nothing to take from inventory!"));
+        return false;
+    }
+
+    auto item_position = FindItemPosition(item); //we use find because UItemBase->GetUpperLeftCell might be overriden by another inventory
+    FillSpaceInGrid(item_position.Key, item_position.Value, EMPTY_SPACE);
+
+    UpdateFreeSpaceLeft(item->GetRows() * item->GetColumns());
+    free_indecies.Push(Items[item]);
+    Mass -= item->GetMass();
+
+    Items.Remove(item);
+
+    OnInventoryUpdated.Broadcast();
+    return true;
+}
+
+bool UInventoryComponent::RemoveItemAt(UItemBase* item, FIntPoint upper_left_cell, FIntPoint lower_right_cell)
+{
+    if(item == nullptr)
+    {
+        UE_LOG(LogTemp, Error, TEXT("RemoveItem: invald item!"));
+        return false;
+    }
+    if(Items.Num() == 0)
+    {
+        UE_LOG(LogTemp, Error, TEXT("RemoveItem: there is nothing to take from inventory!"));
+        return false;
+    }
+
+    FillSpaceInGrid(upper_left_cell, lower_right_cell, EMPTY_SPACE);
+
+    UpdateFreeSpaceLeft(item->GetRows() * item->GetColumns());
+    free_indecies.Push(Items[item]);
+    Mass -= item->GetMass();
+
+    Items.Remove(item);
+
+    OnInventoryUpdated.Broadcast();
+    return true;
+}
+
+void UInventoryComponent::SetupDefaults()
+{
+    InventoryName = "InventoryDefaultName";
+    Rows = 1;
+    Columns = 1;
+    FreeSpaceLeft = 0;
+    Mass = 0;
+    DropDistance = 60;
+}
+
+void UInventoryComponent::InitializeInventoryGrid(int32 rows, int32 columns)
+{
+    if(InventoryGrid.Num() != 0)
+    {
+        checkf(false, TEXT("%s object: InventoryGrid has been initialized already!"), *InventoryName.ToString() );
+    }
+
+    InventoryGrid.Reserve(rows);
+
+    ParallelFor(rows, [&](int32 idx) 
+        {
+            TArray<int32> temp;
+            temp.Init(EMPTY_SPACE, columns);
+            InventoryGrid.Add(temp);
+        });
+
+    FreeSpaceLeft = Rows * Columns;
+}
+
+FIntPoint UInventoryComponent::FindFreeSpaceInGrid(UItemBase* item)
+{
+    LOG_DURATION(LogDurationChronoUnit::nanoseconds, __FUNCTION__);
+
+    constexpr int32 NONE = -9999;
+    auto find = [NONE](int32 first, int32 last, const TArray<int32>& container, int32 value)
+    {
+        for(; first <= last; ++first)
+        {
+            if(container[first] == value)
+            {
+                return first;
+            }
+        }
+        return NONE;
+    };
+
+    for(int32 row_idx = 0; row_idx < InventoryGrid.Num(); row_idx++)
+    {
+        int32 first_col_idx = 0;
+        int32 last_col_idx = InventoryGrid[row_idx].Num() - 1;
+
+        while(first_col_idx != NONE)
+        {
+            first_col_idx = find(first_col_idx, last_col_idx, InventoryGrid[row_idx], -1);
+            
+            if(first_col_idx != NONE)
+            {
+                if(CheckSpace({ row_idx, first_col_idx }, item))
+                {
+                    return { row_idx, first_col_idx };
+                }
+                else
+                {
+                    first_col_idx++;
+                }
+            }
+        }
+    }
+
+    return { NONE, NONE };
+}
+
+TPair<FIntPoint, FIntPoint> UInventoryComponent::FindItemPosition(UItemBase* item) const
+{
+    int32 item_idx = Items[item];
+
+    FIntPoint upper_left_cell;
+    for(size_t i = 0; i < InventoryGrid.Num(); i++)
+    {
+        upper_left_cell.X = InventoryGrid[i].Find(item_idx);
+
+        if(upper_left_cell.X != INDEX_NONE)
+        {
+            upper_left_cell.Y = i;
+            FIntPoint lower_right_cell { upper_left_cell.X + item->GetRows() - 1, upper_left_cell.Y + item->GetColumns() - 1 };
+            return TPair<FIntPoint, FIntPoint>{ upper_left_cell, lower_right_cell };
+        }
+    }
+    
+    return {};
+}
+
+bool UInventoryComponent::CheckSpace(FIntPoint upper_left_cell, UItemBase* item)
+{
+    //whether valid cell idx at all 
+    if(upper_left_cell.X < 0 || upper_left_cell.Y < 0 || upper_left_cell.X > Rows - 1 || upper_left_cell.Y > Columns - 1)
+    {
+        return false;
+    }
+
+    //wether can even fit within inventory dimensions with such starting cell
+    FIntPoint new_lower_right_cell{ upper_left_cell.X + item->GetRows() - 1, upper_left_cell.Y + item->GetColumns() - 1 };
+
+    if(new_lower_right_cell.X >= Rows || new_lower_right_cell.Y >= Columns)
+    {
+        return false;
+    }
+
+    for(int32 i = upper_left_cell.X; i <= new_lower_right_cell.X; i++)
+    {
+        for(int32 j = upper_left_cell.Y; j <= new_lower_right_cell.Y; j++)
+        {
+            if(InventoryGrid[i][j] != EMPTY_SPACE)
+            {
+                return false;
+            }
+        }
+    }
+
+    return true;
+
+}
+
+bool UInventoryComponent::CheckSpaceMove(FIntPoint upper_left_cell, UItemBase* item, FIntPoint dimensions)
+{
+    //whether valid cell idx at all 
+    if(upper_left_cell.X < 0 || upper_left_cell.Y < 0 || upper_left_cell.X > Rows - 1 || upper_left_cell.Y > Columns - 1)
+    {
+        return false;
+    }
+
+    FIntPoint new_lower_right_cell {upper_left_cell.X + dimensions.X - 1, upper_left_cell.Y + dimensions.Y - 1};
+
+    //whether can even fit within inventory dimensions with such starting cell
+    if(new_lower_right_cell.X >= Rows || new_lower_right_cell.Y >= Columns)
+    {
+        return false;
+    }
+
+    bool contains = Contains(item);
+
+    if(contains == true) //check for item idx and empty space
+    {
+        for(int32 i = upper_left_cell.X; i <= new_lower_right_cell.X; i++)
+        {
+            for(int32 j = upper_left_cell.Y; j <= new_lower_right_cell.Y; j++)
+            {
+                if(InventoryGrid[i][j] != Items[item] && InventoryGrid[i][j] != EMPTY_SPACE)
+                {
+                    return false;
+                }
+            }
+        }
+
+    }
+    else //check for empty space only (checking for item idx for non-existent item will result in exception)
+    {
+        for(int32 i = upper_left_cell.X; i <= new_lower_right_cell.X; i++)
+        {
+            for(int32 j = upper_left_cell.Y; j <= new_lower_right_cell.Y; j++)
+            {
+                if(InventoryGrid[i][j] != EMPTY_SPACE)
+                {
+                    return false;
+                }
+            }
+        }
+
+    }
+
+    return true;
+}
+
+void UInventoryComponent::FillSpaceInGrid(FIntPoint upper_left_cell, FIntPoint lower_right_cell, int32 item_idx)
+{
+    for(int32 row = upper_left_cell.X; row <= lower_right_cell.X; row++)
+    {
+        //TODO: Multithread
+        for(int32 column = upper_left_cell.Y; column <= lower_right_cell.Y; column++)
+        {
+            InventoryGrid[row][column] = item_idx;
+        }
+    }
+}
+
+void UInventoryComponent::UpdateFreeSpaceLeft(int32 space_change)
+{
+    FreeSpaceLeft += space_change;
+}
+
+int32 UInventoryComponent::GenerateIndex()
+{
+    if(free_indecies.Num() > 0)
+    {
+        return free_indecies.Pop();
+    }
+    else
+    {
+        return Items.Num();
+    }       
+}
+
+bool UInventoryComponent::Contains(UItemBase* item)
+{
+    return Items.Contains(item);
+}
+
+void UInventoryComponent::PrintInventory()
+{
+    for(int32 i = InventoryGrid.Num() - 1; i != -1; i--)
+    {
+        int32 symbols_added = 0; //how many symbols a number got converted into
+        int32 prev_length = 0;
+        FString str;
+        for(const int32& j : InventoryGrid[i])
+        {
+            prev_length = str.Len();
+            str.AppendInt(j);
+            symbols_added = str.Len() - prev_length;
+            if(symbols_added == 1)
+            {
+                str.Append(" ");
+                str.Append(" ");
+                str.Append(" ");
+                str.Append(" ");
+            }
+            else if(symbols_added == 2)
+            {
+                str.Append(" ");
+                str.Append(" ");
+                str.Append(" ");
+            }
+            else
+            {
+                str.Append(" "); //1 space
+                str.Append(" "); //1 space
+            }
+
+        }
+        UKismetSystemLibrary::PrintString(GetWorld(), str, true, false, FColor::White, 5);
+    }
+
+}
+
+void UInventoryComponent::PrintDebugInfo()
+{
+    FString str;
+    str.Append("InventoryName: ");
+    str.Append(InventoryName.ToString());
+    str.Append("\n");
+    str.Append("Rows: ");
+    str.AppendInt(Rows);
+    str.Append("  Columns: ");
+    str.AppendInt(Columns);
+    str.Append("\n");
+    str.Append("FreeSpaceLeft: ");
+    str.AppendInt(FreeSpaceLeft);
+    str.Append("\n");
+    str.Append("Mass: ");
+    str.AppendInt(Mass);
+    str.Append("\n");
+    str.Append("DropDistance: ");
+    str.AppendInt(DropDistance);
+    str.Append("\n");
+
+    UKismetSystemLibrary::PrintString(GetWorld(), str, true, false, FColor::White, 5);
+}
+
+bool UInventoryComponent::MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination)
+{
+    //TODO: test
+    if(destination.GetObject() == this)
+    {
+        return false;
+    }
+
+    auto temp_upper_l_cell = item->GetUpperLeftCell();
+    auto temp_lower_r_cell = item->GetLowerRightCell();
+
+    if(item != nullptr && Contains(item) && destination->ReceiveItem(item))
+    {
+        RemoveItemAt(item, temp_upper_l_cell, temp_lower_r_cell);
+        return true;
+    }
+
+    return false;
+}
+
+bool UInventoryComponent::MoveItemToInventoryInGrid(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell)
+{
+    //TODO: test
+    if(destination.GetObject() == this)
+    {
+        return false;
+    }
+
+    auto temp_upper_l_cell = item->GetUpperLeftCell();
+    auto temp_lower_r_cell = item->GetLowerRightCell();
+
+    if(item != nullptr && Contains(item) && destination->ReceiveItemInGrid(item, new_upper_left_cell))
+    {
+        RemoveItemAt(item, temp_upper_l_cell, temp_lower_r_cell);
+        return true;
+    }
+
+    return false;
+}
+
+bool UInventoryComponent::DropItemToWorld(UItemBase* item)
+{
+    if(item == nullptr || Contains(item) == false)
+    {
+        return false;
+    }
+
+    auto* item_actor = item->SpawnItemActor(GetOwner()->GetActorLocation() + GetOwner()->GetActorForwardVector() * DropDistance, GetOwner()->GetActorRotation());
+    if(item_actor == nullptr)
+    {
+        //can't spawn, do not delete from inventory
+        UKismetSystemLibrary::PrintString(GetWorld(), "Drop to world is blocked", true, true, FLinearColor(130, 5, 255), 4);
+        return false;
+    }
+
+    RemoveItemAt(item, item->GetUpperLeftCell(), item->GetLowerRightCell());
+
+    item->SetOuterItemActor(item_actor);
+
+    return true;
+}
+
+bool UInventoryComponent::ReceiveItem(UItemBase* item)
+{
+    if(item == nullptr || Items.Contains(item))
+    {
+        return false;
+    }
+
+    return AddItem(item);
+}
+
+bool UInventoryComponent::ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell)
+{
+    if(item == nullptr || Items.Contains(item))
+    {
+        return false;
+    }
+
+    return AddItemAt(item, new_upper_left_cell);
+}

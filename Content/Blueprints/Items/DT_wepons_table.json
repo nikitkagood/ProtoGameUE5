@@ -1,0 +1,67 @@
+[
+	{
+		"Name": "M4",
+		"item_info":
+		{
+			"ItemID": 0,
+			"Type": "None",
+			"Name": "NSLOCTEXT(\"[FDC8DB1B4F1C09C4E5C608B21F15D3AD]\", \"9F4733A64F9705A72DA197B2A1950AF9\", \"M4\")",
+			"Description": "NSLOCTEXT(\"[FDC8DB1B4F1C09C4E5C608B21F15D3AD]\", \"5BC6E32D4DA50C76D464C98A65CB7E37\", \"GoGoUsa\")",
+			"UseActionText": "NSLOCTEXT(\"[FDC8DB1B4F1C09C4E5C608B21F15D3AD]\", \"B9A86E174ABB923595E3EFA73F742406\", \"Equip\")",
+			"Dimensions":
+			{
+				"X": 2,
+				"Y": 4
+			},
+			"MaxStackSize": 1,
+			"Mass": 0.0010000000474974513,
+			"BasePrice": 1,
+			"Thumbnail": "Texture2D'/Game/Textures/ItemThumbnails/T_Thumb_M4.T_Thumb_M4'",
+			"SkeletalMesh": "SkeletalMesh'/Game/Meshes/Items/M4/SK_M4_new.SK_M4_new'"
+		},
+		"weapon_info":
+		{
+			"bFunctional": true,
+			"bHasChamber": true,
+			"FireMode": "Safe",
+			"FireModesAvailable": [
+				"Single",
+				"Auto"
+			],
+			"AmmoType": "BlueprintGeneratedClass'/Game/Blueprints/Projectile/BP_Projectile_5p56x45.BP_Projectile_5p56x45_C'",
+			"FireRate": 800,
+			"VerticalRecoil": 0,
+			"HorizontalRecoil": 0,
+			"PerceivedRecoil": 0,
+			"GunSway": 0,
+			"Dispersion": 0,
+			"DistanceFromSight": 0,
+			"ADS_InAnimTime": 0,
+			"ADS_OutAnimTime": 0,
+			"ADS_InInterpSpeed": 0,
+			"ADS_OutInterpSpeed": 0,
+			"ADS_AccumulatedAnimationTime": 0,
+			"ADS_VertSway": 0,
+			"ADS_HorSway": 0,
+			"ADS_ResetNeeded": false,
+			"bReloading": 0,
+			"ReloadTime": 0,
+			"DrawSpeed": 0,
+			"HolsterSpeed": 0,
+			"Length": 0,
+			"Durability": 150,
+			"Heat": 0,
+			"HeatingSpeed": 1,
+			"FireSound": "SoundCue'/Game/Audio/AR-15_SingleShotOutside_Cue.AR-15_SingleShotOutside_Cue'",
+			"CasingSound": "None",
+			"HoldAnim": "AnimMontage'/Game/Animations/Mannequin/M4/AM_M4_Shoulder.AM_M4_Shoulder'",
+			"AimDownSights": "AnimMontage'/Game/Animations/Mannequin/M4/AM_M4_ADS_ver2.AM_M4_ADS_ver2'",
+			"ReloadCharacter": "AnimMontage'/Game/Animations/Mannequin/M4/AM_M4_ReloadCombined.AM_M4_ReloadCombined'",
+			"ReloadGun": "AnimMontage'/Game/Animations/Items/M4/AM_M4_gun_ReloadCombined.AM_M4_gun_ReloadCombined'",
+			"ChargingHandle": "AnimMontage'/Game/Animations/Mannequin/M4/AM_M4_Charging_hangle.AM_M4_Charging_hangle'",
+			"ChargingHandleGun": "AnimMontage'/Game/Animations/Items/M4/AM_M4_gun_Charging_handle.AM_M4_gun_Charging_handle'",
+			"MuzzleFlash": "ParticleSystem'/Game/Particles/P_Gunshot.P_Gunshot'",
+			"MuzzleLight": "BlueprintGeneratedClass'/Game/Blueprints/Effects/BP_StandardMuzzleLight.BP_StandardMuzzleLight_C'"
+		}
+	}
+]
