@@ -5,6 +5,7 @@
 #include "Engine/DataTable.h"
 #include "ItemInfo.h"
 #include "AmmoInfo.h"
+#include "ItemThumbnailInfo.h"
 #include "AmmoBase.h"
 
 #include "AttachmentInfo.generated.h"
@@ -168,6 +169,9 @@ struct PROTOGAME_API FAttachmentMagazineTable : public FTableRowBase
 	FItemInfo item_info;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	FItemThumbnailInfo item_thumbnail_info;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	FAttachmentInfo attachment_info;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
@@ -194,6 +198,9 @@ struct PROTOGAME_API FAttachmentSightTable : public FTableRowBase
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	FItemInfo item_info;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	FItemThumbnailInfo item_thumbnail_info;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	FAttachmentInfo attachment_info;

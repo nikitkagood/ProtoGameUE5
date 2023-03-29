@@ -4,12 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "EnumItemTypes.h"
-
 #include "Engine/DataTable.h"
 #include "Engine/Texture2DDynamic.h"
 
+#include "ItemThumbnailInfo.h"
+
 #include "ItemInfo.generated.h"
 
+//Contains basic information about items
+//Stored in ItemObject
 USTRUCT(BlueprintType)
 struct PROTOGAME_API FItemInfo : public FTableRowBase
 {
@@ -59,3 +62,17 @@ struct PROTOGAME_API FItemInfo : public FTableRowBase
 	TSoftObjectPtr<UTexture2DDynamic> Thumbnail;
 };
 
+//Contains basic information about Item,
+//also ItemThumbnailInfo which isn't to be included into ItemObject or ItemActor since we access this information infrequently. 
+//So it is stored in data tables only.
+USTRUCT(BlueprintType)
+struct PROTOGAME_API FItemTable : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	FItemInfo item_info;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	FItemThumbnailInfo item_thumbnail_info;
+};

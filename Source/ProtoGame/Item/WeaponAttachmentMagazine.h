@@ -15,10 +15,15 @@ class PROTOGAME_API UWeaponAttachmentMagazine : public UWeaponAttachment, public
 {
 	GENERATED_BODY()
 
+private:
+	using DataTableType = FAttachmentMagazineTable;
+
 public:
 	UWeaponAttachmentMagazine();
 
 	virtual bool SetProperties(FDataTableRowHandle handle) override;
+
+	virtual FItemThumbnailInfo GetItemThumbnailInfoFromDT() override;
 
 	int32 GetCapacity() const { return attachment_magazine_info.capacity; }
 	int32 GetRoundsLeft() const { return attachment_magazine_info.storage.Num(); }

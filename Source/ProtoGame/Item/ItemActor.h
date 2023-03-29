@@ -8,7 +8,6 @@
 #include "Interfaces/InteractionInterface.h"
 #include "Item/ItemInfo.h"
 #include "Item/ItemThumbnailInfo.h"
-#include "Item/ItemBase.h"
 
 #include "ItemActor.generated.h"
 
@@ -56,6 +55,8 @@ class PROTOGAME_API AItemActor : public AActor, public IInteractionInterface
 	
 public:	
 	AItemActor();
+
+	FDataTableRowHandle GetItemProperites() { return DT_ItemProperties; };
 
 	//Deffered spawn is used to set ItemBase
 	//Spawns ItemActor from ItemBase. Sets new ItemActor to be Outer for the ItemBase.
@@ -106,12 +107,9 @@ private:
 	UItemBase* ItemObject;
 
     UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, NoClear, Category = "Item Object", meta = (AllowPrivateAccess = true))
-	TSubclassOf<UItemBase> ItemBaseClass = UItemBase::StaticClass();
+	TSubclassOf<UItemBase> ItemBaseClass;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, NoClear, Category = "Item Object", meta = (AllowPrivateAccess = "true", 
 	EditCondition = "item_object_creation_method == ItemObjectCreationMethod::CreateItemObjectFromDataTable", EditConditionHides))
 	FDataTableRowHandle DT_ItemProperties;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Thumbnail", meta = (AllowPrivateAccess = true))
-	FItemThumbnailInfo thumbnail_info;
 };

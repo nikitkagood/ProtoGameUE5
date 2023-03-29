@@ -23,6 +23,8 @@ public:
 
 	virtual bool SetProperties(FDataTableRowHandle handle) override { check(false); return nullptr; };
 
+	virtual FItemThumbnailInfo GetItemThumbnailInfoFromDT() override { check(false); return {}; };
+
 	UFUNCTION(BlueprintCallable)
 	virtual TSubclassOf<UAnimInstance> GetAnimClass() const { check(false); return nullptr; };
 

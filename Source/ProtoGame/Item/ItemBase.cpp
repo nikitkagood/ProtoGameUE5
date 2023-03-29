@@ -11,7 +11,8 @@
 
 UItemBase::UItemBase()
 {
-	SetupDefaults();
+	upper_left_cell = { -1, -1 };
+	bRotated = false;
 }
 
 UItemBase* UItemBase::StaticCreateObject(AItemActor* outer, TSubclassOf<UItemBase> item_base_class, ItemObjectCreationMethod item_object_creation_method, FDataTableRowHandle dt_item_properties)
@@ -47,11 +48,11 @@ UItemBase* UItemBase::StaticCreateObject(AItemActor* outer, TSubclassOf<UItemBas
 
 bool UItemBase::SetProperties(FDataTableRowHandle handle)
 { 
-	auto* ptr_row = handle.GetRow<FItemInfo>("UItemBase::SetProperties");
+	auto* ptr_row = handle.GetRow<DataTableType>("UItemBase::SetProperties");
 
 	if(ptr_row != nullptr)
 	{
-		item_info = *ptr_row;
+		item_info = ptr_row->item_info;
 		return true;
 	}
 
@@ -126,20 +127,6 @@ bool UItemBase::StackAdd(UItemBase* other)
 	}
 }
 
-void UItemBase::SetupDefaults()
-{
-	//item_info.ItemID = -1;
-	//item_info.Name.FromString("DefaultName");
-	//item_info.Description.FromString("DefaultDescription");
-	//item_info.UseActionText.FromString("DefaultAction");
-	//item_info.Type = ItemType::None;
-	//item_info.Dimensions = { 1, 1 };
-	//item_info.MaxStackSize = 1;
-
-	upper_left_cell = { -1, -1 };
-	bRotated = false;
-}
-
 UStaticMesh* UItemBase::GetStaticMeshFromItemActorCDO() const
 {
 	//Default way to get the mesh. Since it's already used by ItemActor.
@@ -149,7 +136,7 @@ UStaticMesh* UItemBase::GetStaticMeshFromItemActorCDO() const
 USkeletalMesh* UItemBase::GetSkeletalMeshFromItemActorCDO() const
 {
 	//Default way to get the mesh. Since it's already used by ItemActor.
-	return ItemActorClass.GetDefaultObject()->GetSkeletalMeshComp()->SkeletalMesh;
+	return ItemActorClass.GetDefaultObject()->GetSkeletalMeshComp()->GetSkeletalMeshAsset();
 }
 
 TScriptInterface<IInventoryInterface> UItemBase::GetOuterUpstreamInventory() const
@@ -170,6 +157,11 @@ void UItemBase::SetOuterUpstreamInventory(TScriptInterface<IInventoryInterface> 
 void UItemBase::SetOuterItemActor(AItemActor* item_actor)
 { 
 	this->Rename(nullptr, item_actor->_getUObject()); 
+}
+
+FItemThumbnailInfo UItemBase::GetItemThumbnailInfoFromDT()
+{
+	return GetItemThumbnailInfoFromDT_Impl<DataTableType>();
 }
 
 UWorld* UItemBase::GetWorldFromOuter() const

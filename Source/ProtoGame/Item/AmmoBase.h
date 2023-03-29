@@ -11,11 +11,14 @@ UCLASS(Blueprintable, BlueprintType, meta=(BlueprintSpawnableComponent), ClassGr
 class PROTOGAME_API UAmmoBase : public UItemBase
 {
 	GENERATED_BODY()
-
+private:
+	using DataTableType = FAmmoTable;
 public:
-	UAmmoBase();
+	UAmmoBase() = default;
 
 	virtual bool SetProperties(FDataTableRowHandle handle) override;
+
+	virtual FItemThumbnailInfo GetItemThumbnailInfoFromDT() override;
 
 	UFUNCTION(BlueprintCallable)
 	AmmoCaliber GetCaliber() const { return ammo_info.caliber; };

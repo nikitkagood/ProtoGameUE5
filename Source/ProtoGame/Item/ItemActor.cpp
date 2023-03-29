@@ -42,6 +42,7 @@ AItemActor::AItemActor()
 	SetRootComponent(SceneComponent);
 
 	ItemObject = nullptr;
+	ItemBaseClass = UItemBase::StaticClass();
 
 	item_object_creation_method = ItemObjectCreationMethod::CreateItemObjectFromDataTable;
 

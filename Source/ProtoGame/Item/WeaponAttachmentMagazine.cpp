@@ -2,6 +2,7 @@
 
 
 #include "Item/WeaponAttachmentMagazine.h"
+#include "ItemActor.h"
 
 UWeaponAttachmentMagazine::UWeaponAttachmentMagazine()
 {
@@ -10,7 +11,7 @@ UWeaponAttachmentMagazine::UWeaponAttachmentMagazine()
 
 bool UWeaponAttachmentMagazine::SetProperties(FDataTableRowHandle handle)
 {
-	auto* ptr_row = handle.GetRow<FAttachmentMagazineTable>("UWeaponAttachmentMagazine::SetProperties");
+	auto* ptr_row = handle.GetRow<DataTableType>("UWeaponAttachmentMagazine::SetProperties");
 
 	if(ptr_row != nullptr)
 	{
@@ -22,6 +23,11 @@ bool UWeaponAttachmentMagazine::SetProperties(FDataTableRowHandle handle)
 	}
 
     return false;
+}
+
+FItemThumbnailInfo UWeaponAttachmentMagazine::GetItemThumbnailInfoFromDT()
+{
+	return GetItemThumbnailInfoFromDT_Impl<DataTableType>();
 }
 
 bool UWeaponAttachmentMagazine::MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination)

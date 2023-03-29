@@ -9,6 +9,7 @@
 #include "Interfaces/UseInterface.h"
 #include "EnumItemTypes.h"
 #include "ItemInfo.h"
+#include "ItemActor.h"
 
 #include "ItemBase.generated.h"
 
@@ -26,7 +27,11 @@ class PROTOGAME_API UItemBase : public UObject, public IInteractionInterface, pu
 {
 	GENERATED_BODY()
 
-public:	
+private:
+	//What type data table has which stores information needed for this class
+	using DataTableType = FItemTable;
+
+public:	 
 	UItemBase();
 
 	static UItemBase* StaticCreateObject(AItemActor* outer, TSubclassOf<UItemBase> item_base_class, ItemObjectCreationMethod item_object_creation_method, FDataTableRowHandle dt_item_properties = {});
@@ -35,8 +40,18 @@ public:
 
 	void SetItemActorClass(TSubclassOf<AItemActor> value) { ItemActorClass = value; };
 
-	UFUNCTION(BlueprintCallable)
+	UFUNCTION(BlueprintCallable, BlueprintPure)
 	const FItemInfo& GetItemInfo() { return item_info; }
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	virtual FItemThumbnailInfo GetItemThumbnailInfoFromDT();
+protected:
+	//We use this function to avoid code duplication
+	//But to reamain BP interface and class-specific implementation
+	template<typename DataTableType>
+	FItemThumbnailInfo GetItemThumbnailInfoFromDT_Impl();
+
+public:
 
 	UFUNCTION(BlueprintCallable)
 	const FText& GetItemName() const { return item_info.Name; }
@@ -136,8 +151,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, NoClear, meta = (AllowPrivateAccess = true))
 	TSubclassOf<AItemActor> ItemActorClass;
 private:
-	void SetupDefaults();
-
 	//position in inventory
     UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	FIntPoint upper_left_cell; 
@@ -150,3 +163,19 @@ public:
 	//Dimensions
 	friend bool operator== (const UItemBase& lhs, const UItemBase& rhs);
 };
+
+template<typename DataTableType>
+inline FItemThumbnailInfo UItemBase::GetItemThumbnailInfoFromDT_Impl()
+{
+	auto handle = ItemActorClass.GetDefaultObject()->GetItemProperites();
+
+	auto* ptr_row = handle.GetRow<DataTableType>("UItemBase::GetItemThumbnailInfo");
+
+	if(ptr_row != nullptr)
+	{
+		return ptr_row->item_thumbnail_info;
+	}
+
+	checkf(false, TEXT("Failed to get ItemThumbnailInfo"));
+	return FItemThumbnailInfo{};
+}

@@ -3,14 +3,14 @@
 
 #include "AmmoBase.h"
 
-UAmmoBase::UAmmoBase()
-{
-
-}
+//UAmmoBase::UAmmoBase()
+//{
+//
+//}
 
 bool UAmmoBase::SetProperties(FDataTableRowHandle handle)
 {
-	auto* ptr_row = handle.GetRow<FAmmoTable>("SetProperties_AmmoBase");
+	auto* ptr_row = handle.GetRow<DataTableType>("SetProperties_AmmoBase");
 
 	if(ptr_row != nullptr)
 	{
@@ -21,4 +21,9 @@ bool UAmmoBase::SetProperties(FDataTableRowHandle handle)
 	}
 
 	return false;
+}
+
+FItemThumbnailInfo UAmmoBase::GetItemThumbnailInfoFromDT()
+{
+	return GetItemThumbnailInfoFromDT_Impl<DataTableType>();
 }

@@ -68,5 +68,8 @@ struct PROTOGAME_API FAmmoTable : public FTableRowBase
 	FItemInfo item_info;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	FItemThumbnailInfo item_thumbnail_info;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	FAmmoInfo ammo_info;
 };

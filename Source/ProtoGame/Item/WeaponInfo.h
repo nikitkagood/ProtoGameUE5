@@ -4,6 +4,7 @@
 
 #include "ItemInfo.h"
 #include "AttachmentInfo.h"
+#include "ItemThumbnailInfo.h"
 #include "Effects/EffectBase.h"
 
 #include "WeaponInfo.generated.h"
@@ -208,6 +209,9 @@ struct PROTOGAME_API FWeaponTable : public FTableRowBase
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	TArray<FAttachmentSlot> attachment_slots;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	FItemThumbnailInfo item_thumbnail_info;
 };
 
 //Data tables only

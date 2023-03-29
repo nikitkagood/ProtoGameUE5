@@ -12,10 +12,14 @@ class PROTOGAME_API UGunRifle : public UWeaponGun
 {
 	GENERATED_BODY()
 
+private:
+	using DataTableType = FWeaponTable;
 public:
 	UGunRifle();
 
 	virtual bool SetProperties(FDataTableRowHandle handle) override;
+
+	virtual FItemThumbnailInfo GetItemThumbnailInfoFromDT() override;
 
 	//Equips and and de-equips (by calling GameCharacter)
 	virtual bool OnUse(AActor* caller) override;

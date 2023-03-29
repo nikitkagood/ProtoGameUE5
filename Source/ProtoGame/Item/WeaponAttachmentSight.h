@@ -12,11 +12,14 @@ UCLASS(Blueprintable, BlueprintType, DefaultToInstanced, meta=(BlueprintSpawnabl
 class PROTOGAME_API UWeaponAttachmentSight : public UWeaponAttachment
 {
 	GENERATED_BODY()
-	
+private:
+	using DataTableType = FAttachmentSightTable;
 public:
-	UWeaponAttachmentSight();
+	UWeaponAttachmentSight() = default;
 
 	virtual bool SetProperties(FDataTableRowHandle handle) override;
+
+	virtual FItemThumbnailInfo GetItemThumbnailInfoFromDT() override;
 
 private:
 	FAttachmentSightInfo attachment_sight_info;

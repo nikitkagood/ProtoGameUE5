@@ -2,15 +2,16 @@
 
 
 #include "Item/WeaponAttachmentSight.h"
+#include "Item/ItemActor.h"
 
-UWeaponAttachmentSight::UWeaponAttachmentSight()
-{
-
-}
+//UWeaponAttachmentSight::UWeaponAttachmentSight()
+//{
+//
+//}
 
 bool UWeaponAttachmentSight::SetProperties(FDataTableRowHandle handle)
 {
-	auto* ptr_row = handle.GetRow<FAttachmentSightTable>("UWeaponAttachmentSight::SetProperties");
+	auto* ptr_row = handle.GetRow<DataTableType>("UWeaponAttachmentSight::SetProperties");
 
 	if(ptr_row != nullptr)
 	{
@@ -22,4 +23,9 @@ bool UWeaponAttachmentSight::SetProperties(FDataTableRowHandle handle)
 	}
 
 	return false;
+}
+
+FItemThumbnailInfo UWeaponAttachmentSight::GetItemThumbnailInfoFromDT()
+{
+	return GetItemThumbnailInfoFromDT_Impl<DataTableType>();
 }

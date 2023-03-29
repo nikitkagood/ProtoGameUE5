@@ -18,7 +18,7 @@ UGunRifle::UGunRifle()
 
 bool UGunRifle::SetProperties(FDataTableRowHandle handle)
 { 
-	auto* ptr_row = handle.GetRow<FWeaponTable>("SetProperties_GunRifle");
+	auto* ptr_row = handle.GetRow<DataTableType>("SetProperties_GunRifle");
 
 	if(ptr_row != nullptr)
 	{
@@ -34,7 +34,12 @@ bool UGunRifle::SetProperties(FDataTableRowHandle handle)
 	}
 
 	return false;
-} 
+}
+FItemThumbnailInfo UGunRifle::GetItemThumbnailInfoFromDT()
+{
+	return GetItemThumbnailInfoFromDT_Impl<DataTableType>();
+}
+
 
 void UGunRifle::StartFire()
 {
@@ -146,8 +151,7 @@ void UGunRifle::OnFire()
 			ActorSpawnParams.bHideFromSceneOutliner = true;
 
 			World->SpawnActor<AProjectile>(weapon_info.Chamber->GetProjectileClass(), SK_WeaponRepresentation->GetSocketLocation("b_gun_muzzleflash"), SK_WeaponRepresentation->GetSocketRotation("b_gun_muzzleflash"), ActorSpawnParams);
-			weapon_info.Chamber->MarkPendingKill();
-			//weapon_info.Chamber->MarkAsGarbage(); //new API
+			weapon_info.Chamber->MarkAsGarbage();
 			weapon_info.Chamber = nullptr;
 
 			SpawnMuzzleFlash();

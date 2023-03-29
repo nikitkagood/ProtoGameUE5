@@ -17,25 +17,25 @@ UWeaponGun::UWeaponGun()
 	}
 }
 
-bool UWeaponGun::SetProperties(FDataTableRowHandle handle)
-{ 
-	auto* ptr_row = handle.GetRow<FWeaponTable>("SetProperties_WeaponGun");
+//bool UWeaponGun::SetProperties(FDataTableRowHandle handle)
+//{ 
+	//auto* ptr_row = handle.GetRow<FWeaponTable>("SetProperties_WeaponGun");
 
-	if(ptr_row != nullptr)
-	{
-		item_info = ptr_row->item_info;
-		weapon_info = ptr_row->weapon_info;
+	//if(ptr_row != nullptr)
+	//{
+	//	item_info = ptr_row->item_info;
+	//	weapon_info = ptr_row->weapon_info;
 
-		for(auto& i : ptr_row->attachment_slots)
-		{
-			AddAttachmentSlot(i);
-		}
+	//	for(auto& i : ptr_row->attachment_slots)
+	//	{
+	//		AddAttachmentSlot(i);
+	//	}
 
-		return true;
-	}
+	//	return true;
+	//}
 
-	return false;
-} 
+	//return false;
+//} 
 
 void UWeaponGun::StartFire()
 {
