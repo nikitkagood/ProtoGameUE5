@@ -60,9 +60,6 @@ public:
 	//virtual void EndFire() { check(false); return; };
 
 	//class related
-
-
-
 protected:
 	//void OnFire();
 

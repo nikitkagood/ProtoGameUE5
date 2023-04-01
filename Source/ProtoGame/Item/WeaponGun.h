@@ -30,6 +30,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool AddAttachmentSlot(const FAttachmentSlot& slot);
 
+	virtual void SetupAnimInstance(USkeletalMeshComponent* sk_comp);
+
 	//Create functional and animated SK mesh comp which represents Weapon
 
 	virtual USkeletalMeshComponent* CreateSKWeaponRepresentation(USceneComponent* outer) override;

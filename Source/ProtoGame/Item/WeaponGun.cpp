@@ -6,6 +6,7 @@
 #include "ItemActor.h"
 #include "Item/WeaponAttachment.h"
 #include "Item/WeaponAttachmentMagazine.h"
+#include "Animation/GunAnimInstance.h"
 
 #include "Kismet/GameplayStatics.h"
 
@@ -104,53 +105,64 @@ void UWeaponGun::PrintWeaponStats()
 
 void UWeaponGun::OnFire()
 {
-	//if(World != nullptr && weapon_info.AmmoType != nullptr && weapon_info.bFunctional)
-	//{
-	//	if(weapon_info.bHasChamber)
-	//	{
-	//		if(weapon_info.Chamber != nullptr)
-	//		{
-	//			FActorSpawnParameters ActorSpawnParams;
-	//			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	//Default implementation; Isn't meant to be called directly but you can reference it: UChildClass::OnFire -> UWeaponGun::OnFire()
 
-	//			//TODO: Temporary
-	//			World->SpawnActor<AProjectile>(weapon_info.AmmoType, SK_WeaponRepresentation->GetSocketLocation("b_gun_muzzleflash"), SK_WeaponRepresentation->GetSocketRotation("b_gun_muzzleflash"), ActorSpawnParams);
-	//			weapon_info.Chamber->MarkPendingKill();
-	//			weapon_info.Chamber = nullptr;
+	if(World == nullptr || weapon_info.bFunctional != true)
+	{
+		return;
+	}
 
-	//			SpawnMuzzleFlash();
+	if(weapon_info.bHasChamber)
+	{
+		if(weapon_info.Chamber != nullptr)
+		{
+			if(weapon_info.Chamber->GetProjectileClass() == nullptr)
+			{
+				checkf(false, TEXT("Projectile isn't assigned, can't fire."));
+				return;
+			}
 
-	//			if(weapon_info.FireSound != nullptr)
-	//			{
-	//				const FVector muzzle_sound_offset = {-5.f, 0.f, 0.f}; //play sound a bit behind the muzzle end
-	//				UGameplayStatics::PlaySoundAtLocation(this, weapon_info.FireSound, SK_WeaponRepresentation->GetSocketLocation("b_gun_muzzleflash") - muzzle_sound_offset);
-	//			}
+			FActorSpawnParameters ActorSpawnParams;
+			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+			ActorSpawnParams.bHideFromSceneOutliner = true;
 
-	//			LoadAmmoIntoChamberFromMag();
-	//		}
-	//		else //click sound
-	//		{
-	//			UGameplayStatics::SpawnSoundAttached(weapon_info.EmptyClickSound, SK_WeaponRepresentation, "root", {}, EAttachLocation::SnapToTarget);
-	//		}
+			World->SpawnActor<AProjectile>(weapon_info.Chamber->GetProjectileClass(), SK_WeaponRepresentation->GetSocketLocation("b_gun_muzzleflash"), SK_WeaponRepresentation->GetSocketRotation("b_gun_muzzleflash"), ActorSpawnParams);
+			weapon_info.Chamber->MarkAsGarbage();
+			weapon_info.Chamber = nullptr;
 
-	//	}
-	//	else //if no chamber
-	//	{
-	//		//FActorSpawnParameters ActorSpawnParams;
-	//		//ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+			SpawnMuzzleFlash();
 
-	//		////TODO: Temporary
-	//		//World->SpawnActor<AProjectile>(weapon_info.AmmoType, WeaponSkeletalMeshComp->GetSocketLocation("b_gun_muzzleflash"), WeaponSkeletalMeshComp->GetSocketRotation("b_gun_muzzleflash"), ActorSpawnParams);
+			if(weapon_info.FireSound != nullptr)
+			{
+				const FVector muzzle_sound_offset = {-5.f, 0.f, 0.f}; //play sound a bit behind the muzzle end
+				UGameplayStatics::PlaySoundAtLocation(this, weapon_info.FireSound, SK_WeaponRepresentation->GetSocketLocation("b_gun_muzzleflash") - muzzle_sound_offset);
+			}
 
-	//		//SpawnMuzzleFlash();
+			LoadAmmoIntoChamberFromMag();
+		}
+		else //click sound
+		{
+			UGameplayStatics::SpawnSoundAttached(weapon_info.EmptyClickSound, SK_WeaponRepresentation, "root", {}, EAttachLocation::SnapToTarget);
+		}
 
-	//		//if(weapon_info.FireSound != nullptr)
-	//		//{
-	//		//	const FVector muzzle_sound_offset = {-5.f, 0.f, 0.f}; //play sound a bit behind the muzzle end
-	//		//	UGameplayStatics::PlaySoundAtLocation(this, weapon_info.FireSound, WeaponSkeletalMeshComp->GetSocketLocation("b_gun_muzzleflash") - muzzle_sound_offset);
-	//		//}
-	//	}
-	//}
+	}
+	//TODO
+	else //if no chamber 
+	{
+		//FActorSpawnParameters ActorSpawnParams;
+		//ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+		////TODO: Temporary
+		//World->SpawnActor<AProjectile>(weapon_info.AmmoType, WeaponSkeletalMeshComp->GetSocketLocation("b_gun_muzzleflash"), WeaponSkeletalMeshComp->GetSocketRotation("b_gun_muzzleflash"), ActorSpawnParams);
+
+		//SpawnMuzzleFlash();
+
+		//if(weapon_info.FireSound != nullptr)
+		//{
+		//	const FVector muzzle_sound_offset = {-5.f, 0.f, 0.f}; //play sound a bit behind the muzzle end
+		//	UGameplayStatics::PlaySoundAtLocation(this, weapon_info.FireSound, WeaponSkeletalMeshComp->GetSocketLocation("b_gun_muzzleflash") - muzzle_sound_offset);
+		//}
+	}
 }
 
 
@@ -330,6 +342,20 @@ bool UWeaponGun::AddAttachmentSlot(const FAttachmentSlot& slot)
 	return true;
 }
 
+void UWeaponGun::SetupAnimInstance(USkeletalMeshComponent* sk_comp)
+{
+	UGunAnimInstance* anim_instance = Cast<UGunAnimInstance>(sk_comp->GetAnimInstance());
+
+	if(anim_instance == nullptr)
+	{
+		checkf(false, TEXT("ERROR: UWeaponGun - invalid anim instance. Probably it's not assigned or wrong type."));
+		return;
+	}
+
+	anim_instance->SetWeaponGun(this);
+	anim_instance->SetFireMode(weapon_info.FireMode);
+}
+
 USkeletalMeshComponent* UWeaponGun::CreateSKWeaponRepresentation(USceneComponent* outer)
 {
 	if(outer == nullptr)
@@ -341,7 +367,7 @@ USkeletalMeshComponent* UWeaponGun::CreateSKWeaponRepresentation(USceneComponent
 	USkeletalMeshComponent* sk_comp = NewObject<USkeletalMeshComponent>(outer);
 	SK_WeaponRepresentation = sk_comp;
 
-	sk_comp->SetCollisionProfileName("Item");
+	sk_comp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	sk_comp->CanCharacterStepUpOn = ECanBeCharacterBase::ECB_No;
 	sk_comp->SetSimulatePhysics(false);
 	sk_comp->SetGenerateOverlapEvents(false);
@@ -350,6 +376,8 @@ USkeletalMeshComponent* UWeaponGun::CreateSKWeaponRepresentation(USceneComponent
 	sk_comp->SetAnimClass(GetAnimClass());
 
 	sk_comp->RegisterComponent();
+
+	SetupAnimInstance(sk_comp);
 
 	AddAllAttachmentMeshes(sk_comp);
 
@@ -367,7 +395,6 @@ USkeletalMeshComponent* UWeaponGun::CreateSKForSceneCapture(USceneComponent* out
 	USkeletalMeshComponent* sk_comp = NewObject<USkeletalMeshComponent>(outer);
 	SK_SceneCapture = sk_comp;
 
-	//sk_comp->SetCollisionProfileName("Item");
 	sk_comp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	sk_comp->CanCharacterStepUpOn = ECanBeCharacterBase::ECB_No;
 	sk_comp->SetSimulatePhysics(false);
@@ -377,6 +404,8 @@ USkeletalMeshComponent* UWeaponGun::CreateSKForSceneCapture(USceneComponent* out
 	sk_comp->SetAnimClass(GetAnimClass());
 
 	sk_comp->RegisterComponent();
+
+	SetupAnimInstance(sk_comp);
 
 	AddAllAttachmentMeshes(sk_comp);
 
@@ -415,17 +444,20 @@ void UWeaponGun::SpawnMuzzleFlash() const
 {
 	if(weapon_info.MuzzleFlash != nullptr)
 	{
-		//Order: light first, emitter second. Otherwise a weird bug will occur: emitter location will be slightly off.
+		//Order: light first, emitter second. Otherwise a weird bug will occur: emitter location will be slightly off (UE 4.27)
 		const FActorSpawnParameters actor_spawn_params;
-		FTransform actor_transform = SK_WeaponRepresentation->GetSocketTransform("b_gun_muzzleflash");
-		//we move the light slightly back because muzzle bone is straight at the end of the barrel
-		//but the light is usually visible before that, through holes in a muzzle device;
-		//hardcoded for now
-		const float MOVE_LIGHT_SPAWN_LOCATION = -1; 
-		actor_transform.SetLocation(actor_transform.GetLocation() + actor_transform.GetRotation().GetForwardVector() * MOVE_LIGHT_SPAWN_LOCATION);
-		GetWorld()->SpawnActor(weapon_info.MuzzleLight.Get(), &actor_transform, actor_spawn_params);
 
-		UGameplayStatics::SpawnEmitterAttached(weapon_info.MuzzleFlash, SK_WeaponRepresentation, "b_gun_muzzleflash", {}, {}, EAttachLocation::KeepRelativeOffset);
+		//Adjust location to account for muzzle device
+		//hardcoded for now
+		const float MOVE_LIGHT_SPAWN_LOCATION = -1.f; 
+
+		const auto rotation = SK_WeaponRepresentation->GetSocketRotation("b_gun_muzzleflash");
+		const auto location = SK_WeaponRepresentation->GetSocketLocation("b_gun_muzzleflash") + rotation.Vector() * MOVE_LIGHT_SPAWN_LOCATION;
+
+		auto light_actor = GetWorld()->SpawnActor(weapon_info.MuzzleLight.Get(), &location, &rotation, actor_spawn_params);
+		light_actor->AttachToComponent(SK_WeaponRepresentation, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "b_gun_muzzleflash");
+
+		UGameplayStatics::SpawnEmitterAttached(weapon_info.MuzzleFlash, SK_WeaponRepresentation, "b_gun_muzzleflash", {}, rotation, EAttachLocation::KeepWorldPosition);
 	}
 }
 
@@ -633,4 +665,15 @@ void UWeaponGun::ChangeFireMode()
 	{
 		weapon_info.FireMode = weapon_info.FireModesAvailable[0];
 	}
+
+
+	UGunAnimInstance* anim_instance = Cast<UGunAnimInstance>(SK_WeaponRepresentation->GetAnimInstance());
+
+	if(anim_instance == nullptr)
+	{
+		checkf(false, TEXT("ERROR: UWeaponGun - invalid anim instance."));
+		return;
+	}
+
+	anim_instance->SetFireMode(weapon_info.FireMode);
 }
