@@ -95,24 +95,6 @@ bool UInventoryComponent::MoveItemInGrid(UItemBase* item, FIntPoint new_upper_le
     return result;
 }
 
-//bool UInventoryComponent::MoveToSpecialSlot(UItemBase* item, UInvSpecialSlotComponent* destination)
-//{
-//    if(Contains(item) == false)
-//    {
-//        UE_LOG(LogTemp, Error, TEXT("The item %s doesn't belong to this inventory!"), *item->GetName());
-//        return false;
-//    }
-//    if(destination->IsOccupied() == false)
-//    {
-//        if(RemoveItem(item))
-//        {
-//            return destination->AddItem(item);
-//        }
-//    }
-//
-//    return false;
-//}
-
 bool UInventoryComponent::RotateItem(UItemBase* item)
 {
     bool result = false;
@@ -159,8 +141,6 @@ bool UInventoryComponent::AddItem(UItemBase* item)
     {
         //Check if can be added to an existing stack
 
-        bool item_filled_existing_stacks = false;
-
         for(auto& i : Items)
         {
             if(*i.Key == *item)
@@ -171,7 +151,7 @@ bool UInventoryComponent::AddItem(UItemBase* item)
                 {
                     item->ConditionalBeginDestroy();
 
-                    item_filled_existing_stacks = true;
+                    //Item fully added to an existing stack
                     return true;
                 }
             }
@@ -200,12 +180,13 @@ bool UInventoryComponent::AddItem(UItemBase* item)
             int32 idx = GenerateIndex();
             Items.Add(item, idx);
 
+            AddMass(item->GetMassTotal());
+
             item->SetUpperLeftCell(free_space_coords);
             FillSpaceInGrid(item->GetUpperLeftCell(), item->GetLowerRightCell(), idx);
 
             item->SetOuterUpstreamInventory(this);
             item->World = GetWorld();
-      
 
             OnInventoryUpdated.Broadcast();
             return true;
@@ -265,6 +246,8 @@ bool UInventoryComponent::AddItemAt(UItemBase* item, FIntPoint new_upper_left_ce
             int32 idx = GenerateIndex();
             Items.Add(item, idx);
 
+            AddMass(item->GetMassTotal());
+
             item->SetUpperLeftCell(new_upper_left_cell);
             FillSpaceInGrid(item->GetUpperLeftCell(), item->GetLowerRightCell(), idx);
 
@@ -283,12 +266,12 @@ bool UInventoryComponent::RemoveItem(UItemBase* item)
 {
     if(item == nullptr)
     {
-        UE_LOG(LogTemp, Error, TEXT("RemoveItem: invald item!"));
+        UE_LOG(LogTemp, Error, TEXT("RemoveItem: invald item"));
         return false;
     }
     if(Items.Num() == 0)
     {
-        UE_LOG(LogTemp, Error, TEXT("RemoveItem: there is nothing to take from inventory!"));
+        UE_LOG(LogTemp, Warning, TEXT("RemoveItem: there is nothing to remove from inventory"));
         return false;
     }
 
@@ -297,7 +280,8 @@ bool UInventoryComponent::RemoveItem(UItemBase* item)
 
     UpdateFreeSpaceLeft(item->GetRows() * item->GetColumns());
     free_indecies.Push(Items[item]);
-    Mass -= item->GetMass();
+
+    AddMass(-item->GetMassTotal());
 
     Items.Remove(item);
 
@@ -322,12 +306,20 @@ bool UInventoryComponent::RemoveItemAt(UItemBase* item, FIntPoint upper_left_cel
 
     UpdateFreeSpaceLeft(item->GetRows() * item->GetColumns());
     free_indecies.Push(Items[item]);
-    Mass -= item->GetMass();
+
+    AddMass(-item->GetMassTotal());
 
     Items.Remove(item);
 
     OnInventoryUpdated.Broadcast();
     return true;
+}
+
+void UInventoryComponent::AddMass(float value)
+{
+    Mass += value;
+
+    checkf(!(Mass < 0), TEXT("Error: UInventoryComponent: Mass is invalid. Probably this is result of missing or wrong caclulations."))
 }
 
 void UInventoryComponent::SetupDefaults()
@@ -678,4 +670,28 @@ bool UInventoryComponent::ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper
     }
 
     return AddItemAt(item, new_upper_left_cell);
+}
+
+void UInventoryComponent::UpdateStackDependencies(UItemBase* item, int32 new_stack_size)
+{
+    if(item == nullptr)
+    {
+        checkf(false, TEXT("Error: UpdateStackDependencies: Invalid item"));
+        return;
+    }
+
+    if(Contains(item) == false)
+    {
+        checkf(false, TEXT("Error: UpdateStackDependencies: Item doesn't belong to this inventory"));
+        return;
+    }
+
+    //0 is valid input, just make sure the Item is removed after
+    if(new_stack_size < 0)
+    {
+        checkf(false, TEXT("Error: UpdateStackDependencies: Invalid new_stack_size"));
+        return;
+    }
+
+    AddMass(item->GetMassOneUnit() * new_stack_size - item->GetMassTotal());
 }

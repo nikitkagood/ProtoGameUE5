@@ -24,16 +24,6 @@ public:
 	//Equips and and de-equips (by calling GameCharacter)
 	virtual bool OnUse(AActor* caller) override;
 
-	//Inventory interface; This class supports only WeaponAttachment and AmmoBase items
-	//virtual bool MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination) override;
-	//virtual bool MoveItemToInventoryInGrid(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) override;
-	//virtual bool DropItemToWorld(UItemBase* item) override;
-	//virtual bool ReceiveItem(UItemBase* item) override;
-	//virtual void UpdateInventory() override { OnInventoryUpdated.Broadcast(); };
-private:
-	//Not supported
-	virtual bool ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell) override { check(false); return false; };
-
 public: 	
 	//Weapon controls
 
@@ -87,21 +77,6 @@ private:
 
 	//TODO: implement
 	bool AddAttachmentTo(UWeaponAttachment* attachment, TPair<FAttachmentSlot, UWeaponAttachment*>* slot_pair);
-
-	//FTimerHandle OnFireTimerHandle;
-	//FTimerHandle BurstFireTimerHandle;
-
-	//Weapon related
-
-	//UPROPERTY(BlueprintReadWrite, EditAnywhere, NoClear, meta = (AllowPrivateAccess = true))
-	//FGunRifleInfo gun_rifle_info;
-
-	//Class related
-
-	//TArray<TPair<FAttachmentSlot, UWeaponAttachment*>> attachment_slots;
-
-	//Saved for quick access
-	//int32 MagazineAttachmentIdx;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	bool bTestFire = true;

@@ -37,6 +37,10 @@ public:
 
 	virtual bool ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell) = 0;
 
+	//Update everything which depends on stacking system. 
+	//Example: every Inventory keeps track of mass
+	virtual void UpdateStackDependencies(UItemBase* item, int32 new_stack_size) {};
+
 	//Force update visual representation of an inventory.
 	//Inventories ARE REQUIRED to update when they change state.
 	//But when they don't, they might not. 

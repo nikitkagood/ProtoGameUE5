@@ -34,7 +34,8 @@ private:
 public:	 
 	UItemBase();
 
-	static UItemBase* StaticCreateObject(AItemActor* outer, TSubclassOf<UItemBase> item_base_class, ItemObjectCreationMethod item_object_creation_method, FDataTableRowHandle dt_item_properties = {});
+	template<typename T>
+	static T* StaticCreateObject(UObject* outer, TSubclassOf<UItemBase> item_base_class, ItemObjectCreationMethod item_object_creation_method, FDataTableRowHandle dt_item_properties = {});
 
 	virtual bool SetProperties(FDataTableRowHandle handle);
 
@@ -64,7 +65,9 @@ public:
     UFUNCTION(BlueprintCallable)
 	ItemType GetType() const { return item_info.Type; };
 	UFUNCTION(BlueprintCallable)
-	float GetMass() const { return item_info.Mass; };
+	float GetMassOneUnit() const { return item_info.Mass; };
+	UFUNCTION(BlueprintCallable)
+	float GetMassTotal() const { return item_info.Mass * item_info.CurrentStackSize; };
 	UFUNCTION(BlueprintCallable)
 	FIntPoint GetDimensions() const { return item_info.Dimensions; };
 	UFUNCTION(BlueprintCallable)
@@ -132,8 +135,13 @@ public:
     UFUNCTION(BlueprintCallable)
 	void Rotate();
 
+	//Adds another stack to this one
 	UFUNCTION()
 	bool StackAdd(UItemBase* other);
+
+	//Returns new Item with desired amount in stack
+	UFUNCTION()
+	UItemBase* StackGet(int32 ammount, UObject* new_outer);
 
 	//Interfaces
 	virtual bool OnInteract(AActor* caller) override;
@@ -142,6 +150,8 @@ public:
 	virtual bool OnUse(AActor* caller) override;
 
 protected:
+	void SetCurrentStackSize(int32 new_size);
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, NoClear, meta = (AllowPrivateAccess = true))
 	FItemInfo item_info;
 
@@ -161,8 +171,41 @@ public:
 	//Mass
 	//Base price
 	//Dimensions
+	//TODO: some items may have different dimensions, like weapons
 	friend bool operator== (const UItemBase& lhs, const UItemBase& rhs);
 };
+
+template<typename ItemType>
+inline ItemType* UItemBase::StaticCreateObject(UObject* outer, TSubclassOf<UItemBase> item_base_class, ItemObjectCreationMethod item_object_creation_method, FDataTableRowHandle dt_item_properties)
+{
+	ItemType* item_object = nullptr;
+
+	if(item_object_creation_method == ItemObjectCreationMethod::CreateItemObjectFromDataTable)
+	{
+		item_object = NewObject<ItemType>(outer, item_base_class);
+		if(item_object == nullptr)
+		{
+			UE_LOG(LogTemp, Fatal, TEXT("Failed to create ItemObject. Maybe there is something wrong with assigned class."));
+			return nullptr;
+		}
+		if(item_object->SetProperties(dt_item_properties) == false)
+		{
+			UE_LOG(LogTemp, Fatal, TEXT("Failed to set item properties. Maybe there is something wrong with the data table."));
+			return nullptr;
+		}
+		item_object->SetItemActorClass(outer->GetClass()); //what ItemActor to spawn when ItemBase is dropped to world
+		//item_object->SetOuterItemActor(outer);
+	}
+	else if(item_object_creation_method == ItemObjectCreationMethod::CreateItemObjectFromItemBaseBP)
+	{
+		//TODO: might now work now
+		item_object = NewObject<ItemType>(outer, item_base_class);
+		item_object->SetItemActorClass(outer->GetClass()); //what ItemActor to spawn when ItemBase is dropped to world
+		//item_object->SetOuterItemActor(outer);
+	}
+
+	return item_object;
+}
 
 template<typename DataTableType>
 inline FItemThumbnailInfo UItemBase::GetItemThumbnailInfoFromDT_Impl()

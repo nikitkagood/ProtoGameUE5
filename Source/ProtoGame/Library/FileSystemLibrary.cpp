@@ -5,7 +5,7 @@
 
 bool UFileSystemLibrary::IsTextureSafeToRead(UTexture* Texture)
 {
-	if (!Texture || !Texture->Resource || !Texture->Resource->TextureRHI)
+	if (!Texture || !Texture->GetResource() || !Texture->GetResource()->TextureRHI)
 	{
 		return false;
 	}

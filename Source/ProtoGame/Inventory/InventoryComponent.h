@@ -56,6 +56,7 @@ public:
 	virtual bool DropItemToWorld(UItemBase* item) override;
 	virtual bool ReceiveItem(UItemBase* item) override;
 	virtual bool ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell) override;
+	virtual void UpdateStackDependencies(UItemBase* item, int32 new_stack_size) override;
 	virtual void UpdateInventory() override { OnInventoryUpdated.Broadcast(); };
 
 	UPROPERTY(BlueprintAssignable)
@@ -67,6 +68,8 @@ protected:
 	bool AddItemAt(UItemBase* item, FIntPoint new_upper_left_cell); //adds at pre-determined place 
 	bool RemoveItem(UItemBase* item); //finds then removes; does minimal checks; Doesn't clear World and Outer because there Add to another inventory already overrides these;
 	bool RemoveItemAt(UItemBase* item, FIntPoint upper_left_cell, FIntPoint lower_right_cell); //removes from pre-determined place
+
+	void AddMass(float value);
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Inventory", meta = (AllowPrivateAccess = true))
 	FName InventoryName;
@@ -80,6 +83,7 @@ protected:
     UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly, Category = "Inventory", meta = (AllowPrivateAccess = true))
 	int32 FreeSpaceLeft;
 
+	//Do not set it manually. Use AddMass
 	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly, Category = "Inventory", meta = (AllowPrivateAccess = true))
 	float Mass;
 

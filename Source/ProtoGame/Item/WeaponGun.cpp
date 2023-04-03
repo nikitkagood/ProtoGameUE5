@@ -631,14 +631,23 @@ bool UWeaponGun::ReloadFast()
 
 bool UWeaponGun::LoadAmmoStraightIntoChamber(UAmmoBase* ammo)
 {
-	if(ammo == nullptr)
+	if(ammo == nullptr || weapon_info.Chamber != nullptr)
 	{
 		return false;
 	}
 
-	weapon_info.Chamber = ammo;
+	weapon_info.Chamber = Cast<UAmmoBase>(ammo->StackGet(1, this));
 
-	return true;
+	if(ammo->GetCurrentStackSize() == 0)
+	{
+		//Delete
+		return true;
+	}
+	else
+	{
+		//Signal that we don't need to delete the original from original inventory
+		return false;
+	}
 }
 
 bool UWeaponGun::AttachMagazine()

@@ -26,6 +26,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	TSubclassOf<AProjectile> GetProjectileClass() const { return ammo_info.projectile_class; };
 
+	//UAmmoBase* StackGet(int32 amount, UObject* new_outer);
+
 private:
 	FAmmoInfo ammo_info;
 };

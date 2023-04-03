@@ -144,7 +144,7 @@ void AItemActor::Tick(float DeltaTime)
 
 void AItemActor::CreateItemObject()
 {	
-	ItemObject = UItemBase::StaticCreateObject(this, ItemBaseClass, item_object_creation_method, DT_ItemProperties);
+	ItemObject = UItemBase::StaticCreateObject<UItemBase>(this, ItemBaseClass, item_object_creation_method, DT_ItemProperties);
 }
 
 bool AItemActor::OnInteract_Implementation(AActor* caller)

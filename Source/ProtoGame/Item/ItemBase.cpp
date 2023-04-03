@@ -15,37 +15,6 @@ UItemBase::UItemBase()
 	bRotated = false;
 }
 
-UItemBase* UItemBase::StaticCreateObject(AItemActor* outer, TSubclassOf<UItemBase> item_base_class, ItemObjectCreationMethod item_object_creation_method, FDataTableRowHandle dt_item_properties)
-{
-	UItemBase* item_object = nullptr;
-
-	if(item_object_creation_method == ItemObjectCreationMethod::CreateItemObjectFromDataTable)
-	{
-		item_object = NewObject<UItemBase>(outer, item_base_class);
-		if(item_object == nullptr)
-		{
-			UE_LOG(LogTemp, Fatal, TEXT("Failed to create ItemObject. Maybe there is something wrong with assigned class."));
-			return nullptr;
-		}
-		if(item_object->SetProperties(dt_item_properties) == false)
-		{
-			UE_LOG(LogTemp, Fatal, TEXT("Failed to set item properties. Maybe there is something wrong with the data table."));
-			return nullptr;
-		}
-		item_object->SetItemActorClass(outer->GetClass()); //what ItemActor to spawn when ItemBase is dropped to world
-		item_object->SetOuterItemActor(outer);
-	}
-	else if(item_object_creation_method == ItemObjectCreationMethod::CreateItemObjectFromItemBaseBP)
-	{
-		//TODO: might now work now
-		item_object = NewObject<UItemBase>(outer, item_base_class);
-		item_object->SetItemActorClass(outer->GetClass()); //what ItemActor to spawn when ItemBase is dropped to world
-		item_object->SetOuterItemActor(outer);
-	}
-
-	return item_object;
-}
-
 bool UItemBase::SetProperties(FDataTableRowHandle handle)
 { 
 	auto* ptr_row = handle.GetRow<DataTableType>("UItemBase::SetProperties");
@@ -81,6 +50,18 @@ bool UItemBase::OnUse(AActor* caller)
 	return false;
 }
 
+void UItemBase::SetCurrentStackSize(int32 new_size)
+{
+	auto inventory = GetOuterUpstreamInventory();
+
+	if(inventory != nullptr)
+	{
+		inventory->UpdateStackDependencies(this, new_size);
+	}
+
+	item_info.CurrentStackSize = new_size;
+}
+
 AItemActor* UItemBase::SpawnItemActor(const FVector& location, const FRotator& rotation)
 {
 	return AItemActor::StaticCreateObject(GetWorld(), ItemActorClass, this, location, rotation);
@@ -101,7 +82,13 @@ bool UItemBase::StackAdd(UItemBase* other)
 {
 	if(other == nullptr)
 	{
-		checkf(false, TEXT("Item is invalid"))
+		checkf(false, TEXT("Eror: Item is invalid"))
+		return false;
+	}
+
+	if(this->GetClass() != other->GetClass())
+	{
+		checkf(false, TEXT("Error: StackAdd: types aren't equal"))
 		return false;
 	}
 
@@ -137,6 +124,30 @@ USkeletalMesh* UItemBase::GetSkeletalMeshFromItemActorCDO() const
 {
 	//Default way to get the mesh. Since it's already used by ItemActor.
 	return ItemActorClass.GetDefaultObject()->GetSkeletalMeshComp()->GetSkeletalMeshAsset();
+}
+
+UItemBase* UItemBase::StackGet(int32 amount, UObject* new_outer)
+{
+	int32 remainder = item_info.CurrentStackSize - amount;
+
+	if(amount < 1 || remainder < 0)
+	{
+		checkf(false, TEXT("Error: StackGet: Wrong amount"))
+	}
+
+	//if(remainder == 0)
+	//{
+	//	return this;
+	//}
+
+	//UItemBase* new_obj = DuplicateObject<UItemBase>(this, new_outer);
+	UItemBase* new_obj = StaticCreateObject<UItemBase>(new_outer, this->GetClass(), ItemObjectCreationMethod::CreateItemObjectFromDataTable, ItemActorClass.GetDefaultObject()->GetItemProperites());
+	new_obj->item_info.CurrentStackSize = amount;
+
+	//this->item_info.CurrentStackSize = remainder;
+	this->SetCurrentStackSize(remainder);
+
+	return new_obj;
 }
 
 TScriptInterface<IInventoryInterface> UItemBase::GetOuterUpstreamInventory() const
@@ -180,6 +191,7 @@ UWorld* UItemBase::GetWorldFromOuter() const
 	}
 }
 
+//TODO: some items may have different dimensions, like weapons
 bool operator==(const UItemBase& lhs, const UItemBase& rhs)
 {
 	return (lhs.item_info.NameShort.EqualTo(rhs.item_info.NameShort, ETextComparisonLevel::Quinary) 
