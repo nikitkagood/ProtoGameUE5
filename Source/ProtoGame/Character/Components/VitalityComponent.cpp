@@ -1,6 +1,7 @@
 // Nikita Belov, All rights reserved
 
 #include "VitalityComponent.h"
+#include "Character/GameCharacter.h"
 
 #include "Components/ActorComponent.h"
 #include "GameFramework/Character.h"
@@ -14,8 +15,6 @@ UVitalityComponent::UVitalityComponent()
 
 	PrimaryComponentTick.bCanEverTick = true;
 	PrimaryComponentTick.TickInterval = 0.1f; //10hz
-
-	CharacterOwner = Cast<ACharacter>(GetOwner());
 
 	NoEnergyEvent.BindDynamic(this, &UVitalityComponent::OnNoEnergy);
 	NoHydrationEvent.BindDynamic(this, &UVitalityComponent::OnNoHydration);
@@ -139,10 +138,15 @@ void UVitalityComponent::OnNoHealth()
 {
 	bDead = true;
 	SetComponentTickEnabled(false);
+
+	Cast<AGameCharacterBase>(GetOwner())->SetDeathState(true);
+
 }
 
 void UVitalityComponent::CalculateStamina(float DeltaTime)
 {
+	AGameCharacterBase* CharacterOwner = Cast<AGameCharacterBase>(GetOwner());
+
 	if(bUsingStamina == true && 
 		(CharacterOwner->GetCharacterMovement()->IsMovingOnGround() && 
 		(CharacterOwner->GetInputAxisValue("MoveRight") != 0 || CharacterOwner->GetInputAxisValue("MoveForward") != 0)))
@@ -154,7 +158,7 @@ void UVitalityComponent::CalculateStamina(float DeltaTime)
 		else
 		{
 			Stamina = 0;
-			//NoStaminaEventVar.Broadcast();
+			//NoStaminaEvent.Execute();
 		}
 	}
 	else //regen
@@ -186,7 +190,7 @@ void UVitalityComponent::CalculateArmsStamina(float DeltaTime)
 		else
 		{
 			ArmsStamina = 0;
-			//NoArmsStaminaEventVar.Broadcast();
+			NoArmsStaminaEvent.Execute();
 		}
 	}
 	else //regen
@@ -242,7 +246,7 @@ void UVitalityComponent::ChangeEnergy(float value)
 	{
 		Energy = 0;
 		bEnergyRanOut = true;
-		//NoEvergyEventVar.Broadcast(); //is called too often
+		//NoEnergyEvent.Execute();
 	}
 	else
 	{
@@ -258,7 +262,7 @@ void UVitalityComponent::EnergyDecreaseOverTime(float DeltaTime)
 
 void UVitalityComponent::OnNoEnergy()
 {
-
+	//TakeHungerDamage()
 }
 
 void UVitalityComponent::ChangeHydration(float value)
@@ -276,7 +280,7 @@ void UVitalityComponent::ChangeHydration(float value)
 	{
 		Hydration = 0;
 		bHydrationRanOut = true;
-		//NoHydrationEventVar.Broadcast();
+		//NoHydrationEvent.Execute();
 	}
 	else
 	{
@@ -291,5 +295,5 @@ void UVitalityComponent::HydrationDecreaseOverTime(float DeltaTime)
 
 void UVitalityComponent::OnNoHydration()
 {
-
+	//TakeThirstDamage()
 }

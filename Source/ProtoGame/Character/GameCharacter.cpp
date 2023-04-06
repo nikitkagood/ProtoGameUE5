@@ -195,42 +195,6 @@ void AGameCharacterBase::UpdateWeaponSlots()
 			StowedOnBackSkeletalMesh->AttachToComponent(GetMesh(), { EAttachmentRule::SnapToTarget, true }, "StowedOnBackSocket");
 		}
 	}
-
-	//auto* active_slot_weapon = Cast<UWeaponBase>(ActiveSlot->GetItem());
-
-	////Check active slot
-	//if(active_slot_weapon != nullptr)
-	//{
-	//	InHandsSkeletalMesh = active_slot_weapon->CreateWeaponSkeletalMeshComp(GetMesh());
-	//	InHandsSkeletalMesh->AttachToComponent(GetMesh(), { EAttachmentRule::SnapToTarget, true }, "ik_hand_gun");
-	//}
-	//else
-	//{
-	//	DestroyComponentAndChildren(InHandsSkeletalMesh);
-	//}
-
-	////Check non-active slot
-	//UInvSpecialSlotComponent* non_active_slot;
-	//if(ActiveSlot == PrimaryGunSlot)
-	//{
-	//	non_active_slot = SecondaryGunSlot;
-	//}
-	//else //ActiveSlot == SecondaryGunSlot
-	//{
-	//	non_active_slot = PrimaryGunSlot;
-	//}
-
-	//if(non_active_slot->IsOccupied())
-	//{
-	//	StowedOnBackSkeletalMesh = Cast<UWeaponBase>(non_active_slot->GetItem())->CreateWeaponSkeletalMeshComp(GetMesh());
-	//	StowedOnBackSkeletalMesh->AttachToComponent(GetMesh(), { EAttachmentRule::SnapToTarget, true }, "StowedOnBackSocket");
-	//}
-	//else
-	//{
-	//	DestroyComponentAndChildren(StowedOnBackSkeletalMesh);
-	//}
-
-
 }
 
 void AGameCharacterBase::MoveForward(float Value)
@@ -260,13 +224,13 @@ void AGameCharacterBase::MoveRight(float Value)
 void AGameCharacterBase::TurnAtRate(float Rate)
 {
 	//calculate delta for this frame from the rate information
-	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
+	//AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
 }
 
 void AGameCharacterBase::LookUpAtRate(float Rate)
 {
 	//calculate delta for this frame from the rate information
-	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+	//AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
 
 void AGameCharacterBase::ToggleCrouch()
@@ -453,22 +417,29 @@ void AGameCharacterBase::DisableRagdoll()
 	//Mesh1P->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 }
 
-void AGameCharacterBase::Death()
+void AGameCharacterBase::SetDeathState(bool is_dead)
 {
-	//GetCharacterMovement()->DisableMovement();
-	DisableInput(UGameplayStatics::GetPlayerController(GetWorld(), 0));
+	if (is_dead)
+	{
+		//GetCharacterMovement()->DisableMovement();
+		DisableInput(GetController<APlayerController>());
 
+		EnableRagdoll();
 
-	EnableRagdoll();
-
-	PrimaryActorTick.bCanEverTick = false;
+		PrimaryActorTick.bCanEverTick = false;
+	}
+	else
+	{
+		EnableInput(GetController<APlayerController>());
+		PrimaryActorTick.bCanEverTick = true;
+		//VitalityComponent->Revive();
+	}
 }
 
 void AGameCharacterBase::SetupMovementDefaults()
 {
-	// set our turn rates for input
-	BaseTurnRate = 120.f;
-	BaseLookUpRate = 120.f;
+	//BaseTurnRate = 120.f;
+	//BaseLookUpRate = 120.f;
 
 	bJumpButtonDown = false;
 	bCrouchButtonDown = false;

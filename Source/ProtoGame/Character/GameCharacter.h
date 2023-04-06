@@ -30,8 +30,7 @@ class AGameCharacterBase : public ACharacter
 {
 	GENERATED_BODY()
 
-	friend class UWeaponBase;
-	friend class UWeaponGun;
+	friend UVitalityComponent;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = Mesh, meta = (AllowPrivateAccess = "true"))
 	USkeletalMeshComponent* InHandsSkeletalMesh;
@@ -70,23 +69,12 @@ class AGameCharacterBase : public ACharacter
 public:
 	AGameCharacterBase();
 
+	//also de-equips
+	bool EquipGun(UItemBase* item);
+
 protected:
 	virtual void BeginPlay();
 
-public:
-	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category=Camera)
-	float BaseTurnRate;
-
-	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category=Camera)
-	float BaseLookUpRate;
-
-	/** Projectile class to spawn */
-	UPROPERTY(EditDefaultsOnly, Category=Projectile)
-	TSubclassOf<class AProjectile> ProjectileClass;
-
-protected:
 	void MoveForward(float Val);
 	void MoveRight(float Val);
 
@@ -112,9 +100,6 @@ protected:
 	void StartFire();
 	void EndFire();
 
-	//also de-equips
-	bool EquipGun(UItemBase* item);
-
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void UpdateWeaponSlots();
 
@@ -130,7 +115,7 @@ protected:
 	void EnableRagdoll();
 	void DisableRagdoll();
 
-	void Death();
+	void SetDeathState(bool is_dead);
 	//void Ressurect();
 
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
@@ -189,5 +174,13 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Movement)
 	float AimDownSightsSpeed;
+
+	///** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
+	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Camera)
+	//float BaseTurnRate;
+
+	///** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
+	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Camera)
+	//float BaseLookUpRate;
 };
 

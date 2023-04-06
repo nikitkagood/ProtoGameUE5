@@ -8,6 +8,7 @@
 
 class UActorComponent;
 class ACharacter;
+class AGameCharacterBase;
 class UCharacterMovementComponent;
 
 DECLARE_DYNAMIC_DELEGATE(FNoEnergyEvent);
@@ -24,12 +25,6 @@ class PROTOGAME_API UVitalityComponent : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UVitalityComponent();
-
-	//Events
-	//FNoEnergyEvent& GetOnNoEnergy() { return NoEvergyEventVar; };
-	//FNoHydrationEvent& GetOnNoHydration() { return NoHydrationEventVar; };
-	//FNoHealthEvent& GetOnNoHealth() { return NoHealthEventVar; };
-	//FNoStaminaEvent& GetOnNoStamina() { return NoStaminaEventVar; };
 
 protected:
 	virtual void BeginPlay() override;
@@ -50,7 +45,7 @@ protected:
 	void TakeThirstDamage(float DeltaTime);
 
 	UFUNCTION()
-	void OnNoHealth(); //sets bDead, disables tick component
+	void OnNoHealth();
 
 	//Stamina
 	UFUNCTION()
@@ -120,8 +115,6 @@ private:
 	UPROPERTY()
 	FNoArmsStaminaEvent NoArmsStaminaEvent;
 
-	ACharacter* CharacterOwner;
-
 	//Health
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = Health)
 	float Health;
@@ -147,16 +140,16 @@ private:
 	UPROPERTY(VisibleAnywhere, Category = Health)
 	bool bAutoRegeneration;
 
-	UPROPERTY(EditDefaultsOnly, Category = Health)
+	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"), Category = Health)
 	bool bAllowAutoRegeneration;
 
-	UPROPERTY(EditDefaultsOnly, Category = Health)
+	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"), Category = Health)
 	float HungerDamage;
 
-	UPROPERTY(EditDefaultsOnly, Category = Health)
+	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"), Category = Health)
 	float ThirstDamage;
 
-	UPROPERTY(VisibleAnywhere, Category = Health)
+	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"), Category = Health)
 	float EnergyLevelAllowHealthRegeneration;
 
 	UPROPERTY(VisibleAnywhere, Category = Health)
@@ -169,10 +162,10 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = Stamina)
 	float StaminaMax;
 
-	UPROPERTY(EditDefaultsOnly, Category = Stamina)
+	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"), Category = Stamina)
 	float StaminaDrainSpeed;
 
-	UPROPERTY(EditDefaultsOnly, Category = Stamina)
+	UPROPERTY(EditDefaultsOnly, meta = (AllowPrivateAccess = "true"), Category = Stamina)
 	float StaminaRegenSpeed;
 
 	UPROPERTY(VisibleAnywhere, Category = Stamina)
