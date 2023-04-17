@@ -426,12 +426,12 @@ void AGameCharacterBase::SetDeathState(bool is_dead)
 
 		EnableRagdoll();
 
-		PrimaryActorTick.bCanEverTick = false;
+		//PrimaryActorTick.bCanEverTick = false;
 	}
 	else
 	{
 		EnableInput(GetController<APlayerController>());
-		PrimaryActorTick.bCanEverTick = true;
+		//PrimaryActorTick.bCanEverTick = true;
 		//VitalityComponent->Revive();
 	}
 }
