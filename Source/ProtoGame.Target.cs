@@ -11,5 +11,5 @@ public class ProtoGameTarget : TargetRules
 		DefaultBuildSettings = BuildSettingsVersion.Latest;
         IncludeOrderVersion = EngineIncludeOrderVersion.Latest;
         ExtraModuleNames.Add("ProtoGame");
-	}
+    }
 }
