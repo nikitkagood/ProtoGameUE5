@@ -1,10 +1,20 @@
 # Custom:
 *.lnk
-#Download from Epic store
+
+# Download from EGS:
+Content/AutomotiveWinterScene
+Content/Materials/Pack03-LandscapePro
+
+# Purely testing and playing around or/and not to be added to the repo
 Content/MilitaryWeapDark
 Content/MOUT_Civilian
 Content/AnimStarterPack
 Content/StarterContent
+Content/VigilanteContent/Vehicles/West_Ship_DDG102
+Content/STF/Pack03-LandscapePro/Maps
+
+
+
 
 # Unreal Engine gitignore template:
 # Visual Studio 2015 user specific files
