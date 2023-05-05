@@ -31,6 +31,7 @@ Diet water
 Hoover says "suction"
 Monthly Battle Pass in regular job
 Cow aerodynamics
+SlavesFactory (SkillFactory)
 
 Factions:
 Initiative One/Initiative Preservers/ - Western PMC
