@@ -1,0 +1,773 @@
+// Copyright Epic Games, Inc. All Rights Reserved.
+
+//custom
+#include "Character/GameCharacterBase.h"
+#include "Item/Projectile.h"
+#include "Item/ItemBase.h"
+#include "Item/ItemActor.h"
+#include "Item/WeaponGun.h"
+#include "Inventory/InventoryComponent.h"
+#include "Inventory/InvSpecialSlot.h"
+#include "Components/VitalityComponent.h"
+#include "Components/RPGStatsComponent.h"
+#include "Components/CustomCharacterMovementComponent.h"
+
+//engine
+#include "Animation/AnimInstance.h"
+#include "Camera/CameraComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "Components/InputComponent.h"
+#include "GameFramework/InputSettings.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Net/UnrealNetwork.h"
+
+#include <bitset>
+
+//debug
+#include "DrawDebugHelpers.h"
+
+DECLARE_DELEGATE_OneParam(CharInputBool, bool);
+
+DEFINE_LOG_CATEGORY_STATIC(LogCharacter, Log, All);
+
+AGameCharacterBase::AGameCharacterBase(const class FObjectInitializer& ObjectInitializer) 
+	: Super(ObjectInitializer.SetDefaultSubobjectClass<UCustomCharacterMovementComponent>(ACharacter::CharacterMovementComponentName))
+{
+	PrimaryActorTick.bCanEverTick = true;
+
+	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
+	GetCapsuleComponent()->SetVisibility(false, false);
+	GetCapsuleComponent()->SetHiddenInGame(false, false);
+
+	SetupMovementDefaults();
+
+	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
+	FirstPersonCameraComponent->SetupAttachment(GetCapsuleComponent());
+	FirstPersonCameraComponent->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
+	FirstPersonCameraComponent->bUsePawnControlRotation = true;
+	FirstPersonCameraComponent->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, false));
+
+	VitalityComponent = CreateDefaultSubobject<UVitalityComponent>(TEXT("VitalityComponent"));
+	RPGStatsComponent = CreateDefaultSubobject<URPGStatsComponent>(TEXT("RPGStatsComponent"));
+	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
+
+	PrimaryGunSlot = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("Primary gun slot component"));
+	SecondaryGunSlot = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("Secondary gun slot component"));
+	ActiveSlot = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("Active slot component"));
+
+	InHandsSkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("InHandsSkeletalMesh"));
+	InHandsSkeletalMesh->SetupAttachment(GetMesh(), TEXT("ik_hand_gun"));
+	InHandsSkeletalMesh->SetOnlyOwnerSee(false);
+
+	StowedOnBackSkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("StowedOnBackSkeletalMesh"));
+	StowedOnBackSkeletalMesh->SetupAttachment(GetMesh(), TEXT("StowedOnBackSocket"));
+	StowedOnBackSkeletalMesh->SetOnlyOwnerSee(false);
+
+	//VitalityComponent->GetOnNoHealth().AddUObject(this, &AGameCharacterBase::Death);
+}
+
+void AGameCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME_CONDITION(AGameCharacterBase, bIsProne, COND_SimulatedOnly);
+}
+
+void AGameCharacterBase::BeginPlay()
+{
+	Super::BeginPlay();
+
+	//Active slot is PrimarySlot by default
+	ActiveSlot = PrimaryGunSlot;
+}
+
+void AGameCharacterBase::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
+{
+	check(PlayerInputComponent);
+
+	//PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
+	//PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+
+	if (IsFlagSet_ToggleInputMovement(EMovementInputToggleFlags::SlowWalk))
+	{
+		PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AGameCharacterBase::ToggleSlowWalk);
+	}
+	else
+	{
+		PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AGameCharacterBase::StartSlowWalk);
+		PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AGameCharacterBase::EndSlowWalk);
+	}
+
+	if (IsFlagSet_ToggleInputMovement(EMovementInputToggleFlags::Sprint))
+	{
+		PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AGameCharacterBase::ToggleSprint);
+	}
+	else
+	{
+		PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AGameCharacterBase::StartSprint);
+		PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AGameCharacterBase::EndSprint);
+	}
+
+	if (IsFlagSet_ToggleInputMovement(EMovementInputToggleFlags::Prone))
+	{
+		PlayerInputComponent->BindAction("Prone", IE_Pressed, this, &AGameCharacterBase::ToggleProne);
+		//PlayerInputComponent->RemoveActionBinding();
+	}
+	else
+	{
+		PlayerInputComponent->BindAction("Prone", IE_Pressed, this, &AGameCharacterBase::StartProne);
+		PlayerInputComponent->BindAction("Prone", IE_Released, this, &AGameCharacterBase::EndProne);
+	}
+
+	if (IsFlagSet_ToggleInputMovement(EMovementInputToggleFlags::Crouch))
+	{
+		PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AGameCharacterBase::ToggleCrouch);
+	}
+	else
+	{
+		PlayerInputComponent->BindAction<CharInputBool>("Crouch", IE_Pressed, this, &AGameCharacterBase::Crouch, false);
+		PlayerInputComponent->BindAction<CharInputBool>("Crouch", IE_Released, this, &AGameCharacterBase::UnCrouch, false);
+	}
+
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AGameCharacterBase::Jump);
+
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AGameCharacterBase::StartFire);
+	PlayerInputComponent->BindAction("Fire", IE_Released, this, &AGameCharacterBase::EndFire);
+
+	PlayerInputComponent->BindAction("Action", IE_Pressed, this, &AGameCharacterBase::OnAction);
+
+	PlayerInputComponent->BindAction("DropItem", IE_Pressed, this, &AGameCharacterBase::DropItem);
+
+	PlayerInputComponent->BindAxis("MoveForward", this, &AGameCharacterBase::MoveForward);
+	PlayerInputComponent->BindAxis("MoveRight", this, &AGameCharacterBase::MoveRight);
+
+	PlayerInputComponent->BindAxis("Turn", this, &AGameCharacterBase::TurnAtRate);
+	PlayerInputComponent->BindAxis("LookUp", this, &AGameCharacterBase::LookUpAtRate);
+}
+
+//void AGameCharacterBase::Tick(float DeltaTime)
+//{
+//	Super::Tick(DeltaTime);
+//}
+
+UCustomCharacterMovementComponent* AGameCharacterBase::GetCharacterMovement() const
+{
+	return Cast<UCustomCharacterMovementComponent>(ACharacter::GetCharacterMovement());
+}
+
+void AGameCharacterBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	Super::EndPlay(EndPlayReason);
+}
+
+bool AGameCharacterBase::IsFlagSet_ToggleInputMovement(EMovementInputToggleFlags flag)
+{
+	return MovementToggleFlags & static_cast<decltype(MovementToggleFlags)>(flag);
+}
+
+void AGameCharacterBase::SetFlag_ToogleInputMovement(EMovementInputToggleFlags flag, bool value)
+{
+	//1UL - 1 unsigned long, it's for int width independency
+	MovementToggleFlags ^= (-static_cast<long>(value) ^ MovementToggleFlags) & (1UL < static_cast<decltype(MovementToggleFlags)>(flag));
+}
+
+void AGameCharacterBase::OnRep_IsProne()
+{
+	auto CharacterMovementCustom = GetCharacterMovement();
+
+	if (CharacterMovementCustom)
+	{
+		if (bIsProne)
+		{
+			CharacterMovementCustom->bWantsToProne = true;
+			CharacterMovementCustom->Prone(true);
+		}
+		else
+		{
+			CharacterMovementCustom->bWantsToProne = false;
+			CharacterMovementCustom->UnProne(true);
+		}
+		CharacterMovementCustom->bNetworkUpdateReceived = true;
+	}
+}
+
+void AGameCharacterBase::StartFire()
+{
+	bFireButtonDown = true;
+
+	if(ActiveSlot->IsOccupied())
+	{
+		Cast<UWeaponGun>(ActiveSlot->GetItem())->StartFire();
+	}
+}
+
+void AGameCharacterBase::EndFire()
+{
+	if(bFireButtonDown == true)
+	{
+		UWeaponGun* temp = Cast<UWeaponGun>(ActiveSlot->GetItem());
+		
+		if(temp != nullptr)
+		{
+			temp->EndFire();
+		}
+	}
+
+	bFireButtonDown = false;
+}
+
+bool AGameCharacterBase::EquipGun(UItemBase* item)
+{
+	if(item->IsA<UWeaponGun>() == false)
+	{
+		return false;
+	}
+
+	bool result = false;
+
+	if(item->GetOuterUpstreamInventory().GetObject()->IsA<UInvSpecialSlotComponent>())
+	{
+		//De-equip
+		result = item->GetOuterUpstreamInventory()->MoveItemToInventory(item, InventoryComponent);
+	}
+	else
+	{
+		//Equip (move to SpecialSlot)
+		result = item->GetOuterUpstreamInventory()->MoveItemToInventory(item, PrimaryGunSlot);
+		if(result == false)
+		{
+			result = item->GetOuterUpstreamInventory()->MoveItemToInventory(item, SecondaryGunSlot);
+		}
+	}
+
+	UpdateWeaponSlots();
+
+	return result;
+}
+
+void AGameCharacterBase::UpdateWeaponSlots()
+{
+	UWeaponBase::DestroySKStatic(InHandsSkeletalMesh);
+	UWeaponBase::DestroySKStatic(StowedOnBackSkeletalMesh);
+
+	auto* primary_slot_weapon = Cast<UWeaponBase>(PrimaryGunSlot->GetItem());
+	auto* secondary_slot_weapon = Cast<UWeaponBase>(SecondaryGunSlot->GetItem());
+
+	if(ActiveSlot == PrimaryGunSlot)
+	{
+		if(primary_slot_weapon != nullptr)
+		{
+			InHandsSkeletalMesh = primary_slot_weapon->CreateSKWeaponRepresentation(GetMesh());
+			InHandsSkeletalMesh->AttachToComponent(GetMesh(), { EAttachmentRule::SnapToTarget, true }, "ik_hand_gun");
+		}
+
+		if(secondary_slot_weapon != nullptr)
+		{
+			StowedOnBackSkeletalMesh = secondary_slot_weapon->CreateSKWeaponRepresentation(GetMesh());;
+			StowedOnBackSkeletalMesh->AttachToComponent(GetMesh(), { EAttachmentRule::SnapToTarget, true }, "StowedOnBackSocket");
+		}
+
+	}
+	else //ActiveSlot == SecondaryGunSlot 
+	{
+		if(secondary_slot_weapon != nullptr)
+		{
+			InHandsSkeletalMesh = secondary_slot_weapon->CreateSKWeaponRepresentation(GetMesh());;
+			InHandsSkeletalMesh->AttachToComponent(GetMesh(), { EAttachmentRule::SnapToTarget, true }, "ik_hand_gun");
+		}
+
+		if(primary_slot_weapon != nullptr)
+		{
+			StowedOnBackSkeletalMesh = primary_slot_weapon->CreateSKWeaponRepresentation(GetMesh());;
+			StowedOnBackSkeletalMesh->AttachToComponent(GetMesh(), { EAttachmentRule::SnapToTarget, true }, "StowedOnBackSocket");
+		}
+	}
+}
+
+void AGameCharacterBase::MoveForward(float Value)
+{
+	if (Value != 0.0f)
+	{
+		FRotator controller_rotation = GetControlRotation();
+		controller_rotation.Pitch = 0;
+		controller_rotation.Roll = 0;
+
+		AddMovementInput(UKismetMathLibrary::GetForwardVector(controller_rotation), Value);
+	}
+}
+
+void AGameCharacterBase::MoveRight(float Value)
+{
+	if (Value != 0.0f)
+	{
+		FRotator controller_rotation = GetControlRotation();
+		controller_rotation.Pitch = 0;
+		controller_rotation.Roll = 0;
+
+		AddMovementInput(UKismetMathLibrary::GetRightVector(controller_rotation), Value);
+	}
+}
+
+void AGameCharacterBase::TurnAtRate(float Rate)
+{
+	//calculate delta for this frame from the rate information
+	//AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
+}
+
+void AGameCharacterBase::LookUpAtRate(float Rate)
+{
+	//calculate delta for this frame from the rate information
+	//AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
+}
+
+void AGameCharacterBase::Jump()
+{
+	bool is_jump = true;
+
+	if (bIsCrouched)
+	{
+		UnCrouch();
+		is_jump = false;
+	}
+	if (bIsProne)
+	{
+		EndProne();
+		is_jump = false;
+	}
+	
+	if(is_jump)
+	{
+		constexpr float speed_when_min_z = 0;
+		constexpr float speed_when_max_z = 1000;
+		constexpr float min_z_velocity = 300;
+		constexpr float max_z_velocity = 500;
+
+		float computed_z_velocity = FMath::GetMappedRangeValueClamped(FVector2D{ speed_when_min_z, speed_when_max_z }, FVector2D{ min_z_velocity, max_z_velocity }, GetVelocity().Length());
+		GetCharacterMovement()->JumpZVelocity = computed_z_velocity;
+		ACharacter::Jump();
+	}
+}
+
+void AGameCharacterBase::EndJump(const FHitResult& hit)
+{
+	bIsJumping = false;
+}
+
+void AGameCharacterBase::OnJumped_Implementation()
+{
+	bIsJumping = true;
+}
+
+void AGameCharacterBase::ToggleCrouch()
+{
+	if (bIsCrouched)
+	{
+		UnCrouch();
+	}
+	else
+	{
+		Crouch();
+	}
+}
+
+void AGameCharacterBase::Crouch(bool bClientSimulation)
+{
+	if (GetCharacterMovement())
+	{
+		if (CanCrouch())
+		{
+			EndSlowWalk();
+			EndSprint();
+			EndProne();
+
+			GetCharacterMovement()->bWantsToCrouch = true;
+		}
+#if !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
+		else if (!GetCharacterMovement()->CanEverCrouch())
+		{
+			UE_LOG(LogCharacter, Log, TEXT("%s is trying to crouch, but crouching is disabled on this character! (check CharacterMovement NavAgentSettings)"), *GetName());
+		}
+#endif
+	}
+}
+
+void AGameCharacterBase::UnCrouch(bool bClientSimulation)
+{
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->bWantsToCrouch = false;
+	}
+}
+
+//void AGameCharacterBase::StartCrouch()
+//{
+//	EndSlowWalk();
+//	EndSprint();
+//	EndProne();
+//
+//	ACharacter::Crouch();
+//}
+
+//void AGameCharacterBase::EndCrouch()
+//{
+//	ACharacter::UnCrouch();
+//}
+
+void AGameCharacterBase::ToggleProne()
+{
+	UE_LOG(LogCharacter, Log, TEXT(""));
+	 
+	if (bIsProne)
+	{
+		EndProne();
+	}
+	else
+	{
+		StartProne();
+	}
+}
+
+void AGameCharacterBase::StartProne()
+{
+	if (GetCharacterMovement())
+	{
+		if (CanProne())
+		{
+			EndSprint();
+			EndSlowWalk();
+			UnCrouch();
+
+			GetCharacterMovement()->bWantsToProne = true;
+		}
+#if !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
+		else if (!GetCharacterMovement()->CanEverProne())
+		{
+			UE_LOG(LogCharacter, Log, TEXT("%s is trying to prone, but prone is disabled on this character! (check CharacterMovement NavAgentSettings)"), *GetName());
+		}
+#endif
+	}
+}
+void AGameCharacterBase::EndProne()
+{
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->bWantsToProne = false;
+	}
+}
+
+bool AGameCharacterBase::CanSlowWalk() const
+{
+	return !bIsSlowWalking && GetCharacterMovement() && GetCharacterMovement()->CanEverSlowWalk() && GetRootComponent() && !GetRootComponent()->IsSimulatingPhysics();
+}
+
+bool AGameCharacterBase::CanSprint() const
+{
+	return !bIsSprinting && GetCharacterMovement() && GetCharacterMovement()->CanEverSprint() && GetRootComponent() && !GetRootComponent()->IsSimulatingPhysics();
+}
+
+bool AGameCharacterBase::CanProne() const
+{
+	return !bIsProne && GetCharacterMovement() && GetCharacterMovement()->CanEverProne() && GetRootComponent() && !GetRootComponent()->IsSimulatingPhysics();
+}
+
+void AGameCharacterBase::OnStartProne(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
+{
+	RecalculateBaseEyeHeight();
+
+	const AGameCharacterBase* DefaultChar = GetDefault<AGameCharacterBase>(GetClass());
+	if (GetMesh() && DefaultChar->GetMesh())
+	{
+		FVector& MeshRelativeLocation = GetMesh()->GetRelativeLocation_DirectMutable();
+		MeshRelativeLocation.Z = DefaultChar->GetMesh()->GetRelativeLocation().Z + HalfHeightAdjust;
+		BaseTranslationOffset.Z = MeshRelativeLocation.Z;
+	}
+	else
+	{
+		BaseTranslationOffset.Z = DefaultChar->BaseTranslationOffset.Z + HalfHeightAdjust;
+	}
+
+	K2_OnStartProne(HalfHeightAdjust, ScaledHalfHeightAdjust);
+}
+
+void AGameCharacterBase::OnEndProne(float HalfHeightAdjust, float ScaledHalfHeightAdjust)
+{
+	RecalculateBaseEyeHeight();
+
+	const AGameCharacterBase* DefaultChar = GetDefault<AGameCharacterBase>(GetClass());
+	if (GetMesh() && DefaultChar->GetMesh())
+	{
+		FVector& MeshRelativeLocation = GetMesh()->GetRelativeLocation_DirectMutable();
+		MeshRelativeLocation.Z = DefaultChar->GetMesh()->GetRelativeLocation().Z;
+		BaseTranslationOffset.Z = MeshRelativeLocation.Z;
+	}
+	else
+	{
+		BaseTranslationOffset.Z = DefaultChar->BaseTranslationOffset.Z;
+	}
+
+	K2_OnEndProne(HalfHeightAdjust, ScaledHalfHeightAdjust);
+}
+
+//void AGameCharacterBase::RecalculateProneEyeHeight()
+//{
+//	if (GetCharacterMovement() != nullptr)
+//	{
+//		constexpr float EyeHeightRatio = 0.8f;	// how high the character's eyes are, relative to the crouched height
+//
+//		CrouchedEyeHeight = GetCharacterMovement()->GetProneHalfHeight() * EyeHeightRatio;
+//	}
+//}
+
+void AGameCharacterBase::ToggleSprint()
+{
+	//if(GetCharacterMovement()->IsCrouching() == false && bProneButtonDown == false && bWalkButtonDown == false)
+	//{
+	//	bSprintButtonDown = !bSprintButtonDown;
+
+	//	if(bSprintButtonDown)
+	//	{
+	//		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+	//		VitalityComponent->StartUsingStamina();
+	//	}
+	//	else
+	//	{
+	//		GetCharacterMovement()->MaxWalkSpeed = JogSpeed;
+	//		VitalityComponent->StopUsingStamina();
+	//	}
+	//}
+
+	if (bIsSprinting)
+	{
+		EndSprint();
+	}
+	else
+	{
+		StartSprint();
+	}
+}
+
+void AGameCharacterBase::StartSprint()
+{
+	if (GetCharacterMovement())
+	{
+		if (CanSprint() && !bIsProne && !bIsCrouched)
+		{
+			EndSlowWalk();
+
+			GetCharacterMovement()->StartSprint();
+		}
+#if !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
+		else if (!GetCharacterMovement()->CanEverSprint())
+		{
+			UE_LOG(LogCharacter, Log, TEXT("%s is trying to sprint, but sprint is disabled on this character!"), *GetName());
+		}
+#endif
+	}
+
+	//if(GetCharacterMovement()->IsCrouching() == false && GetCharacterMovement()->IsProne() == false && GetCharacterMovement()->IsSlowWalking() == false)
+	//{
+	//	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+	//	bSprintButtonDown = true;
+	//	VitalityComponent->StartUsingStamina();
+	//}
+}
+
+void AGameCharacterBase::EndSprint()
+{
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->EndSprint();
+	}
+
+	//if(GetCharacterMovement()->IsCrouching() == false && GetCharacterMovement()->IsProne() && bWalkButtonDown == false)
+	//{
+	//	GetCharacterMovement()->MaxWalkSpeed = JogSpeed;
+	//	bSprintButtonDown = false;
+	//	VitalityComponent->StopUsingStamina();
+	//}
+}
+
+void AGameCharacterBase::ToggleSlowWalk()
+{
+	if (bIsSlowWalking)
+	{
+		EndSlowWalk();
+	}
+	else
+	{
+		StartSlowWalk();
+	}
+}
+
+void AGameCharacterBase::StartSlowWalk()
+{
+	if (GetCharacterMovement())
+	{
+		if (CanSlowWalk())
+		{
+			GetCharacterMovement()->StartSprint();
+		}
+#if !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
+		else if (!GetCharacterMovement()->CanEverSprint())
+		{
+			UE_LOG(LogCharacter, Log, TEXT("%s is trying to slow walk, but slow walk is disabled on this character!"), *GetName());
+		}
+#endif
+	}
+}
+
+void AGameCharacterBase::EndSlowWalk()
+{
+	if (GetCharacterMovement())
+	{
+		GetCharacterMovement()->EndSlowWalk();
+	}
+}
+
+void AGameCharacterBase::OnAction()
+{
+	AActor* actor_ptr = GetInteractionInfo().GetActor();
+
+	if(actor_ptr != nullptr)
+	{
+		auto name = actor_ptr->GetName();
+
+		if(actor_ptr->Implements<UInteractionInterface>())
+		{
+			IInteractionInterface* interaction_interface = Cast<IInteractionInterface>(actor_ptr);
+
+			//Cast to BP objects that implement the interface returns null, thus null -> call BP function
+			if(interaction_interface != nullptr)
+			{
+				interaction_interface->OnInteract(this);
+			}
+			else
+			{
+				interaction_interface->Execute_OnInteractBP(actor_ptr, this);
+			}
+
+		}
+	}
+}
+
+void AGameCharacterBase::UseItem(UItemBase* item)
+{
+	if(item != nullptr)
+	{
+		//item->Use(this);
+		item->OnUse(this); //BP event
+	}
+}
+
+void AGameCharacterBase::DropItem()
+{
+	//TODO; placeholder; for now it drops the first item
+	if(InventoryComponent->GetItems().Num() != 0)
+	{
+		InventoryComponent->DropItemToWorld(InventoryComponent->GetItems().begin().Key());
+	}
+}
+
+
+float AGameCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	VitalityComponent->ChangeHealth(-1 * DamageAmount);
+	return DamageAmount;
+}
+
+void AGameCharacterBase::EnableRagdoll()
+{
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	GetMesh()->SetSimulatePhysics(true);
+	GetMesh()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+}
+
+void AGameCharacterBase::DisableRagdoll()
+{
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	GetMesh()->SetSimulatePhysics(false);
+	GetMesh()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+}
+
+void AGameCharacterBase::SetDeathState(bool is_dead)
+{
+	if (is_dead)
+	{
+		//GetCharacterMovement()->DisableMovement();
+		DisableInput(GetController<APlayerController>());
+
+		EnableRagdoll();
+
+		//PrimaryActorTick.bCanEverTick = false;
+	}
+	else
+	{
+		EnableInput(GetController<APlayerController>());
+		//PrimaryActorTick.bCanEverTick = true;
+		//VitalityComponent->Revive();
+	}
+}
+
+void AGameCharacterBase::SetupMovementDefaults()
+{
+	//BaseTurnRate = 120.f;
+	//BaseLookUpRate = 120.f;
+
+	//bJumpButtonDown = false;
+	//bCrouchButtonDown = false;
+	//bProneButtonDown = false;
+	//bWalkButtonDown = false;
+	//bSprintButtonDown = false;
+	//bAimButtonDown = false;
+	//bFireButtonDown = false;
+	//JogSpeed = 500.f;
+	//WalkSpeed = 250.f;
+	//SprintSpeed = 1000.f;
+	//CrouchSpeed = 200.f;
+	//ProneSpeed = 120.f;
+	//AimDownSightsSpeed = 250.f;
+	//JumpZVelocity = 420.f;
+
+	//TODO: different JumpZVelocity when standing or moving moving
+
+	//GetCharacterMovement()->MaxWalkSpeed = GetCharacterMovement()->MaxWalkSpeedJog;
+	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
+	GetCharacterMovement()->NavAgentProps.bCanJump = true;
+	GetCharacterMovement()->NavAgentProps.bCanSwim = true;
+	GetCharacterMovement()->NavAgentProps.bCanWalk = true;
+	GetCharacterMovement()->NavAgentProps.bCanFly = false;
+	GetCharacterMovement()->bCanProne = true;
+	GetCharacterMovement()->bCanSprint = true;
+	GetCharacterMovement()->bCanWalkOffLedges = true;
+	GetCharacterMovement()->bCanWalkOffLedgesWhenCrouching = true;
+
+	LandedDelegate.AddDynamic(this, &AGameCharacterBase::EndJump);
+}
+
+FHitResult AGameCharacterBase::GetInteractionInfo()
+{
+	constexpr float interaction_range = 175.f;
+	float radius = 2.1f;
+	FVector start = FirstPersonCameraComponent->GetComponentLocation();
+	FVector end = start + FirstPersonCameraComponent->GetForwardVector() * interaction_range;
+
+	FCollisionQueryParams collision_params;
+	collision_params.AddIgnoredActor(this);
+
+	FHitResult hit_result;
+
+	//DrawDebugLine(GetWorld(), start, end, FColor::Green, false, 3, 0, 5);
+	//GetWorld()->LineTraceSingleByChannel(hit_result, start, end, ECollisionChannel::ECC_Visibility, collision_params);
+	GetWorld()->SweepSingleByChannel(hit_result, start, end, {}, ECollisionChannel::ECC_Visibility, FCollisionShape::MakeSphere(radius), collision_params);
+	DrawDebugSphere(GetWorld(), start, radius, 8, FColor::Green, false, 3, 0, 0.15);
+	DrawDebugSphere(GetWorld(), start + FirstPersonCameraComponent->GetForwardVector() * (interaction_range / 4), radius, 8, FColor::Green, false, 3, 0, 0.15);
+	DrawDebugSphere(GetWorld(), start + FirstPersonCameraComponent->GetForwardVector() * (interaction_range / 2), radius, 8, FColor::Green, false, 3, 0, 0.15);
+	DrawDebugSphere(GetWorld(), start + FirstPersonCameraComponent->GetForwardVector() * (interaction_range / 1.5), radius, 8, FColor::Green, false, 3, 0, 0.15);
+	DrawDebugSphere(GetWorld(), start + FirstPersonCameraComponent->GetForwardVector() * (interaction_range / 1.25), radius, 8, FColor::Green, false, 3, 0, 0.15);
+	DrawDebugSphere(GetWorld(), end, radius, 8, FColor::Green, false, 3, 0, 0.15);
+
+	return hit_result;
+}

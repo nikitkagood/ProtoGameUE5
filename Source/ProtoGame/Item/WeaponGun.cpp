@@ -2,7 +2,7 @@
 
 #include "Item/WeaponGun.h"
 #include "Item/Projectile.h"
-#include "Character/GameCharacter.h"
+#include "Character/GameCharacterBase.h"
 #include "ItemActor.h"
 #include "Item/WeaponAttachment.h"
 #include "Item/WeaponAttachmentMagazine.h"

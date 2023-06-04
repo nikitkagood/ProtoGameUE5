@@ -7,6 +7,8 @@
 
 #include "GameFramework/Character.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/KismetMathLibrary.h"
+//#include <cmath>
 
 #include "Profiler/Profiler.h"
 
@@ -35,32 +37,10 @@ bool UInventoryComponent::AddItemFromWorld(UItemBase* item)
         return false;
     }
 
-    //Cast<AItemActor>(item->ItemActor)->Destroy(); //currently items destroy themselves
+    //item->ItemActor->Destroy(); //currently ItemActors destroy themselves
 
     return true;
 }
-
-//bool UInventoryComponent::DropItemToWorld(UItemBase* item)
-//{
-//    if(item == nullptr)
-//    {
-//        return false;
-//    }
-//    if(Items.Contains(item) == false)
-//    {
-//        return false;
-//    }
-//    if(item->SpawnItemActor(GetOwner()->GetActorLocation() + GetOwner()->GetActorForwardVector() * DropDistance, GetOwner()->GetActorRotation()) == false)
-//    {
-//        //can't spawn, do not delete from inventory
-//        UKismetSystemLibrary::PrintString(GetWorld(), "Drop to world is blocked", true, true, FLinearColor(130, 5, 255), 4);
-//        return false;
-//    }
-//
-//    RemoveItem(item);
-//
-//    return true;
-//}
 
 bool UInventoryComponent::MoveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell, bool widget_rotation)
 {
@@ -132,7 +112,7 @@ bool UInventoryComponent::AddItem(UItemBase* item)
 {
     if(item == nullptr)
     {
-        UE_LOG(LogTemp, Error, TEXT("AddItem: invald item!"));
+        UE_LOG(LogTemp, Error, TEXT("AddItem: invalid item!"));
         return false;
     }
 
@@ -180,7 +160,7 @@ bool UInventoryComponent::AddItem(UItemBase* item)
             int32 idx = GenerateIndex();
             Items.Add(item, idx);
 
-            AddMass(item->GetMassTotal());
+            ChangeMass(item->GetMassTotal());
 
             item->SetUpperLeftCell(free_space_coords);
             FillSpaceInGrid(item->GetUpperLeftCell(), item->GetLowerRightCell(), idx);
@@ -246,7 +226,7 @@ bool UInventoryComponent::AddItemAt(UItemBase* item, FIntPoint new_upper_left_ce
             int32 idx = GenerateIndex();
             Items.Add(item, idx);
 
-            AddMass(item->GetMassTotal());
+            ChangeMass(item->GetMassTotal());
 
             item->SetUpperLeftCell(new_upper_left_cell);
             FillSpaceInGrid(item->GetUpperLeftCell(), item->GetLowerRightCell(), idx);
@@ -279,9 +259,9 @@ bool UInventoryComponent::RemoveItem(UItemBase* item)
     FillSpaceInGrid(item_position.Key, item_position.Value, EMPTY_SPACE);
 
     UpdateFreeSpaceLeft(item->GetRows() * item->GetColumns());
-    free_indecies.Push(Items[item]);
+    free_indices.Push(Items[item]);
 
-    AddMass(-item->GetMassTotal());
+    ChangeMass(-item->GetMassTotal());
 
     Items.Remove(item);
 
@@ -293,7 +273,7 @@ bool UInventoryComponent::RemoveItemAt(UItemBase* item, FIntPoint upper_left_cel
 {
     if(item == nullptr)
     {
-        UE_LOG(LogTemp, Error, TEXT("RemoveItem: invald item!"));
+        UE_LOG(LogTemp, Error, TEXT("RemoveItem: invalid item!"));
         return false;
     }
     if(Items.Num() == 0)
@@ -305,9 +285,9 @@ bool UInventoryComponent::RemoveItemAt(UItemBase* item, FIntPoint upper_left_cel
     FillSpaceInGrid(upper_left_cell, lower_right_cell, EMPTY_SPACE);
 
     UpdateFreeSpaceLeft(item->GetRows() * item->GetColumns());
-    free_indecies.Push(Items[item]);
+    free_indices.Push(Items[item]);
 
-    AddMass(-item->GetMassTotal());
+    ChangeMass(-item->GetMassTotal());
 
     Items.Remove(item);
 
@@ -315,11 +295,19 @@ bool UInventoryComponent::RemoveItemAt(UItemBase* item, FIntPoint upper_left_cel
     return true;
 }
 
-void UInventoryComponent::AddMass(float value)
+void UInventoryComponent::ChangeMass(float value)
 {
     Mass += value;
+    UE_LOG(LogTemp, Warning, TEXT("InventoryComponent: Changed mass by: %f"), value);
 
-    checkf(!(Mass < 0), TEXT("Error: UInventoryComponent: Mass is invalid. Probably this is result of missing or wrong caclulations."))
+    //To avoid floating point errors
+    if (UKismetMathLibrary::NearlyEqual_FloatFloat(Mass, 0, FItemInfo::MassMaxPrecision))
+    {
+        Mass = 0;
+    };
+
+    //Switch to double if above fix isn't enough
+    checkf(!(Mass < 0), TEXT("Error: UInventoryComponent: Mass is invalid. Probably this is result of missing/wrong caclulations. Or floating point error."))
 }
 
 void UInventoryComponent::SetupDefaults()
@@ -514,9 +502,9 @@ void UInventoryComponent::UpdateFreeSpaceLeft(int32 space_change)
 
 int32 UInventoryComponent::GenerateIndex()
 {
-    if(free_indecies.Num() > 0)
+    if(free_indices.Num() > 0)
     {
-        return free_indecies.Pop();
+        return free_indices.Pop();
     }
     else
     {
@@ -693,5 +681,5 @@ void UInventoryComponent::UpdateStackDependencies(UItemBase* item, int32 new_sta
         return;
     }
 
-    AddMass(item->GetMassOneUnit() * new_stack_size - item->GetMassTotal());
+    ChangeMass(item->GetMassOneUnit() * new_stack_size - item->GetMassTotal());
 }

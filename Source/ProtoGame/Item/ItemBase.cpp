@@ -3,7 +3,7 @@
 
 #include "ItemBase.h"
 
-#include "Character/GameCharacter.h"
+#include "Character/GameCharacterBase.h"
 #include "Inventory/InventoryComponent.h"
 #include "ItemActor.h"
 

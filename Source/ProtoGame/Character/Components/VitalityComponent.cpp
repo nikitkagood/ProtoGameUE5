@@ -1,7 +1,7 @@
 // Nikita Belov, All rights reserved
 
 #include "VitalityComponent.h"
-#include "Character/GameCharacter.h"
+#include "Character/GameCharacterBase.h"
 
 #include "Components/ActorComponent.h"
 #include "GameFramework/Character.h"

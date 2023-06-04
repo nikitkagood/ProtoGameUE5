@@ -52,6 +52,8 @@ struct PROTOGAME_API FItemInfo : public FTableRowBase
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true", ClampMin = 1))
 	int32 MaxStackSize = 1;
 
+	constexpr static double MassMaxPrecision = 1.0E-4;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true", ClampMin = 0))
 	float Mass = 0.001;
 

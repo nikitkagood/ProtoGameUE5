@@ -69,7 +69,7 @@ protected:
 	bool RemoveItem(UItemBase* item); //finds then removes; does minimal checks; Doesn't clear World and Outer because there Add to another inventory already overrides these;
 	bool RemoveItemAt(UItemBase* item, FIntPoint upper_left_cell, FIntPoint lower_right_cell); //removes from pre-determined place
 
-	void AddMass(float value);
+	void ChangeMass(float value);
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Inventory", meta = (AllowPrivateAccess = true))
 	FName InventoryName;
@@ -83,7 +83,9 @@ protected:
     UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly, Category = "Inventory", meta = (AllowPrivateAccess = true))
 	int32 FreeSpaceLeft;
 
-	//Do not set it manually. Use AddMass
+	//Do not set it manually
+	//Max precision is 
+
 	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly, Category = "Inventory", meta = (AllowPrivateAccess = true))
 	float Mass;
 
@@ -111,7 +113,7 @@ private:
 	UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly, Category = "Inventory", meta = (AllowPrivateAccess = true))
 	TMap<UItemBase*, int32> Items; //item pointer + it's index in the grid
 
-	TArray<int32> free_indecies;
+	TArray<int32> free_indices;
 	
 	TArray<TArray<int32>> InventoryGrid; //-1 is free space; 0 and so on - some item
 

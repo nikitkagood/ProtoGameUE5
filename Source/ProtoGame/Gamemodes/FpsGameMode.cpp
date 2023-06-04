@@ -2,7 +2,7 @@
 
 #include "FpsGameMode.h"
 #include "UI/FpsHUD.h"
-#include "Character/GameCharacter.h"
+#include "Character/GameCharacterBase.h"
 #include "UObject/ConstructorHelpers.h"
 
 AFpsGameMode::AFpsGameMode() : Super()

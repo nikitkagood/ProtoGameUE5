@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+
 #include "RPGStatsComponent.generated.h"
 
 DECLARE_EVENT(URPGStats, FNewLevelEvent)
