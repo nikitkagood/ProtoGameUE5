@@ -91,12 +91,12 @@ void AGameCharacterBase::SetupPlayerInputComponent(class UInputComponent* Player
 
 	if (IsFlagSet_ToggleInputMovement(EMovementInputToggleFlags::SlowWalk))
 	{
-		PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AGameCharacterBase::ToggleSlowWalk);
+		PlayerInputComponent->BindAction("SlowWalk", IE_Pressed, this, &AGameCharacterBase::ToggleSlowWalk);
 	}
 	else
 	{
-		PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AGameCharacterBase::StartSlowWalk);
-		PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AGameCharacterBase::EndSlowWalk);
+		PlayerInputComponent->BindAction("SlowWalk", IE_Pressed, this, &AGameCharacterBase::StartSlowWalk);
+		PlayerInputComponent->BindAction("SlowWalk", IE_Released, this, &AGameCharacterBase::EndSlowWalk);
 	}
 
 	if (IsFlagSet_ToggleInputMovement(EMovementInputToggleFlags::Sprint))
@@ -458,12 +458,12 @@ void AGameCharacterBase::EndProne()
 
 bool AGameCharacterBase::CanSlowWalk() const
 {
-	return !bIsSlowWalking && GetCharacterMovement() && GetCharacterMovement()->CanEverSlowWalk() && GetRootComponent() && !GetRootComponent()->IsSimulatingPhysics();
+	return !bIsSlowWalking && !bIsCrouched && !bIsProne && GetCharacterMovement() && GetCharacterMovement()->CanEverSlowWalk() && GetRootComponent() && !GetRootComponent()->IsSimulatingPhysics();
 }
 
 bool AGameCharacterBase::CanSprint() const
 {
-	return !bIsSprinting && GetCharacterMovement() && GetCharacterMovement()->CanEverSprint() && GetRootComponent() && !GetRootComponent()->IsSimulatingPhysics();
+	return !bIsSprinting && !bIsCrouched && !bIsProne && GetCharacterMovement() && GetCharacterMovement()->CanEverSprint() && GetRootComponent() && !GetRootComponent()->IsSimulatingPhysics();
 }
 
 bool AGameCharacterBase::CanProne() const
@@ -551,7 +551,7 @@ void AGameCharacterBase::StartSprint()
 {
 	if (GetCharacterMovement())
 	{
-		if (CanSprint() && !bIsProne && !bIsCrouched)
+		if (CanSprint())
 		{
 			EndSlowWalk();
 
@@ -606,10 +606,10 @@ void AGameCharacterBase::StartSlowWalk()
 	{
 		if (CanSlowWalk())
 		{
-			GetCharacterMovement()->StartSprint();
+			GetCharacterMovement()->StartSlowWalk();
 		}
 #if !(UE_BUILD_SHIPPING || UE_BUILD_TEST)
-		else if (!GetCharacterMovement()->CanEverSprint())
+		else if (!GetCharacterMovement()->CanEverSlowWalk())
 		{
 			UE_LOG(LogCharacter, Log, TEXT("%s is trying to slow walk, but slow walk is disabled on this character!"), *GetName());
 		}
