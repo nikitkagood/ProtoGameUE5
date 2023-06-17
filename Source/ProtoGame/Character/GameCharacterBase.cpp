@@ -402,8 +402,6 @@ void AGameCharacterBase::UnCrouch(bool bClientSimulation)
 
 void AGameCharacterBase::ToggleProne()
 {
-	UE_LOG(LogCharacter, Log, TEXT(""));
-	 
 	if (bIsProne)
 	{
 		EndProne();
@@ -454,7 +452,6 @@ bool AGameCharacterBase::CanSprint() const
 
 bool AGameCharacterBase::CanProne() const
 {
-	//!GetCharacterMovement()->bWantsToCrouch
 	return !bIsProne && GetCharacterMovement() && GetCharacterMovement()->CanEverProne() && GetRootComponent() && !GetRootComponent()->IsSimulatingPhysics();
 }
 

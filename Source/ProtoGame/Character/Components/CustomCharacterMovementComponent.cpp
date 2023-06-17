@@ -419,8 +419,6 @@ void UCustomCharacterMovementComponent::Crouch(bool bClientSimulation)
 			{
 				CharacterOwner->GetCapsuleComponent()->SetCapsuleSize(OldUnscaledRadius, OldUnscaledHalfHeight);
 
-				GEngine->AddOnScreenDebugMessage(5, 15.0f, FColor::Yellow, FString::Printf(TEXT("Crouch::SetCapsuleSize (to larger height) to: %f"), OldUnscaledHalfHeight));
-
 				return;
 			}
 		}
