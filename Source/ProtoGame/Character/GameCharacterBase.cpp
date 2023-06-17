@@ -400,20 +400,6 @@ void AGameCharacterBase::UnCrouch(bool bClientSimulation)
 	}
 }
 
-//void AGameCharacterBase::StartCrouch()
-//{
-//	EndSlowWalk();
-//	EndSprint();
-//	EndProne();
-//
-//	ACharacter::Crouch();
-//}
-
-//void AGameCharacterBase::EndCrouch()
-//{
-//	ACharacter::UnCrouch();
-//}
-
 void AGameCharacterBase::ToggleProne()
 {
 	UE_LOG(LogCharacter, Log, TEXT(""));
@@ -468,7 +454,13 @@ bool AGameCharacterBase::CanSprint() const
 
 bool AGameCharacterBase::CanProne() const
 {
+	//!GetCharacterMovement()->bWantsToCrouch
 	return !bIsProne && GetCharacterMovement() && GetCharacterMovement()->CanEverProne() && GetRootComponent() && !GetRootComponent()->IsSimulatingPhysics();
+}
+
+bool AGameCharacterBase::CanCrouch() const
+{
+	return !bIsCrouched && GetCharacterMovement() && GetCharacterMovement()->CanEverCrouch() && GetRootComponent() && !GetRootComponent()->IsSimulatingPhysics();
 }
 
 void AGameCharacterBase::OnStartProne(float HalfHeightAdjust, float ScaledHalfHeightAdjust)

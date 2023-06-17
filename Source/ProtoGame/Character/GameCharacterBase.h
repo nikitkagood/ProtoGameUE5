@@ -155,6 +155,7 @@ public:
 	bool CanSlowWalk() const;
 	bool CanSprint() const;
 	bool CanProne() const;
+	virtual bool CanCrouch() const override;
 
 protected:
 

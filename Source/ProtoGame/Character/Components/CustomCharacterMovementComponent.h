@@ -61,6 +61,9 @@ public:
 	 */
 	void UnProne(bool bClientSimulation = false);
 
+	virtual void Crouch(bool bClientSimulation = false) override;
+	void UnCrouch(bool bClientSimulation = false) override;
+
 	bool CanSlowWalkInCurrentState() const;
 	bool CanSprintInCurrentState() const;
 	bool CanProneInCurrentState() const;
