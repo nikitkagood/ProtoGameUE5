@@ -340,7 +340,7 @@ void AGameCharacterBase::Jump()
 	{
 		constexpr float speed_when_min_z = 0;
 		constexpr float speed_when_max_z = 1000;
-		constexpr float min_z_velocity = 300;
+		constexpr float min_z_velocity = 380;
 		constexpr float max_z_velocity = 500;
 
 		float computed_z_velocity = FMath::GetMappedRangeValueClamped(FVector2D{ speed_when_min_z, speed_when_max_z }, FVector2D{ min_z_velocity, max_z_velocity }, GetVelocity().Length());

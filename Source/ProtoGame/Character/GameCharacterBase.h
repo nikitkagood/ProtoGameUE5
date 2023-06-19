@@ -111,13 +111,10 @@ public:
 	virtual void OnJumped_Implementation() override;
 
 	void ToggleCrouch();
-	//void StartCrouch();
-	//void EndCrouch();
 
 	virtual void Crouch(bool bClientSimulation = false) override;
 	virtual void UnCrouch(bool bClientSimulation = false) override;
 
-	//Prone is a bit complicated because there is no default implementation of prone in ACharacter
 	void ToggleProne();
 	void StartProne();
 	void EndProne();

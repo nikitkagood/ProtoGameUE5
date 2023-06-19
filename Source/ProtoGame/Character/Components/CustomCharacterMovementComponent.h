@@ -9,6 +9,23 @@
 
 #include "CustomCharacterMovementComponent.generated.h"
 
+UENUM(BlueprintType)
+enum class EWalkingModeMovementType : uint8
+{
+	Stand = 0				UMETA(DisplayName = "Stand"),
+	StandToProne			UMETA(DisplayName = "Stand To Prone"),
+	StandToCrouch			UMETA(DisplayName = "Stand To Crouch"),
+	Prone					UMETA(DisplayName = "Prone"),
+	ProneToCrouch			UMETA(DisplayName = "Prone To Crouch"),
+	ProneToStand			UMETA(DisplayName = "Prone To Stand"),
+	Crouch					UMETA(DisplayName = "Crouch"),
+	CrouchToStand			UMETA(DisplayName = "Crouch To Stand"),
+	CrouchToProne			UMETA(DisplayName = "Crouch To Prone"),
+	//SlowWalk				UMETA(DisplayName = "SlowWalk"),
+	//Sprint				UMETA(DisplayName = "Sprint"),
+
+};
+
 //Added new fields to fully integrate new functionality
 //struct PROTOGAME_API FCustomCharacterMovementComponentAsyncInput : public FCharacterMovementComponentAsyncInput
 //{

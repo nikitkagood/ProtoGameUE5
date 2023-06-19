@@ -136,6 +136,7 @@ void UCustomCharacterMovementComponent::Prone(bool bClientSimulation)
 		if (!bClientSimulation)
 		{
 			CharacterOwnerCustom->bIsProne = true;
+			CharacterOwnerCustom->bIsCrouched = false;
 		}
 		CharacterOwnerCustom->OnStartProne(0.f, 0.f);
 		return;
@@ -188,6 +189,7 @@ void UCustomCharacterMovementComponent::Prone(bool bClientSimulation)
 		}
 
 		CharacterOwnerCustom->bIsProne = true;
+		CharacterOwnerCustom->bIsCrouched = false;
 	}
 
 	bForceNextFloorCheck = true;
@@ -377,7 +379,8 @@ void UCustomCharacterMovementComponent::Crouch(bool bClientSimulation)
 	{
 		if (!bClientSimulation)
 		{
-			CharacterOwner->bIsCrouched = true;
+			GetCharacterOwner()->bIsCrouched = true;
+			GetCharacterOwner()->bIsProne = false;
 		}
 		CharacterOwner->OnStartCrouch(0.f, 0.f);
 		return;
@@ -429,7 +432,8 @@ void UCustomCharacterMovementComponent::Crouch(bool bClientSimulation)
 			UpdatedComponent->MoveComponent(FVector(0.f, 0.f, -ScaledHalfHeightAdjust), UpdatedComponent->GetComponentQuat(), true, nullptr, EMoveComponentFlags::MOVECOMP_NoFlags, ETeleportType::TeleportPhysics);
 		}
 
-		CharacterOwner->bIsCrouched = true;
+		GetCharacterOwner()->bIsCrouched = true;
+		GetCharacterOwner()->bIsProne = false;
 	}
 
 	bForceNextFloorCheck = true;
@@ -669,8 +673,16 @@ void UCustomCharacterMovementComponent::UpdateCharacterStateBeforeMovement(float
 	// Proxies get replicated crouch state.
 	if (CharacterOwner->GetLocalRole() != ROLE_SimulatedProxy)
 	{
+		if (!IsCrouching() && bWantsToCrouch && CanCrouchInCurrentState())
+		{
+			Crouch(false);
+		}
+		else if (!IsProne() && bWantsToProne && CanProneInCurrentState())
+		{
+			Prone(false);
+		}		
 		// Check for a change in crouch state. Players toggle crouch by changing bWantsToCrouch.
-		if (IsCrouching() && (!bWantsToCrouch || !CanCrouchInCurrentState()))
+		else if (IsCrouching() && (!bWantsToCrouch || !CanCrouchInCurrentState()))
 		{
 			UnCrouch(false);
 			//If we can't UnCrouch, we reset player input, so the character doesn't stand up automatically
@@ -688,14 +700,7 @@ void UCustomCharacterMovementComponent::UpdateCharacterStateBeforeMovement(float
 				bWantsToProne = true;
 			}
 		}
-		else if (!IsCrouching() && bWantsToCrouch && CanCrouchInCurrentState())
-		{
-			Crouch(false);
-		}
-		else if (!IsProne() && bWantsToProne && CanProneInCurrentState())
-		{
-			Prone(false);
-		}
+
 	}
 }
 
