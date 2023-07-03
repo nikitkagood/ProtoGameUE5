@@ -198,6 +198,8 @@ public:
 	bool IsFlagSet_ToggleInputMovement(EMovementInputToggleFlags flag);
 	void SetFlag_ToogleInputMovement(EMovementInputToggleFlags flag, bool value);
 public:
+	float InteractionRange = 125.f;
+
 	//May not be necessary - just use crouched value. Game is mainly 1st person anyway
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Camera)
 	//float ProneEyeHeight;

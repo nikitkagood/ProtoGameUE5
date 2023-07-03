@@ -738,10 +738,12 @@ void AGameCharacterBase::SetupMovementDefaults()
 
 FHitResult AGameCharacterBase::GetInteractionInfo()
 {
-	constexpr float interaction_range = 175.f;
-	float radius = 2.1f;
-	FVector start = FirstPersonCameraComponent->GetComponentLocation();
-	FVector end = start + FirstPersonCameraComponent->GetForwardVector() * interaction_range;
+	const float half_height = InteractionRange / 2;
+	const float radius = 2.1f;
+	const FVector start = FirstPersonCameraComponent->GetComponentLocation();
+	const FVector end = start + FirstPersonCameraComponent->GetForwardVector() * InteractionRange;
+	const FVector center = start + FirstPersonCameraComponent->GetForwardVector() * InteractionRange / 2;
+	const auto rot = FirstPersonCameraComponent->GetUpVector().Rotation().Quaternion();
 
 	FCollisionQueryParams collision_params;
 	collision_params.AddIgnoredActor(this);
@@ -750,13 +752,16 @@ FHitResult AGameCharacterBase::GetInteractionInfo()
 
 	//DrawDebugLine(GetWorld(), start, end, FColor::Green, false, 3, 0, 5);
 	//GetWorld()->LineTraceSingleByChannel(hit_result, start, end, ECollisionChannel::ECC_Visibility, collision_params);
-	GetWorld()->SweepSingleByChannel(hit_result, start, end, {}, ECollisionChannel::ECC_Visibility, FCollisionShape::MakeSphere(radius), collision_params);
-	DrawDebugSphere(GetWorld(), start, radius, 8, FColor::Green, false, 3, 0, 0.15);
-	DrawDebugSphere(GetWorld(), start + FirstPersonCameraComponent->GetForwardVector() * (interaction_range / 4), radius, 8, FColor::Green, false, 3, 0, 0.15);
-	DrawDebugSphere(GetWorld(), start + FirstPersonCameraComponent->GetForwardVector() * (interaction_range / 2), radius, 8, FColor::Green, false, 3, 0, 0.15);
-	DrawDebugSphere(GetWorld(), start + FirstPersonCameraComponent->GetForwardVector() * (interaction_range / 1.5), radius, 8, FColor::Green, false, 3, 0, 0.15);
-	DrawDebugSphere(GetWorld(), start + FirstPersonCameraComponent->GetForwardVector() * (interaction_range / 1.25), radius, 8, FColor::Green, false, 3, 0, 0.15);
-	DrawDebugSphere(GetWorld(), end, radius, 8, FColor::Green, false, 3, 0, 0.15);
+	//GetWorld()->SweepSingleByChannel(hit_result, start, end, {}, ECollisionChannel::ECC_Visibility, FCollisionShape::MakeSphere(radius), collision_params);
+	//DrawDebugSphere(GetWorld(), start, radius, 8, FColor::Green, false, 3, 0, 0.15);
+	//DrawDebugSphere(GetWorld(), start + FirstPersonCameraComponent->GetForwardVector() * (interaction_range / 4), radius, 8, FColor::Green, false, 3, 0, 0.15);
+	//DrawDebugSphere(GetWorld(), start + FirstPersonCameraComponent->GetForwardVector() * (interaction_range / 2), radius, 8, FColor::Green, false, 3, 0, 0.15);
+	//DrawDebugSphere(GetWorld(), start + FirstPersonCameraComponent->GetForwardVector() * (interaction_range / 1.5), radius, 8, FColor::Green, false, 3, 0, 0.15);
+	//DrawDebugSphere(GetWorld(), start + FirstPersonCameraComponent->GetForwardVector() * (interaction_range / 1.25), radius, 8, FColor::Green, false, 3, 0, 0.15);
+	//DrawDebugSphere(GetWorld(), end, radius, 8, FColor::Green, false, 3, 0, 0.15);
+
+	GetWorld()->SweepSingleByChannel(hit_result, start, end, rot, ECollisionChannel::ECC_Visibility, FCollisionShape::MakeCapsule(radius, InteractionRange / 2), collision_params);
+	DrawDebugCapsule(GetWorld(), center, half_height, radius, rot, FColor::Green, false, 3, 0, 0.2);
 
 	return hit_result;
 }
