@@ -54,20 +54,34 @@ AItemActor* AItemActor::StaticCreateObject(UWorld* world, TSubclassOf<AItemActor
 	//Deffered spawn is used to set ItemObject
 	AItemActor* spawned_actor = world->SpawnActorDeferred<AItemActor>(item_actor_class, { rotation, location }, nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding);
 
-	if(spawned_actor != nullptr)
+	if(spawned_actor == nullptr)
 	{
-		spawned_actor->SetItemObject(item_object);
-
-		if(item_object != nullptr)
-		{
-			item_object->SetOuterItemActor(spawned_actor);
-		}
-
-		UGameplayStatics::FinishSpawningActor(spawned_actor, { rotation, location });
-		return spawned_actor;
+		return nullptr;
 	}
 
-	return nullptr;
+	spawned_actor->SetItemObject(item_object);
+
+	if (item_object == nullptr)
+	{
+		//Although ItemActors can spawn their own ItemObjects, 
+		//StaticCreateObject is meant to be used primarily with inventory and has to avoid "duping", 
+		//i.e. creating new items out of thin air
+		//This behaviour may change
+		checkf(false, TEXT("Error: Invalid ItemObject"))
+	}
+	else
+	{
+		item_object->SetOuterItemActor(spawned_actor);
+	}
+
+	UGameplayStatics::FinishSpawningActor(spawned_actor, { rotation, location });
+
+	if (spawned_actor->IsPendingKill())
+	{
+		return nullptr;
+	}
+
+	return spawned_actor;
 }
 
 AItemActor* AItemActor::StaticCreateObjectVisualOnly(UWorld* world, TSubclassOf<AItemActor> item_actor_class, UItemBase* item_object, const FVector& location, const FRotator& rotation)
@@ -84,6 +98,78 @@ AItemActor* AItemActor::StaticCreateObjectVisualOnly(UWorld* world, TSubclassOf<
 	}
 
 	return nullptr;
+}
+
+void AItemActor::DrawInteractionOutline_Implementation()
+{
+	TArray<USceneComponent*> children;
+
+	if (item_actor_mesh_type == ItemActorMeshType::StaticMesh || GetDefault<AItemActor>() == this)
+	{
+		StaticMeshComp->GetChildrenComponents(true, children);
+
+		StaticMeshComp->SetRenderCustomDepth(true);
+		StaticMeshComp->SetCustomDepthStencilValue(static_cast<uint8>(InteractionType::Item));
+
+	}
+	else
+	{
+		SkeletalMeshComp->GetChildrenComponents(true, children);
+
+		SkeletalMeshComp->SetRenderCustomDepth(true);
+		SkeletalMeshComp->SetCustomDepthStencilValue(static_cast<uint8>(InteractionType::Item));
+
+		//SkeletalMeshComp->SetRenderCustomDepth(true);
+		//SkeletalMeshComp->SetCustomDepthStencilValue(static_cast<uint8>(InteractionType::Item));
+
+
+		//FTimerHandle StopDrawingOutlineHandle;
+
+		//FTimerDelegate Delegate;
+		//Delegate.BindStatic(&IInteractionInterface::StopDrawingOutline, Cast<UPrimitiveComponent>(SkeletalMeshComp));
+
+		//if (GetWorld()->GetTimerManager().TimerExists(StopDrawingOutlineHandle))
+		//{
+		//	GetWorld()->GetTimerManager().ClearTimer(StopDrawingOutlineHandle);
+		//}
+
+		//GetWorld()->GetTimerManager().SetTimer(StopDrawingOutlineHandle, Delegate, 0.1f, false, 0.f);
+
+		//GetWorld()->GetTimerManager().SetTimer(TurnOffOutlineHandle, this, &AItemActor::StopDrawingOutline, SkeletalMeshComp, 1.f / 30.f, true, 0.f);
+	}
+
+	FLatentActionInfo latent_action(0, GetUniqueID(), TEXT("StopDrawingOutline"), this);
+	UKismetSystemLibrary::RetriggerableDelay(GetWorld(), 0.05f, latent_action);
+
+	for (auto& i : children)
+	{
+		auto child_primitive = Cast<UPrimitiveComponent>(i);
+		child_primitive->SetRenderCustomDepth(true);
+		child_primitive->SetCustomDepthStencilValue(static_cast<uint8>(InteractionType::Item));
+	}
+}
+
+void AItemActor::StopDrawingOutline()
+{
+	TArray<USceneComponent*> children;
+
+	if (item_actor_mesh_type == ItemActorMeshType::StaticMesh || GetDefault<AItemActor>() == this)
+	{
+		StaticMeshComp->GetChildrenComponents(true, children);
+
+		StaticMeshComp->SetRenderCustomDepth(false);
+	}
+	else
+	{
+		SkeletalMeshComp->GetChildrenComponents(true, children);
+
+		SkeletalMeshComp->SetRenderCustomDepth(false);
+	}
+
+	for (auto& i : children)
+	{
+		Cast<UPrimitiveComponent>(i)->SetRenderCustomDepth(false);
+	}
 }
 
 void AItemActor::SetAnimClass(TSubclassOf<UAnimInstance> anim_class)

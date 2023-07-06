@@ -44,6 +44,26 @@ bool UItemBase::OnInteract(AActor* caller)
 	return false;
 }
 
+bool UItemBase::IsInteractible_Implementation() const
+{
+	if (GetOuterItemActor() != nullptr)
+	{
+		return GetOuterItemActor()->IsInteractible();
+	}
+
+	return false;
+}
+
+InteractionType UItemBase::GetInteractionType_Implementation() const
+{
+	if (GetOuterItemActor() != nullptr)
+	{
+		return GetOuterItemActor()->GetInteractionType();
+	}
+
+	return InteractionType::None;
+}
+
 bool UItemBase::OnUse(AActor* caller)
 {
 	//checkf(false, TEXT("ItemBase::OnUse isn't meant to be called")); 

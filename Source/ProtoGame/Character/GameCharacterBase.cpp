@@ -80,6 +80,8 @@ void AGameCharacterBase::BeginPlay()
 
 	//Active slot is PrimarySlot by default
 	ActiveSlot = PrimaryGunSlot;
+
+	GetWorld()->GetTimerManager().SetTimer(InteractionVisualTraceTimerHandle, this, &AGameCharacterBase::TraceInteractionVisual, 1.f / 30.f, true, 0.f);
 }
 
 void AGameCharacterBase::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -146,10 +148,12 @@ void AGameCharacterBase::SetupPlayerInputComponent(class UInputComponent* Player
 	PlayerInputComponent->BindAxis("LookUp", this, &AGameCharacterBase::LookUpAtRate);
 }
 
-//void AGameCharacterBase::Tick(float DeltaTime)
-//{
-//	Super::Tick(DeltaTime);
-//}
+void AGameCharacterBase::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	//TraceInteractionVisual();
+}
 
 UCustomCharacterMovementComponent* AGameCharacterBase::GetCharacterMovement() const
 {
@@ -159,6 +163,8 @@ UCustomCharacterMovementComponent* AGameCharacterBase::GetCharacterMovement() co
 void AGameCharacterBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
+
+	GetWorld()->GetTimerManager().ClearAllTimersForObject(this);
 }
 
 bool AGameCharacterBase::IsFlagSet_ToggleInputMovement(EMovementInputToggleFlags flag)
@@ -616,27 +622,11 @@ void AGameCharacterBase::EndSlowWalk()
 
 void AGameCharacterBase::OnAction()
 {
-	AActor* actor_ptr = GetInteractionInfo().GetActor();
+	AActor* actor_ptr = TraceInteraction().GetActor();
 
 	if(actor_ptr != nullptr)
 	{
-		auto name = actor_ptr->GetName();
-
-		if(actor_ptr->Implements<UInteractionInterface>())
-		{
-			IInteractionInterface* interaction_interface = Cast<IInteractionInterface>(actor_ptr);
-
-			//Cast to BP objects that implement the interface returns null, thus null -> call BP function
-			if(interaction_interface != nullptr)
-			{
-				interaction_interface->OnInteract(this);
-			}
-			else
-			{
-				interaction_interface->Execute_OnInteractBP(actor_ptr, this);
-			}
-
-		}
+		IInteractionInterface::InteractCombined(actor_ptr, this);
 	}
 }
 
@@ -705,23 +695,6 @@ void AGameCharacterBase::SetupMovementDefaults()
 	//BaseTurnRate = 120.f;
 	//BaseLookUpRate = 120.f;
 
-	//bJumpButtonDown = false;
-	//bCrouchButtonDown = false;
-	//bProneButtonDown = false;
-	//bWalkButtonDown = false;
-	//bSprintButtonDown = false;
-	//bAimButtonDown = false;
-	//bFireButtonDown = false;
-	//JogSpeed = 500.f;
-	//WalkSpeed = 250.f;
-	//SprintSpeed = 1000.f;
-	//CrouchSpeed = 200.f;
-	//ProneSpeed = 120.f;
-	//AimDownSightsSpeed = 250.f;
-	//JumpZVelocity = 420.f;
-
-	//TODO: different JumpZVelocity when standing or moving moving
-
 	//GetCharacterMovement()->MaxWalkSpeed = GetCharacterMovement()->MaxWalkSpeedJog;
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 	GetCharacterMovement()->NavAgentProps.bCanJump = true;
@@ -736,7 +709,7 @@ void AGameCharacterBase::SetupMovementDefaults()
 	LandedDelegate.AddDynamic(this, &AGameCharacterBase::EndJump);
 }
 
-FHitResult AGameCharacterBase::GetInteractionInfo()
+FHitResult AGameCharacterBase::TraceInteraction()
 {
 	const float half_height = InteractionRange / 2;
 	const float radius = 2.1f;
@@ -750,18 +723,25 @@ FHitResult AGameCharacterBase::GetInteractionInfo()
 
 	FHitResult hit_result;
 
-	//DrawDebugLine(GetWorld(), start, end, FColor::Green, false, 3, 0, 5);
-	//GetWorld()->LineTraceSingleByChannel(hit_result, start, end, ECollisionChannel::ECC_Visibility, collision_params);
-	//GetWorld()->SweepSingleByChannel(hit_result, start, end, {}, ECollisionChannel::ECC_Visibility, FCollisionShape::MakeSphere(radius), collision_params);
-	//DrawDebugSphere(GetWorld(), start, radius, 8, FColor::Green, false, 3, 0, 0.15);
-	//DrawDebugSphere(GetWorld(), start + FirstPersonCameraComponent->GetForwardVector() * (interaction_range / 4), radius, 8, FColor::Green, false, 3, 0, 0.15);
-	//DrawDebugSphere(GetWorld(), start + FirstPersonCameraComponent->GetForwardVector() * (interaction_range / 2), radius, 8, FColor::Green, false, 3, 0, 0.15);
-	//DrawDebugSphere(GetWorld(), start + FirstPersonCameraComponent->GetForwardVector() * (interaction_range / 1.5), radius, 8, FColor::Green, false, 3, 0, 0.15);
-	//DrawDebugSphere(GetWorld(), start + FirstPersonCameraComponent->GetForwardVector() * (interaction_range / 1.25), radius, 8, FColor::Green, false, 3, 0, 0.15);
-	//DrawDebugSphere(GetWorld(), end, radius, 8, FColor::Green, false, 3, 0, 0.15);
-
 	GetWorld()->SweepSingleByChannel(hit_result, start, end, rot, ECollisionChannel::ECC_Visibility, FCollisionShape::MakeCapsule(radius, InteractionRange / 2), collision_params);
-	DrawDebugCapsule(GetWorld(), center, half_height, radius, rot, FColor::Green, false, 3, 0, 0.2);
 
 	return hit_result;
+}
+
+void AGameCharacterBase::TraceInteractionVisual()
+{
+	AActor* actor_ptr = TraceInteraction().GetActor();
+
+	if (actor_ptr != nullptr)
+	{
+		if (actor_ptr->Implements<UInteractionInterface>())
+		{
+			IInteractionInterface* interaction_interface = Cast<IInteractionInterface>(actor_ptr);
+
+			if (interaction_interface->Execute_IsInteractible(actor_ptr))
+			{
+				interaction_interface->Execute_DrawInteractionOutline(actor_ptr);
+			}
+		}
+	}
 }

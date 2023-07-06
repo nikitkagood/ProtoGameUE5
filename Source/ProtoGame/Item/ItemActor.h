@@ -66,8 +66,22 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
+	//IInteractionInterface
+
+	//See OnInteract_Implementation
+	//Even though it's already virtual, don't type "virtual bool" - it will cause compiler error
 	UFUNCTION(BlueprintNativeEvent)
-	bool OnInteract(AActor* caller) override;
+	bool OnInteract(AActor* caller) override; 
+
+	//UFUNCTION(BlueprintCallable, Category = "Interaction")
+	bool IsInteractible_Implementation() const { return bInteractable; };
+
+	//UFUNCTION(BlueprintCallable, Category = "Interaction")
+	InteractionType GetInteractionType_Implementation() const override { return InteractionType::Item; };
+
+	void DrawInteractionOutline_Implementation();
+
+	virtual void StopDrawingOutline() override;
 
 	//UFUNCTION(BlueprintCallable)
 	//UStaticMesh* GetMesh() { return StaticMeshComp->GetStaticMesh(); };

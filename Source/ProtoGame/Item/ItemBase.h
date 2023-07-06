@@ -144,7 +144,14 @@ public:
 	UItemBase* StackGet(int32 ammount, UObject* new_outer);
 
 	//Interfaces
+	//IInteractionInterface
 	virtual bool OnInteract(AActor* caller) override;
+
+	//UFUNCTION(BlueprintCallable, Category = "Interaction")
+	virtual bool IsInteractible_Implementation() const override; //Asks corresponding ItemActor, since Interaction logic isn't really applicable to ItemBase
+
+	//UFUNCTION(BlueprintCallable, Category = "Interaction")
+	virtual InteractionType GetInteractionType_Implementation() const override; //Asks corresponding ItemActor, since Interaction logic isn't really applicable to ItemBase
 
 	UFUNCTION(BlueprintCallable)
 	virtual bool OnUse(AActor* caller) override;

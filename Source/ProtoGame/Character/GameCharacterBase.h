@@ -85,6 +85,12 @@ class PROTOGAME_API AGameCharacterBase : public ACharacter
 	UInvSpecialSlotComponent* ActiveSlot;
 
 public:
+	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
+	UInventoryComponent* GetInventoryComponent() const { return InventoryComponent; }
+
+	UFUNCTION(BlueprintCallable)
+	UCustomCharacterMovementComponent* GetCharacterMovement() const;
+
 	AGameCharacterBase(const class FObjectInitializer& ObjectInitializer);
 	
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
@@ -154,8 +160,14 @@ public:
 	bool CanProne() const;
 	virtual bool CanCrouch() const override;
 
-protected:
+	bool IsFlagSet_ToggleInputMovement(EMovementInputToggleFlags flag);
+	void SetFlag_ToogleInputMovement(EMovementInputToggleFlags flag, bool value);
 
+	virtual void Tick(float DeltaTime) override;
+
+	void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
+protected:
 	void StartFire();
 	void EndFire();
 
@@ -179,26 +191,20 @@ protected:
 
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 
-	FHitResult GetInteractionInfo();
+	UFUNCTION(BlueprintCallable)
+	FHitResult TraceInteraction();
+
+	UFUNCTION()
+	void TraceInteractionVisual();
 
 private:
 	void SetupMovementDefaults();
 
 public:
-	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
-	UInventoryComponent* GetInventoryComponent() const { return InventoryComponent; }
-
-	UFUNCTION(BlueprintCallable)
-	UCustomCharacterMovementComponent* GetCharacterMovement() const;
-
-	//virtual void Tick(float DeltaTime) override;
-
-	void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-
-	bool IsFlagSet_ToggleInputMovement(EMovementInputToggleFlags flag);
-	void SetFlag_ToogleInputMovement(EMovementInputToggleFlags flag, bool value);
-public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Interaction)
 	float InteractionRange = 125.f;
+
+	FTimerHandle InteractionVisualTraceTimerHandle;
 
 	//May not be necessary - just use crouched value. Game is mainly 1st person anyway
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Camera)
@@ -227,41 +233,11 @@ public:
 
 private:
 
-	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Movement)
-	//bool bJumpButtonDown;
-
-	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Movement)
-	//bool bCrouchButtonDown;
-
-	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Movement)
-	//bool bProneButtonDown;
-
-	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Movement)
-	//bool bWalkButtonDown;
-
-	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Movement)
-	//bool bSprintButtonDown;
-
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Movement)
 	bool bAimButtonDown;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Movement)
 	bool bFireButtonDown;
-
-	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Movement)
-	//float JogSpeed;
-
-	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Movement)
-	//float WalkSpeed;
-
-	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Movement)
-	//float SprintSpeed;
-
-	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Movement)
-	//float CrouchSpeed;
-
-	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Movement)
-	//float ProneSpeed;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Movement)
 	float AimDownSightsSpeed;

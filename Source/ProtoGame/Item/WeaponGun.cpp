@@ -193,6 +193,8 @@ bool UWeaponGun::AddAttachmentMesh(USkeletalMeshComponent* sk_comp, UWeaponAttac
 		return false;
 	}
 
+	//TODO: There is a rare nullptr bug here. When switching weapons maybe.
+
 	sm_comp->SetStaticMesh(attachment->GetStaticMeshFromItemActorCDO());
 
 	if(sm_comp->GetStaticMesh() == nullptr)
