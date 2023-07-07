@@ -20,8 +20,3 @@ inline void IInteractionInterface::InteractCombined(AActor* iteracted_actor, AAc
 		}
 	}
 }
-
-//void IInteractionInterface::StopDrawingOutline(UPrimitiveComponent* primitive_comp)
-//{
-//	primitive_comp->SetRenderCustomDepth(false);
-//}

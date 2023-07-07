@@ -43,10 +43,13 @@ AGameCharacterBase::AGameCharacterBase(const class FObjectInitializer& ObjectIni
 	SetupMovementDefaults();
 
 	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
-	FirstPersonCameraComponent->SetupAttachment(GetCapsuleComponent());
-	FirstPersonCameraComponent->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
+	//FirstPersonCameraComponent->SetupAttachment(GetCapsuleComponent());
+	//FirstPersonCameraComponent->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
 	FirstPersonCameraComponent->bUsePawnControlRotation = true;
 	FirstPersonCameraComponent->AttachToComponent(GetMesh(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, false));
+
+	SpringArm_FPCam = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm_FPCam"));
+	SpringArm_FPCam->SetupAttachment(GetMesh());
 
 	VitalityComponent = CreateDefaultSubobject<UVitalityComponent>(TEXT("VitalityComponent"));
 	RPGStatsComponent = CreateDefaultSubobject<URPGStatsComponent>(TEXT("RPGStatsComponent"));
@@ -247,13 +250,15 @@ bool AGameCharacterBase::EquipGun(UItemBase* item)
 		}
 	}
 
-	UpdateWeaponSlots();
+	UpdateAllWeaponSlots();
 
 	return result;
 }
 
-void AGameCharacterBase::UpdateWeaponSlots()
+void AGameCharacterBase::UpdateAllWeaponSlots()
 {
+	EndFire();
+
 	UWeaponBase::DestroySKStatic(InHandsSkeletalMesh);
 	UWeaponBase::DestroySKStatic(StowedOnBackSkeletalMesh);
 
@@ -290,6 +295,56 @@ void AGameCharacterBase::UpdateWeaponSlots()
 		}
 	}
 }
+
+//Not used but has to be functional
+//void AGameCharacterBase::UpdateWeaponSlots(UInvSpecialSlotComponent* new_active_slot)
+//{
+//	if (new_active_slot == nullptr)
+//	{
+//		return;
+//	}
+//
+//	EndFire();
+//
+//	if (new_active_slot == ActiveSlot)
+//	{
+//		//do nothing
+//	}
+//	else
+//	{
+//		ActiveSlot = new_active_slot;
+//
+//		UWeaponBase::DestroySKStatic(InHandsSkeletalMesh);
+//		UWeaponBase::DestroySKStatic(StowedOnBackSkeletalMesh);
+//
+//		auto active_weapon = Cast<UWeaponBase>(ActiveSlot->GetItem());
+//
+//		if (active_weapon != nullptr)
+//		{
+//			InHandsSkeletalMesh = active_weapon->CreateSKWeaponRepresentation(GetMesh());
+//			InHandsSkeletalMesh->AttachToComponent(GetMesh(), { EAttachmentRule::SnapToTarget, true }, "ik_hand_gun");
+//		}
+//
+//		UInvSpecialSlotComponent* stowed_slot;
+//
+//		if (ActiveSlot == PrimaryGunSlot)
+//		{
+//			stowed_slot = SecondaryGunSlot;
+//		}
+//		else
+//		{
+//			stowed_slot = PrimaryGunSlot;
+//		}
+//
+//		auto stowed_weapon = Cast<UWeaponBase>(stowed_slot->GetItem());
+//
+//		if (stowed_weapon != nullptr)
+//		{
+//			StowedOnBackSkeletalMesh = stowed_weapon->CreateSKWeaponRepresentation(GetMesh());
+//			StowedOnBackSkeletalMesh->AttachToComponent(GetMesh(), { EAttachmentRule::SnapToTarget, true }, "StowedOnBackSocket");
+//		}
+//	}
+//}
 
 void AGameCharacterBase::MoveForward(float Value)
 {
@@ -651,6 +706,17 @@ void AGameCharacterBase::DropItem()
 
 float AGameCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	if (DamageAmount < 0)
+	{
+		return 0;
+	}
+	if (EventInstigator == GetController())
+	{
+		//In theory, only AOE weapons can damage Character itself
+		//This checkf will remain until non-AOE weapon damage is set up properly
+		checkf(false, TEXT("Warning: Character damages itself. Is this intended behaviour?"));
+	}
+
 	VitalityComponent->ChangeHealth(-1 * DamageAmount);
 	return DamageAmount;
 }
@@ -659,16 +725,33 @@ void AGameCharacterBase::EnableRagdoll()
 {
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+	GetMesh()->SetEnableGravity(true);
 	GetMesh()->SetSimulatePhysics(true);
 	GetMesh()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+
+	if (InHandsSkeletalMesh != nullptr)
+	{
+		InHandsSkeletalMesh->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+		InHandsSkeletalMesh->SetEnableGravity(true);
+		InHandsSkeletalMesh->SetSimulatePhysics(true);
+	}
+
 }
 
 void AGameCharacterBase::DisableRagdoll()
 {
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	GetMesh()->SetEnableGravity(false);
 	GetMesh()->SetSimulatePhysics(false);
 	GetMesh()->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
+
+	if (InHandsSkeletalMesh != nullptr)
+	{
+		InHandsSkeletalMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		InHandsSkeletalMesh->SetEnableGravity(false);
+		InHandsSkeletalMesh->SetSimulatePhysics(false);
+	}
 }
 
 void AGameCharacterBase::SetDeathState(bool is_dead)

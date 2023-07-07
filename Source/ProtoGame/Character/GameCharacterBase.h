@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 //#include "BuoyancyComponent.h"
+#include "GameFramework/SpringArmComponent.h"
 
 #include "Interfaces/InteractionInterface.h"
 
@@ -59,7 +60,11 @@ class PROTOGAME_API AGameCharacterBase : public ACharacter
 	//UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = Inventory, meta = (AllowPrivateAccess = "true"))
 	//AItemActor* StowedOnBackActor;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	//Collision (clipping) avoidance. Prototype. Doesn't really work with visible head and neck
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera, meta = (AllowPrivateAccess = "true"))
+	USpringArmComponent* SpringArm_FPCam;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	UCameraComponent* FirstPersonCameraComponent;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Components)
@@ -172,7 +177,11 @@ protected:
 	void EndFire();
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
-	void UpdateWeaponSlots();
+	void UpdateAllWeaponSlots();
+
+	//Not used
+	//UFUNCTION(BlueprintCallable, Category = "Weapon")
+	//void UpdateWeaponSlots(UInvSpecialSlotComponent* new_active_slot);
 
 	void OnAction();
 
@@ -181,6 +190,7 @@ protected:
 
 	void DropItem();
 
+	//DamageAmount - positive number
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 	void EnableRagdoll();
