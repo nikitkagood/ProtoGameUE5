@@ -137,8 +137,8 @@ void AGameCharacterBase::SetupPlayerInputComponent(class UInputComponent* Player
 
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AGameCharacterBase::Jump);
 
-	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AGameCharacterBase::StartFire);
-	PlayerInputComponent->BindAction("Fire", IE_Released, this, &AGameCharacterBase::EndFire);
+	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AGameCharacterBase::StartFireActive);
+	PlayerInputComponent->BindAction("Fire", IE_Released, this, &AGameCharacterBase::EndFireActive);
 
 	PlayerInputComponent->BindAction("Action", IE_Pressed, this, &AGameCharacterBase::OnAction);
 
@@ -201,7 +201,7 @@ void AGameCharacterBase::OnRep_IsProne()
 	}
 }
 
-void AGameCharacterBase::StartFire()
+void AGameCharacterBase::StartFireActive()
 {
 	bFireButtonDown = true;
 
@@ -211,15 +211,15 @@ void AGameCharacterBase::StartFire()
 	}
 }
 
-void AGameCharacterBase::EndFire()
+void AGameCharacterBase::EndFireActive()
 {
 	if(bFireButtonDown == true)
 	{
-		UWeaponGun* temp = Cast<UWeaponGun>(ActiveSlot->GetItem());
-		
-		if(temp != nullptr)
+		UWeaponGun* gun = Cast<UWeaponGun>(ActiveSlot->GetItem());
+
+		if(gun != nullptr)
 		{
-			temp->EndFire();
+			gun->EndFire();
 		}
 	}
 
@@ -257,42 +257,37 @@ bool AGameCharacterBase::EquipGun(UItemBase* item)
 
 void AGameCharacterBase::UpdateAllWeaponSlots()
 {
-	EndFire();
+	UpdateWeaponSlot(PrimaryGunSlot);
+	UpdateWeaponSlot(SecondaryGunSlot);
+}
 
-	UWeaponBase::DestroySKStatic(InHandsSkeletalMesh);
-	UWeaponBase::DestroySKStatic(StowedOnBackSkeletalMesh);
-
-	auto* primary_slot_weapon = Cast<UWeaponBase>(PrimaryGunSlot->GetItem());
-	auto* secondary_slot_weapon = Cast<UWeaponBase>(SecondaryGunSlot->GetItem());
-
-	if(ActiveSlot == PrimaryGunSlot)
+void AGameCharacterBase::UpdateWeaponSlot(UInvSpecialSlotComponent* slot)
+{
+	if (slot == nullptr)
 	{
-		if(primary_slot_weapon != nullptr)
-		{
-			InHandsSkeletalMesh = primary_slot_weapon->CreateSKWeaponRepresentation(GetMesh());
-			InHandsSkeletalMesh->AttachToComponent(GetMesh(), { EAttachmentRule::SnapToTarget, true }, "ik_hand_gun");
-		}
-
-		if(secondary_slot_weapon != nullptr)
-		{
-			StowedOnBackSkeletalMesh = secondary_slot_weapon->CreateSKWeaponRepresentation(GetMesh());;
-			StowedOnBackSkeletalMesh->AttachToComponent(GetMesh(), { EAttachmentRule::SnapToTarget, true }, "StowedOnBackSocket");
-		}
-
+		return;
 	}
-	else //ActiveSlot == SecondaryGunSlot 
-	{
-		if(secondary_slot_weapon != nullptr)
-		{
-			InHandsSkeletalMesh = secondary_slot_weapon->CreateSKWeaponRepresentation(GetMesh());;
-			InHandsSkeletalMesh->AttachToComponent(GetMesh(), { EAttachmentRule::SnapToTarget, true }, "ik_hand_gun");
-		}
 
-		if(primary_slot_weapon != nullptr)
-		{
-			StowedOnBackSkeletalMesh = primary_slot_weapon->CreateSKWeaponRepresentation(GetMesh());;
-			StowedOnBackSkeletalMesh->AttachToComponent(GetMesh(), { EAttachmentRule::SnapToTarget, true }, "StowedOnBackSocket");
-		}
+	auto* weapon = Cast<UWeaponGun>(slot->GetItem());
+
+	if (weapon == nullptr)
+	{
+		return;
+	}
+
+	weapon->EndFire();
+
+	UWeaponBase::DestroySKStatic(weapon->GetWeaponRepresentation());
+
+	if (slot == ActiveSlot)
+	{
+		InHandsSkeletalMesh = weapon->CreateSKWeaponRepresentation(GetMesh());
+		InHandsSkeletalMesh->AttachToComponent(GetMesh(), { EAttachmentRule::SnapToTarget, true }, "ik_hand_gun");
+	}
+	else
+	{
+		StowedOnBackSkeletalMesh = weapon->CreateSKWeaponRepresentation(GetMesh());
+		StowedOnBackSkeletalMesh->AttachToComponent(GetMesh(), { EAttachmentRule::SnapToTarget, true }, "StowedOnBackSocket");
 	}
 }
 

@@ -31,6 +31,9 @@ public:
 	//virtual AItemActor* SpawnItemActor(const FVector& location, const FRotator& rotation) override;
 	//virtual AItemActor* SpawnItemActorVisualOnly(const FVector& location, const FRotator& rotation) override;
 
+	UFUNCTION()
+	virtual USkeletalMeshComponent* GetWeaponRepresentation() { return SK_WeaponRepresentation; };
+
 	//Create functional and animated SK mesh comp which represents Weapon
 	UFUNCTION()
 	virtual USkeletalMeshComponent* CreateSKWeaponRepresentation(USceneComponent* outer) { check(false); return nullptr; };

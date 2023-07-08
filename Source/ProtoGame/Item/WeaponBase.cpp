@@ -32,8 +32,3 @@ void UWeaponBase::DestroySKStatic(USkeletalMeshComponent* sk_comp)
 
 	sk_comp->DestroyComponent();
 }
-
-//void UWeaponBase::SetWeaponInfo(FWeaponInfo&& value)
-//{
-//	weapon_info = value;
-//}

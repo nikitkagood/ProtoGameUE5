@@ -106,6 +106,8 @@ public:
 	virtual void StartFire();
 	virtual void EndFire();
 
+	bool IsFiring() { return Firing;  };
+
 	//class related
 
 	//Debug
@@ -145,4 +147,6 @@ protected:
 
 	//Saved for quick access
 	int32 MagazineAttachmentIdx;
+
+	int8 Firing : 1;
 };

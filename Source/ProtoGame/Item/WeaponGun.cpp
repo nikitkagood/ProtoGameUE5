@@ -42,6 +42,8 @@ void UWeaponGun::StartFire()
 {
 	if(weapon_info.bFunctional)
 	{
+		Firing = true;
+
 		const float rate = 1 / (weapon_info.FireRate / 60);
 
 		switch(weapon_info.FireMode)
@@ -93,6 +95,8 @@ void UWeaponGun::EndFire()
 	{
 		GetWorld()->GetTimerManager().ClearTimer(OnFireTimerHandle);
 	}
+
+	Firing = false;
 }
 
 void UWeaponGun::PrintWeaponStats()

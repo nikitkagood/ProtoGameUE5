@@ -173,11 +173,16 @@ public:
 	void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 protected:
-	void StartFire();
-	void EndFire();
+	//Gun in hands only
+	void StartFireActive();
+	//Gun in hands only
+	void EndFireActive();
 
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void UpdateAllWeaponSlots();
+
+	UFUNCTION(BlueprintCallable, Category = "Weapon")
+	void UpdateWeaponSlot(UInvSpecialSlotComponent* slot);
 
 	//Not used
 	//UFUNCTION(BlueprintCallable, Category = "Weapon")
