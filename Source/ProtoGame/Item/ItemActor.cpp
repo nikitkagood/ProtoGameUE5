@@ -118,24 +118,6 @@ void AItemActor::DrawInteractionOutline_Implementation()
 
 		SkeletalMeshComp->SetRenderCustomDepth(true);
 		SkeletalMeshComp->SetCustomDepthStencilValue(static_cast<uint8>(InteractionType::Item));
-
-		//SkeletalMeshComp->SetRenderCustomDepth(true);
-		//SkeletalMeshComp->SetCustomDepthStencilValue(static_cast<uint8>(InteractionType::Item));
-
-
-		//FTimerHandle StopDrawingOutlineHandle;
-
-		//FTimerDelegate Delegate;
-		//Delegate.BindStatic(&IInteractionInterface::StopDrawingOutline, Cast<UPrimitiveComponent>(SkeletalMeshComp));
-
-		//if (GetWorld()->GetTimerManager().TimerExists(StopDrawingOutlineHandle))
-		//{
-		//	GetWorld()->GetTimerManager().ClearTimer(StopDrawingOutlineHandle);
-		//}
-
-		//GetWorld()->GetTimerManager().SetTimer(StopDrawingOutlineHandle, Delegate, 0.1f, false, 0.f);
-
-		//GetWorld()->GetTimerManager().SetTimer(TurnOffOutlineHandle, this, &AItemActor::StopDrawingOutline, SkeletalMeshComp, 1.f / 30.f, true, 0.f);
 	}
 
 	FLatentActionInfo latent_action(0, GetUniqueID(), TEXT("StopDrawingOutline"), this);
@@ -149,7 +131,7 @@ void AItemActor::DrawInteractionOutline_Implementation()
 	}
 }
 
-void AItemActor::StopDrawingOutline()
+void AItemActor::StopDrawingOutline_Implementation()
 {
 	TArray<USceneComponent*> children;
 
@@ -243,7 +225,9 @@ bool AItemActor::OnInteract_Implementation(AActor* caller)
 		return false;
 	}
 
-	if(bInteractable == true && ItemObject->OnInteract(caller) == true)
+	//Ask ItemObject what to do
+	//This behaviour might be reduntant and may change later
+	if(bInteractable == true && ItemObject->Interact(caller) == true)
 	{
 		return Destroy(); //currently ItemActors are obliged to destroy themselves
 	}

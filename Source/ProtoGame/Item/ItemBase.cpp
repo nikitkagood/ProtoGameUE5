@@ -29,7 +29,7 @@ bool UItemBase::SetProperties(FDataTableRowHandle handle)
 }
 
 
-bool UItemBase::OnInteract(AActor* caller)
+bool UItemBase::Interact(AActor* caller)
 {
 	auto ptr = Cast<AGameCharacterBase>(caller);
 
@@ -42,26 +42,6 @@ bool UItemBase::OnInteract(AActor* caller)
 	}
 
 	return false;
-}
-
-bool UItemBase::IsInteractible_Implementation() const
-{
-	if (GetOuterItemActor() != nullptr)
-	{
-		return GetOuterItemActor()->IsInteractible();
-	}
-
-	return false;
-}
-
-InteractionType UItemBase::GetInteractionType_Implementation() const
-{
-	if (GetOuterItemActor() != nullptr)
-	{
-		return GetOuterItemActor()->GetInteractionType();
-	}
-
-	return InteractionType::None;
 }
 
 bool UItemBase::OnUse(AActor* caller)

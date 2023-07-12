@@ -77,11 +77,11 @@ public:
 	bool IsInteractible_Implementation() const { return bInteractable; };
 
 	//UFUNCTION(BlueprintCallable, Category = "Interaction")
-	InteractionType GetInteractionType_Implementation() const override { return InteractionType::Item; };
+	InteractionType GetInteractionType_Implementation() const { return InteractionType::Item; };
 
 	void DrawInteractionOutline_Implementation();
 
-	virtual void StopDrawingOutline() override;
+	void StopDrawingOutline_Implementation();
 
 	//UFUNCTION(BlueprintCallable)
 	//UStaticMesh* GetMesh() { return StaticMeshComp->GetStaticMesh(); };

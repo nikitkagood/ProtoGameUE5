@@ -25,6 +25,7 @@ class UInteractionInterface : public UInterface
 	GENERATED_BODY()
 };
 
+//Both C++ and BP interface, thus may have some redundancy
 class PROTOGAME_API IInteractionInterface
 {
 	GENERATED_BODY()
@@ -50,7 +51,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction")
 	void DrawInteractionOutline();
 
-	//CPP only, BP objects must use DrawInteractionOutline. With retrigerrable delay to stop drawing outline for example.
-	UFUNCTION(Category = "Interaction")
-	virtual void StopDrawingOutline() { checkf(false, TEXT("IInteractionInterface::StopDrawingOutline is not meant to be called")); };
+	//BP objects aren't obliged to implement this function 
+	//They can use Retrigerrable Delay within "DrawInteractionOutline" to stop drawing outline for example
+	//C++ needs it since here Retrigerable Delay can't just continue execution and has to bind to some functon
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction")
+	void StopDrawingOutline();
 };

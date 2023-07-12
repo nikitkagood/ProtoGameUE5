@@ -23,7 +23,7 @@ enum class ItemObjectCreationMethod : uint8;
 //It represents actual properties of an item, as opposed to ItemActor which is used to represent physical location in a world.
 //Note that items attached to a character ARE NOT considered ItemActors. They are ItemBase + SkeletalMesh (although this might change).
 UCLASS(Blueprintable, BlueprintType, DefaultToInstanced, meta=(BlueprintSpawnableComponent), ClassGroup=Item)
-class PROTOGAME_API UItemBase : public UObject, public IInteractionInterface, public IUseInterface
+class PROTOGAME_API UItemBase : public UObject, public IUseInterface
 {
 	GENERATED_BODY()
 
@@ -143,15 +143,11 @@ public:
 	UFUNCTION()
 	UItemBase* StackGet(int32 ammount, UObject* new_outer);
 
+	//ItemActors ask ItemObject what to do
+	//This behaviour might be reduntant and may change later
+	virtual bool Interact(AActor* caller);
+
 	//Interfaces
-	//IInteractionInterface
-	virtual bool OnInteract(AActor* caller) override;
-
-	//UFUNCTION(BlueprintCallable, Category = "Interaction")
-	virtual bool IsInteractible_Implementation() const override; //Asks corresponding ItemActor, since Interaction logic isn't really applicable to ItemBase
-
-	//UFUNCTION(BlueprintCallable, Category = "Interaction")
-	virtual InteractionType GetInteractionType_Implementation() const override; //Asks corresponding ItemActor, since Interaction logic isn't really applicable to ItemBase
 
 	UFUNCTION(BlueprintCallable)
 	virtual bool OnUse(AActor* caller) override;
