@@ -76,7 +76,7 @@ AItemActor* AItemActor::StaticCreateObject(UWorld* world, TSubclassOf<AItemActor
 
 	UGameplayStatics::FinishSpawningActor(spawned_actor, { rotation, location });
 
-	if (spawned_actor->IsPendingKill())
+	if (IsValidChecked(spawned_actor))
 	{
 		return nullptr;
 	}

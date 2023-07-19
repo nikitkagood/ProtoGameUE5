@@ -118,6 +118,11 @@ bool UInvSpecialSlotComponent::ReceiveItem(UItemBase* item)
 	return false;
 }
 
+TScriptInterface<IInventoryInterface> UInvSpecialSlotComponent::GetOuterUpstreamInventory() const
+{
+	return GetOuter();
+}
+
 bool UInvSpecialSlotComponent::IsOccupied() const
 {
 	if(GetItem() != nullptr)

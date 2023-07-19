@@ -50,7 +50,7 @@ public:
 	UFUNCTION(BlueprintGetter)
 	TMap<UItemBase*, int32> GetItems() const { return Items; };
 
-	//Inventory interface
+	//IInventoryInterface
 	virtual bool MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination) override;
 	virtual bool MoveItemToInventoryInGrid(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) override;
 	virtual bool DropItemToWorld(UItemBase* item) override;
@@ -58,6 +58,8 @@ public:
 	virtual bool ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell) override;
 	virtual void UpdateStackDependencies(UItemBase* item, int32 new_stack_size) override;
 	virtual void UpdateInventory() override { OnInventoryUpdated.Broadcast(); };
+	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const override;
+	//IInventoryInterface end
 
 	UPROPERTY(BlueprintAssignable)
 	FOnInventoryUpdated OnInventoryUpdated;

@@ -27,12 +27,15 @@ public:
 	UFUNCTION(BlueprintGetter)
 	TArray<ItemType>& GetCompatibleTypesRef() { return CompatibleTypes; }
 
-	//Inventory interface
+	//IInventoryInterface
+
 	virtual bool MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination) override;
 	virtual bool MoveItemToInventoryInGrid(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) override;
 	virtual bool DropItemToWorld(UItemBase* item) override;
 	virtual bool ReceiveItem(UItemBase* item) override;
 	virtual void UpdateInventory() override { OnInventoryUpdated.Broadcast(); };
+	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const override;
+	//IInventoryInterface end
 private:
 	//Grid receive operation isn't supported because SpecialSlot class doesn't have any grid
 	virtual bool ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell) override { check(false); return false; };

@@ -112,6 +112,7 @@ bool UInventoryComponent::AddItem(UItemBase* item)
 {
     if(item == nullptr)
     {
+        check(false);
         UE_LOG(LogTemp, Error, TEXT("AddItem: invalid item!"));
         return false;
     }
@@ -682,4 +683,9 @@ void UInventoryComponent::UpdateStackDependencies(UItemBase* item, int32 new_sta
     }
 
     ChangeMass(item->GetMassOneUnit() * new_stack_size - item->GetMassTotal());
+}
+
+TScriptInterface<IInventoryInterface> UInventoryComponent::GetOuterUpstreamInventory() const
+{
+    return GetOuter();
 }

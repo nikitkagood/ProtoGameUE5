@@ -46,15 +46,18 @@ public:
 	//Equips and and de-equips (by calling GameCharacter)
 	//virtual bool OnUse(AActor* caller) override;
 
-	//Inventory interface
+	//IInventoryInterface
+
 	virtual bool MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination) override { check(false); return false; };
 	virtual bool MoveItemToInventoryInGrid(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) override { check(false); return false; };
 	virtual bool DropItemToWorld(UItemBase* item) override { check(false); return false; };
 	virtual bool ReceiveItem(UItemBase* item) override { check(false); return false; };
 	virtual void UpdateInventory() override { check(false); return; };
+	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const override;
 private:
 	//Not supported
 	virtual bool ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell) override { check(false); return false; };
+	//IInventoryInterface end
 
 public: 	
 	//Weapon controls

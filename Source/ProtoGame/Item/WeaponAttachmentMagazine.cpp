@@ -80,6 +80,11 @@ bool UWeaponAttachmentMagazine::ReceiveItem(UItemBase* item)
 	return Push(Cast<UAmmoBase>(item));
 }
 
+TScriptInterface<IInventoryInterface> UWeaponAttachmentMagazine::GetOuterUpstreamInventory() const
+{
+	return GetOuter();
+}
+
 bool UWeaponAttachmentMagazine::OnUse(AActor* caller)
 {
 	//Mag unload

@@ -32,3 +32,8 @@ void UWeaponBase::DestroySKStatic(USkeletalMeshComponent* sk_comp)
 
 	sk_comp->DestroyComponent();
 }
+
+TScriptInterface<IInventoryInterface> UWeaponBase::GetOuterUpstreamInventory() const
+{
+	return GetOuter();
+}
