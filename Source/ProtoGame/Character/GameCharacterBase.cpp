@@ -8,6 +8,7 @@
 #include "Item/WeaponGun.h"
 #include "Inventory/InventoryComponent.h"
 #include "Inventory/InvSpecialSlot.h"
+#include "Inventory/InventoryManager.h"
 #include "Components/VitalityComponent.h"
 #include "Components/RPGStatsComponent.h"
 #include "Components/CustomCharacterMovementComponent.h"
@@ -27,6 +28,7 @@
 //debug
 #include "DrawDebugHelpers.h"
 
+//It's for BindAction with parameter
 DECLARE_DELEGATE_OneParam(CharInputBool, bool);
 
 DEFINE_LOG_CATEGORY_STATIC(LogCharacter, Log, All);
@@ -53,10 +55,13 @@ AGameCharacterBase::AGameCharacterBase(const class FObjectInitializer& ObjectIni
 
 	VitalityComponent = CreateDefaultSubobject<UVitalityComponent>(TEXT("VitalityComponent"));
 	RPGStatsComponent = CreateDefaultSubobject<URPGStatsComponent>(TEXT("RPGStatsComponent"));
-	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
 
+	InventoryManager = CreateDefaultSubobject<UInventoryManager>(TEXT("InventoryManager"));
+	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
+	InventoryComponentSecond = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponentSecond"));
 	PrimaryGunSlot = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("Primary gun slot component"));
 	SecondaryGunSlot = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("Secondary gun slot component"));
+	//It is created so it is visibile in Blueprints, otherwise it's redundant
 	ActiveSlot = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("Active slot component"));
 
 	InHandsSkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("InHandsSkeletalMesh"));
@@ -80,6 +85,11 @@ void AGameCharacterBase::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& O
 void AGameCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
+
+	InventoryManager->AddInventory(PrimaryGunSlot);
+	InventoryManager->AddInventory(SecondaryGunSlot);
+	InventoryManager->AddInventory(InventoryComponent);
+	InventoryManager->AddInventory(InventoryComponentSecond);
 
 	//Active slot is PrimarySlot by default
 	ActiveSlot = PrimaryGunSlot;
@@ -238,7 +248,8 @@ bool AGameCharacterBase::EquipGun(UItemBase* item)
 	if(item->GetOuterUpstreamInventory().GetObject()->IsA<UInvSpecialSlotComponent>())
 	{
 		//De-equip
-		result = item->GetOuterUpstreamInventory()->MoveItemToInventory(item, InventoryComponent);
+		//result = item->GetOuterUpstreamInventory()->MoveItemToInventory(item, InventoryComponent);
+		result = InventoryManager->MoveItemToInventory(item, EManagerInventoryType::InventoryComponent);
 	}
 	else
 	{

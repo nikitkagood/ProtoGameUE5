@@ -23,10 +23,12 @@ class UCharacterMovementComponent;
 class UCustomCharacterMovementComponent;
 class UVitalityComponent;
 class URPGStatsComponent;
+class UInventoryManager;
 class UInventoryComponent;
+class UInvSpecialSlotComponent;
 class UItemBase;
 class AItemActor;
-class UInvSpecialSlotComponent;
+
 
 //8 flags max but can be extended if needed
 UENUM(BlueprintType, meta = (Bitflags, UseEnumValuesAsMaskValuesInEditor = "true"))
@@ -75,9 +77,14 @@ class PROTOGAME_API AGameCharacterBase : public ACharacter
 
 
 	////Inventory
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Inventory)
+	UInventoryManager* InventoryManager;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Components)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Inventory)
 	UInventoryComponent* InventoryComponent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Inventory)
+	UInventoryComponent* InventoryComponentSecond;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Inventory)
 	UInvSpecialSlotComponent* PrimaryGunSlot;

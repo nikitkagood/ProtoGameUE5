@@ -434,7 +434,7 @@ bool UInventoryComponent::CheckSpace(FIntPoint upper_left_cell, UItemBase* item)
 
 }
 
-bool UInventoryComponent::CheckSpaceMove(FIntPoint upper_left_cell, UItemBase* item, FIntPoint dimensions)
+bool UInventoryComponent::CheckSpaceMove(const FIntPoint upper_left_cell, UItemBase* item, FIntPoint dimensions)
 {
     //whether valid cell idx at all 
     if(upper_left_cell.X < 0 || upper_left_cell.Y < 0 || upper_left_cell.X > Rows - 1 || upper_left_cell.Y > Columns - 1)
@@ -450,9 +450,7 @@ bool UInventoryComponent::CheckSpaceMove(FIntPoint upper_left_cell, UItemBase* i
         return false;
     }
 
-    bool contains = Contains(item);
-
-    if(contains == true) //check for item idx and empty space
+    if(Contains(item) == true) //check for item idx and empty space
     {
         for(int32 i = upper_left_cell.X; i <= new_lower_right_cell.X; i++)
         {

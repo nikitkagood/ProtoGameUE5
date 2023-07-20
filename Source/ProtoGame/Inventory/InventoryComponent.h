@@ -32,7 +32,7 @@ public:
 	//checks for empty cells and cells with item idx; used by UI;
 	//works for both items within the inventory and outside
 	UFUNCTION(BlueprintCallable)
-	bool CheckSpaceMove(FIntPoint upper_left_cell, UItemBase* item, FIntPoint dimensions); 
+	bool CheckSpaceMove(const FIntPoint upper_left_cell, UItemBase* item, FIntPoint dimensions); 
 
 	UFUNCTION(BlueprintCallable)
 	bool RotateItem(UItemBase* item);
