@@ -14,7 +14,7 @@ class ACharacter;
 class UInvSpecialSlotComponent;
 
 //Represents grid inventory
-UCLASS(BlueprintType, DefaultToInstanced, meta=(BlueprintSpawnableComponent), ClassGroup=(Inventory))
+UCLASS(BlueprintType, DefaultToInstanced, meta=(BlueprintSpawnableComponent, DisplayName = "Inventory Component"))
 class PROTOGAME_API UInventoryComponent : public UActorComponent, public IInventoryInterface
 {
 	GENERATED_BODY()

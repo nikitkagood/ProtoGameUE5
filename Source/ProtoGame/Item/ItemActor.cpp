@@ -109,7 +109,7 @@ void AItemActor::DrawInteractionOutline_Implementation()
 		StaticMeshComp->GetChildrenComponents(true, children);
 
 		StaticMeshComp->SetRenderCustomDepth(true);
-		StaticMeshComp->SetCustomDepthStencilValue(static_cast<uint8>(InteractionType::Item));
+		StaticMeshComp->SetCustomDepthStencilValue(static_cast<uint8>(EInteractionType::Item));
 
 	}
 	else
@@ -117,7 +117,7 @@ void AItemActor::DrawInteractionOutline_Implementation()
 		SkeletalMeshComp->GetChildrenComponents(true, children);
 
 		SkeletalMeshComp->SetRenderCustomDepth(true);
-		SkeletalMeshComp->SetCustomDepthStencilValue(static_cast<uint8>(InteractionType::Item));
+		SkeletalMeshComp->SetCustomDepthStencilValue(static_cast<uint8>(EInteractionType::Item));
 	}
 
 	FLatentActionInfo latent_action(0, GetUniqueID(), TEXT("StopDrawingOutline"), this);
@@ -127,7 +127,7 @@ void AItemActor::DrawInteractionOutline_Implementation()
 	{
 		auto child_primitive = Cast<UPrimitiveComponent>(i);
 		child_primitive->SetRenderCustomDepth(true);
-		child_primitive->SetCustomDepthStencilValue(static_cast<uint8>(InteractionType::Item));
+		child_primitive->SetCustomDepthStencilValue(static_cast<uint8>(EInteractionType::Item));
 	}
 }
 
@@ -215,7 +215,7 @@ void AItemActor::CreateItemObject()
 	ItemObject = UItemBase::StaticCreateObject<UItemBase>(this, ItemBaseClass, item_object_creation_method, DT_ItemProperties);
 }
 
-bool AItemActor::OnInteract_Implementation(AActor* caller)
+bool AItemActor::OnInteract_Implementation(AActor* caller, EInteractionActions action)
 {
 	if(ItemObject == nullptr)
 	{

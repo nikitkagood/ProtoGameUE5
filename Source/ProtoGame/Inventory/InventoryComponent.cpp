@@ -140,7 +140,7 @@ bool UInventoryComponent::AddItem(UItemBase* item)
     }
 
 
-    if(FreeSpaceLeft >= (item->GetRows() * item->GetColumns()))
+    if(FreeSpaceLeft >= (item->GetDimensions().X * item->GetDimensions().Y))
     {
         constexpr int32 NONE = -9999;
         FIntPoint free_space_coords = FindFreeSpaceInGrid(item);
@@ -157,7 +157,7 @@ bool UInventoryComponent::AddItem(UItemBase* item)
 
         if(free_space_coords != NONE)
         {
-            UpdateFreeSpaceLeft(-1 * item->GetRows() * item->GetColumns());
+            UpdateFreeSpaceLeft(-1 * item->GetDimensions().X * item->GetDimensions().Y);
             int32 idx = GenerateIndex();
             Items.Add(item, idx);
 
@@ -219,11 +219,11 @@ bool UInventoryComponent::AddItemAt(UItemBase* item, FIntPoint new_upper_left_ce
     }
 
 
-    if(FreeSpaceLeft >= (item->GetRows() * item->GetColumns()))
+    if(FreeSpaceLeft >= (item->GetDimensions().X * item->GetDimensions().Y))
     {
         if(CheckSpace(new_upper_left_cell, item))
         {
-            UpdateFreeSpaceLeft(-1 * item->GetRows() * item->GetColumns());
+            UpdateFreeSpaceLeft(-1 * item->GetDimensions().X * item->GetDimensions().Y);
             int32 idx = GenerateIndex();
             Items.Add(item, idx);
 
@@ -259,7 +259,7 @@ bool UInventoryComponent::RemoveItem(UItemBase* item)
     auto item_position = FindItemPosition(item); //we use find because UItemBase->GetUpperLeftCell might be overriden by another inventory
     FillSpaceInGrid(item_position.Key, item_position.Value, EMPTY_SPACE);
 
-    UpdateFreeSpaceLeft(item->GetRows() * item->GetColumns());
+    UpdateFreeSpaceLeft(item->GetDimensions().X * item->GetDimensions().Y);
     free_indices.Push(Items[item]);
 
     ChangeMass(-item->GetMassTotal());
@@ -285,7 +285,7 @@ bool UInventoryComponent::RemoveItemAt(UItemBase* item, FIntPoint upper_left_cel
 
     FillSpaceInGrid(upper_left_cell, lower_right_cell, EMPTY_SPACE);
 
-    UpdateFreeSpaceLeft(item->GetRows() * item->GetColumns());
+    UpdateFreeSpaceLeft(item->GetDimensions().X * item->GetDimensions().Y);
     free_indices.Push(Items[item]);
 
     ChangeMass(-item->GetMassTotal());
@@ -395,7 +395,7 @@ TPair<FIntPoint, FIntPoint> UInventoryComponent::FindItemPosition(UItemBase* ite
         if(upper_left_cell.X != INDEX_NONE)
         {
             upper_left_cell.Y = i;
-            FIntPoint lower_right_cell { upper_left_cell.X + item->GetRows() - 1, upper_left_cell.Y + item->GetColumns() - 1 };
+            FIntPoint lower_right_cell { upper_left_cell.X + item->GetDimensions().X - 1, upper_left_cell.Y + item->GetDimensions().Y - 1 };
             return TPair<FIntPoint, FIntPoint>{ upper_left_cell, lower_right_cell };
         }
     }
@@ -412,7 +412,7 @@ bool UInventoryComponent::CheckSpace(FIntPoint upper_left_cell, UItemBase* item)
     }
 
     //wether can even fit within inventory dimensions with such starting cell
-    FIntPoint new_lower_right_cell{ upper_left_cell.X + item->GetRows() - 1, upper_left_cell.Y + item->GetColumns() - 1 };
+    FIntPoint new_lower_right_cell{ upper_left_cell.X + item->GetDimensions().X - 1, upper_left_cell.Y + item->GetDimensions().Y - 1 };
 
     if(new_lower_right_cell.X >= Rows || new_lower_right_cell.Y >= Columns)
     {
@@ -449,6 +449,8 @@ bool UInventoryComponent::CheckSpaceMove(const FIntPoint upper_left_cell, UItemB
     {
         return false;
     }
+
+    //UE_LOG(LogTemp, Warning, TEXT("CheckSpaceMove: new_lower_right_cell: X: %i, Y: %i "), new_lower_right_cell.X, new_lower_right_cell.Y)
 
     if(Contains(item) == true) //check for item idx and empty space
     {

@@ -24,7 +24,7 @@ enum class EManagerInventoryType : uint8
 //For example, character might have pockets, backpack, vest and whatever - 
 //we don't want manually go through every possible inventory, we just ask this Manager
 //Not used when we already know all required inventories, Drag and Drop for example
-UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
+UCLASS(ClassGroup=(Inventory), meta=(BlueprintSpawnableComponent))
 class PROTOGAME_API UInventoryManager : public UActorComponent, public IInventoryInterface
 {
 	GENERATED_BODY()

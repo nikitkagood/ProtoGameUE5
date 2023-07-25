@@ -68,16 +68,13 @@ public:
 
 	//IInteractionInterface
 
-	//See OnInteract_Implementation
-	//Even though it's already virtual, don't type "virtual bool" - it will cause compiler error
-	UFUNCTION(BlueprintNativeEvent)
-	bool OnInteract(AActor* caller) override; 
+	bool OnInteract_Implementation(AActor* caller, EInteractionActions action);
 
 	//UFUNCTION(BlueprintCallable, Category = "Interaction")
 	bool IsInteractible_Implementation() const { return bInteractable; };
 
 	//UFUNCTION(BlueprintCallable, Category = "Interaction")
-	InteractionType GetInteractionType_Implementation() const { return InteractionType::Item; };
+	EInteractionType GetEInteractionType_Implementation() const { return EInteractionType::Item; };
 
 	void DrawInteractionOutline_Implementation();
 
@@ -107,8 +104,6 @@ protected:
 	bool bInteractable;
 private:
 	void CreateItemObject();
-
-	bool OnInteract_Implementation(AActor* caller);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Actor", meta = (AllowPrivateAccess = "true"))
 	ItemActorMeshType item_actor_mesh_type = ItemActorMeshType::StaticMesh;

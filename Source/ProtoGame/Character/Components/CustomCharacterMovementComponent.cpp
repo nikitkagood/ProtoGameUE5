@@ -102,7 +102,6 @@ void UCustomCharacterMovementComponent::StartSprint()
 		return;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("UCustomCharacterMovementComponent::StartSprint"));
 	GetCharacterOwner()->bIsSprinting = true;
 }
 

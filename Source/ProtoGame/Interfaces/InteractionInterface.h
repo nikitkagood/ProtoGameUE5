@@ -10,13 +10,27 @@
 //Right now this is used purely visually - for outlines with custom depth stencil
 //Do not change int values
 UENUM(BlueprintType)
-enum class InteractionType : uint8
+enum class EInteractionType : uint8
 {
 	None = 0					UMETA(DisplayName = "None"),
 	Item = 1					UMETA(DisplayName = "Item"),
 	WorldInteractible = 2		UMETA(DisplayName = "World Interactible"),
 	Quest = 3					UMETA(DisplayName = "Quest"),
 };
+
+//UENUM(BlueprintType, meta = (Bitflags))
+UENUM(BlueprintType)
+enum class EInteractionActions : uint8
+{
+	Unspecified	= 0				UMETA(DisplayName = "Unspecified"),
+	Use							UMETA(DisplayName = "Use"),
+	Consume						UMETA(DisplayName = "Consume"),
+	Open						UMETA(DisplayName = "Open"), //both open something like door and something like crate
+	Close						UMETA(DisplayName = "Close"),
+	Equip						UMETA(DisplayName = "Equip"), //into inventory but into special slot
+	Take 						UMETA(DisplayName = "Take"), //into inventory
+};
+//ENUM_CLASS_FLAGS(EInteractionActions);
 
 UINTERFACE(Blueprintable, MinimalAPI)
 class UInteractionInterface : public UInterface
@@ -31,22 +45,15 @@ class PROTOGAME_API IInteractionInterface
 	GENERATED_BODY()
 
 public:
-	//Calls only C++ Interact
-	virtual bool OnInteract(AActor* caller) = 0; //to be overriden in C++ classes that implement this interface
-	
-	//Calls only BP Interact
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category="Interaction") //to be implemented in BP
-	bool OnInteractBP(AActor* caller);
-
-	//Combines OnInteract C++ and OnInteractBP for code reusability reasons
-	//Doesn't check for nullptr
-	static void InteractCombined(AActor* iteracted_actor, AActor* caller);
+	//Actions array can be empty
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction")
+	bool OnInteract(AActor* caller, EInteractionActions action);
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction")
 	bool IsInteractible() const;
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction")
-	InteractionType GetInteractionType() const;
+	EInteractionType GetInteractionType() const;
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction")
 	void DrawInteractionOutline();
@@ -56,4 +63,9 @@ public:
 	//C++ needs it since here Retrigerable Delay can't just continue execution and has to bind to some functon
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction")
 	void StopDrawingOutline();
+
+	//Note that UI will show array elements in the order, so place actions accordingly
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction")
+	TArray<EInteractionActions> GetInteractionActions();
+	//UPARAM(meta = (Bitmask, BitmaskEnum = EInteractionActions)) int32 GetInteractionActions();
 };

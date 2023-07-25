@@ -69,11 +69,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	float GetMassTotal() const { return item_info.Mass * item_info.CurrentStackSize; };
 	UFUNCTION(BlueprintCallable)
-	FIntPoint GetDimensions() const { return item_info.Dimensions; };
-	UFUNCTION(BlueprintCallable)
-	int32 GetRows() const { return item_info.Dimensions.X; };
-	UFUNCTION(BlueprintCallable)
-	int32 GetColumns() const { return item_info.Dimensions.Y; };
+	virtual FIntPoint GetDimensions() const { return item_info.Dimensions; };
 	UFUNCTION(BlueprintCallable)
 	int32 GetCurrentStackSize() const { return item_info.CurrentStackSize; };
 	UFUNCTION(BlueprintCallable)
@@ -105,7 +101,7 @@ public:
 	UFUNCTION()
 	void SetUpperLeftCell(FIntPoint value) { upper_left_cell = value; };
 	UFUNCTION(BlueprintCallable)
-	FIntPoint GetLowerRightCell() const { return { upper_left_cell.X + GetRows() - 1, upper_left_cell.Y + GetColumns() - 1 }; }
+	FIntPoint GetLowerRightCell() const { return { upper_left_cell.X + GetDimensions().X - 1, upper_left_cell.Y + GetDimensions().Y - 1 }; }
 	UFUNCTION(BlueprintCallable)
 	bool GetRotated() const { return bRotated; }
 

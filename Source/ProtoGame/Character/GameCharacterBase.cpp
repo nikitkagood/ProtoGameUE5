@@ -12,6 +12,7 @@
 #include "Components/VitalityComponent.h"
 #include "Components/RPGStatsComponent.h"
 #include "Components/CustomCharacterMovementComponent.h"
+#include "Library/BitmaskLib.h"
 
 //engine
 #include "Animation/AnimInstance.h"
@@ -22,8 +23,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
-
-#include <bitset>
+#include "Blueprint/UserWidget.h"
 
 //debug
 #include "DrawDebugHelpers.h"
@@ -104,7 +104,7 @@ void AGameCharacterBase::SetupPlayerInputComponent(class UInputComponent* Player
 	//PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	//PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
-	if (IsFlagSet_ToggleInputMovement(EMovementInputToggleFlags::SlowWalk))
+	if (BitmaskLib::IsBitSetPowerOfTwo(MovementToggleFlags, EMovementInputToggleFlags::SlowWalk))
 	{
 		PlayerInputComponent->BindAction("SlowWalk", IE_Pressed, this, &AGameCharacterBase::ToggleSlowWalk);
 	}
@@ -114,7 +114,7 @@ void AGameCharacterBase::SetupPlayerInputComponent(class UInputComponent* Player
 		PlayerInputComponent->BindAction("SlowWalk", IE_Released, this, &AGameCharacterBase::EndSlowWalk);
 	}
 
-	if (IsFlagSet_ToggleInputMovement(EMovementInputToggleFlags::Sprint))
+	if (BitmaskLib::IsBitSetPowerOfTwo(MovementToggleFlags, EMovementInputToggleFlags::Sprint))
 	{
 		PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AGameCharacterBase::ToggleSprint);
 	}
@@ -124,7 +124,7 @@ void AGameCharacterBase::SetupPlayerInputComponent(class UInputComponent* Player
 		PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AGameCharacterBase::EndSprint);
 	}
 
-	if (IsFlagSet_ToggleInputMovement(EMovementInputToggleFlags::Prone))
+	if (BitmaskLib::IsBitSetPowerOfTwo(MovementToggleFlags, EMovementInputToggleFlags::Prone))
 	{
 		PlayerInputComponent->BindAction("Prone", IE_Pressed, this, &AGameCharacterBase::ToggleProne);
 		//PlayerInputComponent->RemoveActionBinding();
@@ -135,7 +135,7 @@ void AGameCharacterBase::SetupPlayerInputComponent(class UInputComponent* Player
 		PlayerInputComponent->BindAction("Prone", IE_Released, this, &AGameCharacterBase::EndProne);
 	}
 
-	if (IsFlagSet_ToggleInputMovement(EMovementInputToggleFlags::Crouch))
+	if (BitmaskLib::IsBitSetPowerOfTwo(MovementToggleFlags, EMovementInputToggleFlags::Crouch))
 	{
 		PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AGameCharacterBase::ToggleCrouch);
 	}
@@ -150,9 +150,9 @@ void AGameCharacterBase::SetupPlayerInputComponent(class UInputComponent* Player
 	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AGameCharacterBase::StartFireActive);
 	PlayerInputComponent->BindAction("Fire", IE_Released, this, &AGameCharacterBase::EndFireActive);
 
-	PlayerInputComponent->BindAction("Action", IE_Pressed, this, &AGameCharacterBase::OnAction);
+	//PlayerInputComponent->BindAction("Action", IE_Pressed, this, &AGameCharacterBase::OnAction);
 
-	PlayerInputComponent->BindAction("DropItem", IE_Pressed, this, &AGameCharacterBase::DropItem);
+	//PlayerInputComponent->BindAction("DropItem", IE_Pressed, this, &AGameCharacterBase::DropItem);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AGameCharacterBase::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AGameCharacterBase::MoveRight);
@@ -164,8 +164,6 @@ void AGameCharacterBase::SetupPlayerInputComponent(class UInputComponent* Player
 void AGameCharacterBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	//TraceInteractionVisual();
 }
 
 UCustomCharacterMovementComponent* AGameCharacterBase::GetCharacterMovement() const
@@ -180,16 +178,16 @@ void AGameCharacterBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	GetWorld()->GetTimerManager().ClearAllTimersForObject(this);
 }
 
-bool AGameCharacterBase::IsFlagSet_ToggleInputMovement(EMovementInputToggleFlags flag)
-{
-	return MovementToggleFlags & static_cast<decltype(MovementToggleFlags)>(flag);
-}
+//bool AGameCharacterBase::IsFlagSet_ToggleInputMovement(EMovementInputToggleFlags flag)
+//{
+//	return MovementToggleFlags & static_cast<decltype(MovementToggleFlags)>(flag);
+//}
 
-void AGameCharacterBase::SetFlag_ToogleInputMovement(EMovementInputToggleFlags flag, bool value)
-{
-	//1UL - 1 unsigned long, it's for int width independency
-	MovementToggleFlags ^= (-static_cast<long>(value) ^ MovementToggleFlags) & (1UL < static_cast<decltype(MovementToggleFlags)>(flag));
-}
+//void AGameCharacterBase::SetFlag_ToogleInputMovement(EMovementInputToggleFlags flag, bool value)
+//{
+//	//1UL - 1 unsigned long, it's for int width independency
+//	MovementToggleFlags ^= (-static_cast<long>(value) ^ MovementToggleFlags) & (1UL < static_cast<decltype(MovementToggleFlags)>(flag));
+//}
 
 void AGameCharacterBase::OnRep_IsProne()
 {
@@ -681,15 +679,16 @@ void AGameCharacterBase::EndSlowWalk()
 	}
 }
 
-void AGameCharacterBase::OnAction()
-{
-	AActor* actor_ptr = TraceInteraction().GetActor();
-
-	if(actor_ptr != nullptr)
-	{
-		IInteractionInterface::InteractCombined(actor_ptr, this);
-	}
-}
+//void AGameCharacterBase::OnAction()
+//{
+//	AActor* actor_ptr = TraceInteraction().GetActor();
+//
+//	if(actor_ptr != nullptr && actor_ptr->Implements<UInteractionInterface>())
+//	{
+//		IInteractionInterface* interaction = Cast<IInteractionInterface>(actor_ptr);
+//		interaction->Execute_OnInteract(actor_ptr, this, {});
+//	}
+//}
 
 void AGameCharacterBase::UseItem(UItemBase* item)
 {
@@ -700,14 +699,14 @@ void AGameCharacterBase::UseItem(UItemBase* item)
 	}
 }
 
-void AGameCharacterBase::DropItem()
-{
-	//TODO; placeholder; for now it drops the first item
-	if(InventoryComponent->GetItems().Num() != 0)
-	{
-		InventoryComponent->DropItemToWorld(InventoryComponent->GetItems().begin().Key());
-	}
-}
+//void AGameCharacterBase::DropItem()
+//{
+//	//TODO; placeholder; for now it drops the first item
+//	if(InventoryComponent->GetItems().Num() != 0)
+//	{
+//		InventoryComponent->DropItemToWorld(InventoryComponent->GetItems().begin().Key());
+//	}
+//}
 
 
 float AGameCharacterBase::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -801,7 +800,7 @@ void AGameCharacterBase::SetupMovementDefaults()
 FHitResult AGameCharacterBase::TraceInteraction()
 {
 	const float half_height = InteractionRange / 2;
-	const float radius = 2.1f;
+	const float radius = 2.25f;
 	const FVector start = FirstPersonCameraComponent->GetComponentLocation();
 	const FVector end = start + FirstPersonCameraComponent->GetForwardVector() * InteractionRange;
 	const FVector center = start + FirstPersonCameraComponent->GetForwardVector() * InteractionRange / 2;
@@ -819,18 +818,32 @@ FHitResult AGameCharacterBase::TraceInteraction()
 
 void AGameCharacterBase::TraceInteractionVisual()
 {
-	AActor* actor_ptr = TraceInteraction().GetActor();
+	AActor* traced_actor = TraceInteraction().GetActor();
 
-	if (actor_ptr != nullptr)
+	if (traced_actor != nullptr)
 	{
-		if (actor_ptr->Implements<UInteractionInterface>())
+		if (traced_actor != interaction_actor)
 		{
-			IInteractionInterface* interaction_interface = Cast<IInteractionInterface>(actor_ptr);
+			interaction_actor = traced_actor;
+			CloseInteractionUI();
+		}
 
-			if (interaction_interface->Execute_IsInteractible(actor_ptr))
+		if (traced_actor->Implements<UInteractionInterface>())
+		{
+			IInteractionInterface* interaction_interface = Cast<IInteractionInterface>(traced_actor);
+
+			if (interaction_interface->Execute_IsInteractible(traced_actor))
 			{
-				interaction_interface->Execute_DrawInteractionOutline(actor_ptr);
+				interaction_interface->Execute_DrawInteractionOutline(traced_actor);
+				OpenInteractionUI();
+
+				//ConstructorHelpers::FClassFinder<UUserWidget> widget_class(TEXT("/Game/Blueprints/UI/WBP_InteractionMenu"));
+				//UUserWidget* widget = CreateWidget(this, widget_class.Class);
 			}
 		}
+	}
+	else
+	{
+		CloseInteractionUI();
 	}
 }

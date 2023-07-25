@@ -97,14 +97,22 @@ class PROTOGAME_API AGameCharacterBase : public ACharacter
 	UInvSpecialSlotComponent* ActiveSlot;
 
 public:
+	AGameCharacterBase(const class FObjectInitializer& ObjectInitializer);
+
+	virtual void BeginPlay();
+
+	virtual void Tick(float DeltaTime) override;
+
+	void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 	UInventoryComponent* GetInventoryComponent() const { return InventoryComponent; }
 
 	UFUNCTION(BlueprintCallable)
 	UCustomCharacterMovementComponent* GetCharacterMovement() const;
-
-	AGameCharacterBase(const class FObjectInitializer& ObjectInitializer);
 	
+	TObjectPtr<AActor> GetInteractionActor() const { return interaction_actor; }
+
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 	//Maybe will be needed, see ACharacter
@@ -114,8 +122,6 @@ public:
 
 	//also de-equips
 	bool EquipGun(UItemBase* item);
-
-	virtual void BeginPlay();
 
 	void MoveForward(float Val);
 	void MoveRight(float Val);
@@ -172,13 +178,14 @@ public:
 	bool CanProne() const;
 	virtual bool CanCrouch() const override;
 
-	bool IsFlagSet_ToggleInputMovement(EMovementInputToggleFlags flag);
-	void SetFlag_ToogleInputMovement(EMovementInputToggleFlags flag, bool value);
+	//bool IsFlagSet_ToggleInputMovement(EMovementInputToggleFlags flag);
+	//void SetFlag_ToogleInputMovement(EMovementInputToggleFlags flag, bool value);
 
-	virtual void Tick(float DeltaTime) override;
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "UI")
+	void OpenInteractionUI();
 
-	void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "UI")
+	void CloseInteractionUI();
 protected:
 	//Gun in hands only
 	void StartFireActive();
@@ -191,16 +198,13 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void UpdateWeaponSlot(UInvSpecialSlotComponent* slot);
 
-	//Not used
-	//UFUNCTION(BlueprintCallable, Category = "Weapon")
-	//void UpdateWeaponSlots(UInvSpecialSlotComponent* new_active_slot);
-
-	void OnAction();
+	//BP handles it now
+	//void OnAction();
 
 	UFUNCTION(BlueprintCallable, Category = "Items")
 	void UseItem(UItemBase* item);
 
-	void DropItem();
+	//void DropItem();
 
 	//DamageAmount - positive number
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
@@ -209,7 +213,6 @@ protected:
 	void DisableRagdoll();
 
 	void SetDeathState(bool is_dead);
-	//void Ressurect();
 
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 
@@ -219,12 +222,15 @@ protected:
 	UFUNCTION()
 	void TraceInteractionVisual();
 
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Interaction")
+	EInteractionActions GetInteractionAction();
+
 private:
 	void SetupMovementDefaults();
 
 public:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Interaction)
-	float InteractionRange = 125.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Interaction")
+	float InteractionRange = 130.f;
 
 	FTimerHandle InteractionVisualTraceTimerHandle;
 
@@ -232,18 +238,18 @@ public:
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Camera)
 	//float ProneEyeHeight;
 
-	UPROPERTY(BlueprintReadOnly, Category = Character)
+	UPROPERTY(BlueprintReadOnly, Category = "Character")
 	uint8 bIsSlowWalking : 1;
 
-	UPROPERTY(BlueprintReadOnly, Category = Character)
+	UPROPERTY(BlueprintReadOnly, Category = "Character")
 	uint8 bIsSprinting : 1;
 
 	/** Set by character movement to specify that this Character is currently crouched. */
-	UPROPERTY(BlueprintReadOnly, replicatedUsing = OnRep_IsProne, Category=Character)
+	UPROPERTY(BlueprintReadOnly, replicatedUsing = OnRep_IsProne, Category = "Character")
 	uint8 bIsProne : 1;
 
 	/** Set by character movement to specify that this Character is currently crouched. */
-	UPROPERTY(BlueprintReadOnly, Category = Character)
+	UPROPERTY(BlueprintReadOnly, Category = "Character")
 	uint8 bIsJumping : 1;
 
 	/** Handle Prone replicated from server */
@@ -255,13 +261,13 @@ public:
 
 private:
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Movement)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Movement")
 	bool bAimButtonDown;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Movement)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Movement")
 	bool bFireButtonDown;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Movement)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Movement")
 	float AimDownSightsSpeed;
 
 	///** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
@@ -271,5 +277,8 @@ private:
 	///** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
 	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Camera)
 	//float BaseLookUpRate;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Interaction")
+	TObjectPtr<AActor> interaction_actor;
 };
 
