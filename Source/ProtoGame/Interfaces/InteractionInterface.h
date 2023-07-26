@@ -29,6 +29,8 @@ enum class EInteractionActions : uint8
 	Close						UMETA(DisplayName = "Close"),
 	Equip						UMETA(DisplayName = "Equip"), //into inventory but into special slot
 	Take 						UMETA(DisplayName = "Take"), //into inventory
+	Lock 						UMETA(DisplayName = "Lock"), 
+	Unlock 						UMETA(DisplayName = "Unlock"),
 };
 //ENUM_CLASS_FLAGS(EInteractionActions);
 
@@ -67,5 +69,4 @@ public:
 	//Note that UI will show array elements in the order, so place actions accordingly
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction")
 	TArray<EInteractionActions> GetInteractionActions();
-	//UPARAM(meta = (Bitmask, BitmaskEnum = EInteractionActions)) int32 GetInteractionActions();
 };
