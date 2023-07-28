@@ -64,13 +64,20 @@ AGameCharacterBase::AGameCharacterBase(const class FObjectInitializer& ObjectIni
 	//It is created so it is visibile in Blueprints, otherwise it's redundant
 	ActiveSlot = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("Active slot component"));
 
+	//ECC_GameTraceChannel3 is Interaction
+	//See DefaultEngine.ini
+	//[/Script/Engine.CollisionProfile]
+	//GetMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel3, ECollisionResponse::ECR_Ignore);
+
 	InHandsSkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("InHandsSkeletalMesh"));
 	InHandsSkeletalMesh->SetupAttachment(GetMesh(), TEXT("ik_hand_gun"));
 	InHandsSkeletalMesh->SetOnlyOwnerSee(false);
+	//InHandsSkeletalMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel3, ECollisionResponse::ECR_Ignore);
 
 	StowedOnBackSkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("StowedOnBackSkeletalMesh"));
 	StowedOnBackSkeletalMesh->SetupAttachment(GetMesh(), TEXT("StowedOnBackSocket"));
 	StowedOnBackSkeletalMesh->SetOnlyOwnerSee(false);
+	//StowedOnBackSkeletalMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel3, ECollisionResponse::ECR_Ignore);
 
 	//VitalityComponent->GetOnNoHealth().AddUObject(this, &AGameCharacterBase::Death);
 }
@@ -94,7 +101,7 @@ void AGameCharacterBase::BeginPlay()
 	//Active slot is PrimarySlot by default
 	ActiveSlot = PrimaryGunSlot;
 
-	GetWorld()->GetTimerManager().SetTimer(InteractionVisualTraceTimerHandle, this, &AGameCharacterBase::TraceInteractionVisual, 1.f / 30.f, true, 0.f);
+	GetWorld()->GetTimerManager().SetTimer(InteractionSweepTimerHandle, this, &AGameCharacterBase::SweepInteractionLoop, 1.f / 30.f, true, 0.f);
 }
 
 void AGameCharacterBase::SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent)
@@ -797,44 +804,53 @@ void AGameCharacterBase::SetupMovementDefaults()
 	LandedDelegate.AddDynamic(this, &AGameCharacterBase::EndJump);
 }
 
-FHitResult AGameCharacterBase::TraceInteraction()
+FHitResult AGameCharacterBase::SweepInteractionFromView(ECollisionChannel collision_channel)
 {
-	const float half_height = InteractionRange / 2;
+	//DO NOT trace from FirstPersonCamera - it changes rotation unexpectedly (~90deg) when weapon is equipped
+	//Even though actual view is not affected and mesh head moves very slightly
+
 	const float radius = 2.25f;
-	const FVector start = FirstPersonCameraComponent->GetComponentLocation();
-	const FVector end = start + FirstPersonCameraComponent->GetForwardVector() * InteractionRange;
-	const FVector center = start + FirstPersonCameraComponent->GetForwardVector() * InteractionRange / 2;
-	const auto rot = FirstPersonCameraComponent->GetUpVector().Rotation().Quaternion();
+	FVector start;
+	FRotator view_point_rot;
+	Cast<APlayerController>(GetController())->GetPlayerViewPoint(start, view_point_rot);
+
+	const auto shape_rot = view_point_rot.Quaternion().GetUpVector().Rotation().Quaternion();
+	const FVector end = start + view_point_rot.Quaternion().GetForwardVector() * InteractionRange;
 
 	FCollisionQueryParams collision_params;
 	collision_params.AddIgnoredActor(this);
+	//collision_params.AddIgnoredComponent(GetComponentByClass<UMeshComponent>());
 
 	FHitResult hit_result;
 
-	GetWorld()->SweepSingleByChannel(hit_result, start, end, rot, ECollisionChannel::ECC_Visibility, FCollisionShape::MakeCapsule(radius, InteractionRange / 2), collision_params);
+	GetWorld()->SweepSingleByChannel(hit_result, start, end, shape_rot, collision_channel, FCollisionShape::MakeSphere(radius), collision_params);
 
+	//DrawDebugLine(GetWorld(), start, end, FColor::Cyan, false, 2, 0, 1.5f);
 	return hit_result;
 }
 
-void AGameCharacterBase::TraceInteractionVisual()
+void AGameCharacterBase::SweepInteractionLoop()
 {
-	AActor* traced_actor = TraceInteraction().GetActor();
+	AActor* swept_actor = SweepInteractionFromView().GetActor();
+	//auto hit_comp = SweepInteractionFromView().GetComponent();
+	//UE_LOG(LogTemp, Warning, TEXT("Hit comp: %s"), hit_comp ? *hit_comp->GetName() : TEXT("none"));
+	//UE_LOG(LogTemp, Warning, TEXT("Swept actor: %s"), swept_actor ? *swept_actor->GetName() : TEXT("none"));
 
-	if (traced_actor != nullptr)
+	if (swept_actor != nullptr)
 	{
-		if (traced_actor != interaction_actor)
+		if (swept_actor != interaction_actor)
 		{
-			interaction_actor = traced_actor;
+			interaction_actor = swept_actor;
 			CloseInteractionUI();
 		}
 
-		if (traced_actor->Implements<UInteractionInterface>())
+		if (swept_actor->Implements<UInteractionInterface>())
 		{
-			IInteractionInterface* interaction_interface = Cast<IInteractionInterface>(traced_actor);
+			IInteractionInterface* interaction_interface = Cast<IInteractionInterface>(swept_actor);
 
-			if (interaction_interface->Execute_IsInteractible(traced_actor))
+			if (interaction_interface->Execute_IsInteractible(swept_actor))
 			{
-				interaction_interface->Execute_DrawInteractionOutline(traced_actor);
+				interaction_interface->Execute_DrawInteractionOutline(swept_actor);
 				OpenInteractionUI();
 
 				//ConstructorHelpers::FClassFinder<UUserWidget> widget_class(TEXT("/Game/Blueprints/UI/WBP_InteractionMenu"));

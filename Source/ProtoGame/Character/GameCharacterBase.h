@@ -48,6 +48,9 @@ class PROTOGAME_API AGameCharacterBase : public ACharacter
 {
 	GENERATED_BODY()
 
+
+
+
 	friend UVitalityComponent;
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = Mesh, meta = (AllowPrivateAccess = "true"))
@@ -198,7 +201,6 @@ protected:
 	UFUNCTION(BlueprintCallable, Category = "Weapon")
 	void UpdateWeaponSlot(UInvSpecialSlotComponent* slot);
 
-	//BP handles it now
 	//void OnAction();
 
 	UFUNCTION(BlueprintCallable, Category = "Items")
@@ -216,11 +218,16 @@ protected:
 
 	virtual void SetupPlayerInputComponent(UInputComponent* InputComponent) override;
 
+	//Ignores this actor
+	//Currently we check for visibility but in case it won't be enough, use Interaction trace channel - ECC_GameTraceChannel3
 	UFUNCTION(BlueprintCallable)
-	FHitResult TraceInteraction();
+	FHitResult SweepInteractionFromView(ECollisionChannel collision_channel = ECollisionChannel::ECC_Visibility);
 
+	//We need to loop sweep (trace) in order for outline and UI to work properly
+	//But since we are looping already, it's also used for Action/interaction itself
+	//Result is stored in interaction_actor
 	UFUNCTION()
-	void TraceInteractionVisual();
+	void SweepInteractionLoop();
 
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Interaction")
 	EInteractionActions GetInteractionAction();
@@ -232,7 +239,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Interaction")
 	float InteractionRange = 130.f;
 
-	FTimerHandle InteractionVisualTraceTimerHandle;
+	FTimerHandle InteractionSweepTimerHandle;
 
 	//May not be necessary - just use crouched value. Game is mainly 1st person anyway
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category=Camera)
