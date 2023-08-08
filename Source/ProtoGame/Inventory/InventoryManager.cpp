@@ -118,6 +118,21 @@ bool UInventoryManager::MoveItemToInventoryInGrid(UItemBase* item, TScriptInterf
 	return inv->MoveItemToInventoryInGrid(item, destination, new_upper_left_cell);
 }
 
+bool UInventoryManager::AddItemFromWorld(UItemBase* item)
+{
+	//TODO: Priorities. Special slots first.
+
+	for (auto& inv : inventories)
+	{
+		if(inv.GetInterface()->AddItemFromWorld(item))
+		{
+			return true;
+		}
+	}
+
+	return false;
+}
+
 bool UInventoryManager::DropItemToWorld(UItemBase* item)
 {
 	TScriptInterface<IInventoryInterface> inv = item->GetOuterUpstreamInventory();

@@ -4,7 +4,8 @@
 #include "ItemBase.h"
 
 #include "Character/GameCharacterBase.h"
-#include "Inventory/InventoryComponent.h"
+//#include "Inventory/InventoryComponent.h"
+#include "Inventory/InventoryManager.h"
 #include "ItemActor.h"
 
 #include "Engine/StaticMesh.h"
@@ -35,7 +36,7 @@ bool UItemBase::Interact(AActor* caller)
 
 	if(ptr != nullptr)
 	{
-		if(ptr->GetInventoryComponent()->AddItemFromWorld(this))
+		if(ptr->GetInventoryManger()->AddItemFromWorld(this))
 		{
 			return true; 
 		}

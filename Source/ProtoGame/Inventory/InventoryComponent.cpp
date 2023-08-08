@@ -26,22 +26,6 @@ UInventoryComponent::UInventoryComponent()
     Columns = 1;
 }
 
-bool UInventoryComponent::AddItemFromWorld(UItemBase* item)
-{
-    if(item == nullptr)
-    {
-        return false;
-    }
-    if(AddItem(item) == false)
-    {
-        return false;
-    }
-
-    //item->ItemActor->Destroy(); //currently ItemActors destroy themselves
-
-    return true;
-}
-
 bool UInventoryComponent::MoveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell, bool widget_rotation)
 {
     bool result = false;
@@ -617,6 +601,22 @@ bool UInventoryComponent::MoveItemToInventoryInGrid(UItemBase* item, TScriptInte
     }
 
     return false;
+}
+
+bool UInventoryComponent::AddItemFromWorld(UItemBase* item)
+{
+    if (item == nullptr)
+    {
+        return false;
+    }
+    if (AddItem(item) == false)
+    {
+        return false;
+    }
+
+    //item->ItemActor->Destroy(); //currently ItemActors destroy themselves
+
+    return true;
 }
 
 bool UInventoryComponent::DropItemToWorld(UItemBase* item)

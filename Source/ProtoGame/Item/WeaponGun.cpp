@@ -541,6 +541,20 @@ bool UWeaponGun::MoveItemToInventoryInGrid(UItemBase* item, TScriptInterface<IIn
 	return false;
 }
 
+bool UWeaponGun::AddItemFromWorld(UItemBase* item)
+{
+	//TODO: Untested
+
+	auto* attachment = Cast<UWeaponAttachment>(item);
+
+	if (attachment == nullptr)
+	{
+		return false;
+	}
+
+	return AddAttachment(attachment);
+}
+
 bool UWeaponGun::DropItemToWorld(UItemBase* item)
 {
 	auto* attachment = Cast<UWeaponAttachment>(item);

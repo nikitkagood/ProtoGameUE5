@@ -82,6 +82,22 @@ bool UInvSpecialSlotComponent::MoveItemToInventoryInGrid(UItemBase* item, TScrip
 	return false;
 }
 
+bool UInvSpecialSlotComponent::AddItemFromWorld(UItemBase* item)
+{
+	if (item == nullptr)
+	{
+		return false;
+	}
+	if (AddItem(item) == false)
+	{
+		return false;
+	}
+
+	//item->ItemActor->Destroy(); //currently ItemActors destroy themselves
+
+	return true;
+}
+
 bool UInvSpecialSlotComponent::DropItemToWorld(UItemBase* item)
 {
 	if(item == nullptr || item != GetItem())

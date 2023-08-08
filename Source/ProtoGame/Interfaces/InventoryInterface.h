@@ -31,6 +31,9 @@ public:
 	virtual bool MoveItemToInventoryInGrid(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) = 0;
 
 	UFUNCTION(BlueprintCallable)
+	virtual bool AddItemFromWorld(UItemBase* item) = 0; //add item; currently items destroy themselves
+
+	UFUNCTION(BlueprintCallable)
 	virtual bool DropItemToWorld(UItemBase* item) = 0;
 
 	virtual bool ReceiveItem(UItemBase* item) = 0;

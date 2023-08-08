@@ -57,8 +57,8 @@ AGameCharacterBase::AGameCharacterBase(const class FObjectInitializer& ObjectIni
 	RPGStatsComponent = CreateDefaultSubobject<URPGStatsComponent>(TEXT("RPGStatsComponent"));
 
 	InventoryManager = CreateDefaultSubobject<UInventoryManager>(TEXT("InventoryManager"));
-	InventoryComponent = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent"));
-	InventoryComponentSecond = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponentSecond"));
+	InventoryComponent_Pockets = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent_Pockets"));
+
 	PrimaryGunSlot = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("Primary gun slot component"));
 	SecondaryGunSlot = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("Secondary gun slot component"));
 	//It is created so it is visibile in Blueprints, otherwise it's redundant
@@ -95,8 +95,7 @@ void AGameCharacterBase::BeginPlay()
 
 	InventoryManager->AddInventory(PrimaryGunSlot);
 	InventoryManager->AddInventory(SecondaryGunSlot);
-	InventoryManager->AddInventory(InventoryComponent);
-	InventoryManager->AddInventory(InventoryComponentSecond);
+	InventoryManager->AddInventory(InventoryComponent_Pockets);
 
 	//Active slot is PrimarySlot by default
 	ActiveSlot = PrimaryGunSlot;
@@ -171,6 +170,28 @@ void AGameCharacterBase::SetupPlayerInputComponent(class UInputComponent* Player
 void AGameCharacterBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+UInventoryComponent* AGameCharacterBase::GetInventoryComponent(ECharacterInventoryType type) const
+{
+	switch (type)
+	{
+	case ECharacterInventoryType::None:
+		return nullptr;
+		break;
+	case ECharacterInventoryType::Pockets:
+		return InventoryComponent_Pockets;
+		break;
+	case ECharacterInventoryType::Backpack:
+		return InventoryComponent_Backpack;
+		break;
+	case ECharacterInventoryType::ChestRig:
+		return InventoryComponent_ChestRig;
+		break;
+	default:
+		return nullptr;
+		break;
+	}
 }
 
 UCustomCharacterMovementComponent* AGameCharacterBase::GetCharacterMovement() const

@@ -24,13 +24,14 @@ public:
 	UInventoryComponent();
 
 	UFUNCTION(BlueprintCallable)
-	bool AddItemFromWorld(UItemBase* item); //add item; currently items destroy themselves
+	FIntPoint GetDimensions() { return { Rows, Columns }; };
 
+	//Move item internally
 	UFUNCTION(BlueprintCallable)
 	bool MoveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell, bool widget_rotation);
 
-	//checks for empty cells and cells with item idx; used by UI;
-	//works for both items within the inventory and outside
+	//Checks for empty cells and cells with item idx; used by UI;
+	//Works for both items within tis inventory and another InventoryComponents
 	UFUNCTION(BlueprintCallable)
 	bool CheckSpaceMove(const FIntPoint upper_left_cell, UItemBase* item, FIntPoint dimensions); 
 
@@ -53,6 +54,7 @@ public:
 	//IInventoryInterface
 	virtual bool MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination) override;
 	virtual bool MoveItemToInventoryInGrid(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) override;
+	virtual bool AddItemFromWorld(UItemBase* item) override;
 	virtual bool DropItemToWorld(UItemBase* item) override;
 	virtual bool ReceiveItem(UItemBase* item) override;
 	virtual bool ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell) override;

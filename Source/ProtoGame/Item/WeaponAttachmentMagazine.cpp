@@ -70,6 +70,24 @@ bool UWeaponAttachmentMagazine::MoveItemToInventoryInGrid(UItemBase* item, TScri
 	return false;
 }
 
+bool UWeaponAttachmentMagazine::AddItemFromWorld(UItemBase* item)
+{
+	if (item == nullptr)
+	{
+		return false;
+	}
+
+	UAmmoBase* ammo = Cast<UAmmoBase>(item);
+
+	if (ammo == nullptr || Push(ammo) == false)
+	{
+		return false;
+	}
+
+	//item->ItemActor->Destroy(); //currently ItemActors destroy themselves
+
+	return true;
+}
 bool UWeaponAttachmentMagazine::DropItemToWorld(UItemBase* item)
 {
 	return false;

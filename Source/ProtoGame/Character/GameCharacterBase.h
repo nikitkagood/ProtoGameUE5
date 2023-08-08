@@ -42,14 +42,20 @@ enum class EMovementInputToggleFlags : uint8
 };
 ENUM_CLASS_FLAGS(EMovementInputToggleFlags);
 
+UENUM(BlueprintType)
+enum class ECharacterInventoryType : uint8
+{
+	None = 0				UMETA(DisplayName = "None"),
+	Pockets					UMETA(DisplayName = "Pockets"),
+	Backpack				UMETA(DisplayName = "Backpack"),
+	ChestRig				UMETA(DisplayName = "ChestRig"),
+};
+
 
 UCLASS(config=Game, BlueprintType)
 class PROTOGAME_API AGameCharacterBase : public ACharacter
 {
 	GENERATED_BODY()
-
-
-
 
 	friend UVitalityComponent;
 
@@ -83,11 +89,20 @@ class PROTOGAME_API AGameCharacterBase : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Inventory)
 	UInventoryManager* InventoryManager;
 
+	//On character inventory
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Inventory)
-	UInventoryComponent* InventoryComponent;
+	UInventoryComponent* InventoryComponent_Pockets;
 
+	//Only pointer, inventory itself has to be created in a corresponding item
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Inventory)
-	UInventoryComponent* InventoryComponentSecond;
+	UInventoryComponent* InventoryComponent_Backpack;
+
+	//Only pointer, inventory itself has to be created in a corresponding item
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Inventory)
+	UInventoryComponent* InventoryComponent_ChestRig;
+
+	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = Inventory)
+	//TArray<UInventoryComponent*> InventoryComponents_Additional;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Inventory)
 	UInvSpecialSlotComponent* PrimaryGunSlot;
@@ -109,7 +124,8 @@ public:
 	void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
-	UInventoryComponent* GetInventoryComponent() const { return InventoryComponent; }
+	UInventoryManager* GetInventoryManger() const { return InventoryManager; }
+	UInventoryComponent* GetInventoryComponent(ECharacterInventoryType type) const;
 
 	UFUNCTION(BlueprintCallable)
 	UCustomCharacterMovementComponent* GetCharacterMovement() const;
