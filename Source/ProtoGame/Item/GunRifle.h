@@ -17,7 +17,7 @@ private:
 public:
 	UGunRifle();
 
-	virtual bool SetProperties(FDataTableRowHandle handle) override;
+	virtual bool Initialize(FDataTableRowHandle handle) override;
 
 	virtual FItemThumbnailInfo GetItemThumbnailInfoFromDT() override;
 

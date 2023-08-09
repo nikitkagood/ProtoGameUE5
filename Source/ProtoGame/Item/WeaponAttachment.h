@@ -22,7 +22,7 @@ public:
 
 	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
-	virtual bool SetProperties(FDataTableRowHandle handle) override;
+	virtual bool Initialize(FDataTableRowHandle handle) override;
 
 	void SetOuterWeapon(UWeaponBase* weapon);
 

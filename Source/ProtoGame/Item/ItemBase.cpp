@@ -16,9 +16,9 @@ UItemBase::UItemBase()
 	bRotated = false;
 }
 
-bool UItemBase::SetProperties(FDataTableRowHandle handle)
+bool UItemBase::Initialize(FDataTableRowHandle handle)
 { 
-	auto* ptr_row = handle.GetRow<DataTableType>("UItemBase::SetProperties");
+	auto* ptr_row = handle.GetRow<DataTableType>("UItemBase::Initialize");
 
 	if(ptr_row != nullptr)
 	{

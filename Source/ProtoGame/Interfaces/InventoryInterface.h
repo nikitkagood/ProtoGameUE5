@@ -24,6 +24,12 @@ class PROTOGAME_API IInventoryInterface
 	GENERATED_BODY()
 
 public:
+	UFUNCTION(BlueprintCallable)
+	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const = 0;
+
+	//UFUNCTION(BlueprintCallable)
+	//virtual FIntPoint GetInventoryDimensions() const = 0;
+
     UFUNCTION(BlueprintCallable)
 	virtual bool MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination) = 0;
 
@@ -50,9 +56,6 @@ public:
 	//Prime example is Drag and Drop: if it fails, inventory doesn't change but visuals are required to be updated.
 	UFUNCTION(BlueprintCallable)
 	virtual void UpdateInventory() = 0;
-
-	UFUNCTION(BlueprintCallable)
-	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const = 0;
 
 	//UFUNCTION(BlueprintCallable)
 	//virtual AActor* GetOuterActor() const = 0;

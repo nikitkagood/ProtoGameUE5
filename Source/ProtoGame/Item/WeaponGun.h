@@ -16,7 +16,7 @@ class PROTOGAME_API UWeaponGun : public UWeaponBase
 public:
 	UWeaponGun();
 
-	virtual bool SetProperties(FDataTableRowHandle handle) override { check(false); return false; };
+	virtual bool Initialize(FDataTableRowHandle handle) override { check(false); return false; };
 
 	virtual FItemThumbnailInfo GetItemThumbnailInfoFromDT() override { check(false); return {}; };
 

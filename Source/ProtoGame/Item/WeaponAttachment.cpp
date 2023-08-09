@@ -17,7 +17,7 @@ UWeaponAttachment::UWeaponAttachment()
 }
 
 
-bool UWeaponAttachment::SetProperties(FDataTableRowHandle handle)
+bool UWeaponAttachment::Initialize(FDataTableRowHandle handle)
 {
 	checkf(false, TEXT("UWeaponAttachment is an abstract class. Setting it's properties isn't meaningful."));
 

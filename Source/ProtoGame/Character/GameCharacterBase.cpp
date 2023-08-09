@@ -4,6 +4,7 @@
 #include "Character/GameCharacterBase.h"
 #include "Item/Projectile.h"
 #include "Item/ItemBase.h"
+#include "Item/InventoryItem.h"
 #include "Item/ItemActor.h"
 #include "Item/WeaponGun.h"
 #include "Inventory/InventoryComponent.h"
@@ -58,6 +59,8 @@ AGameCharacterBase::AGameCharacterBase(const class FObjectInitializer& ObjectIni
 
 	InventoryManager = CreateDefaultSubobject<UInventoryManager>(TEXT("InventoryManager"));
 	InventoryComponent_Pockets = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent_Pockets"));
+	InventoryItemSlot_Backpack = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("InventoryItemSlot_Backpack"));
+	InventoryItemSlot_ChestRig = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("InventoryItemSlot_ChestRig"));
 
 	PrimaryGunSlot = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("Primary gun slot component"));
 	SecondaryGunSlot = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("Secondary gun slot component"));
@@ -96,6 +99,8 @@ void AGameCharacterBase::BeginPlay()
 	InventoryManager->AddInventory(PrimaryGunSlot);
 	InventoryManager->AddInventory(SecondaryGunSlot);
 	InventoryManager->AddInventory(InventoryComponent_Pockets);
+	InventoryManager->AddInventory(InventoryItemSlot_Backpack);
+	InventoryManager->AddInventory(InventoryItemSlot_ChestRig);
 
 	//Active slot is PrimarySlot by default
 	ActiveSlot = PrimaryGunSlot;
@@ -174,6 +179,8 @@ void AGameCharacterBase::Tick(float DeltaTime)
 
 UInventoryComponent* AGameCharacterBase::GetInventoryComponent(ECharacterInventoryType type) const
 {
+	UInventoryItem* temp_inventory_item;
+
 	switch (type)
 	{
 	case ECharacterInventoryType::None:
@@ -183,10 +190,28 @@ UInventoryComponent* AGameCharacterBase::GetInventoryComponent(ECharacterInvento
 		return InventoryComponent_Pockets;
 		break;
 	case ECharacterInventoryType::Backpack:
-		return InventoryComponent_Backpack;
+		temp_inventory_item = Cast<UInventoryItem>(InventoryItemSlot_Backpack->GetItem());
+
+		if (temp_inventory_item == nullptr)
+		{
+			return nullptr;
+		}
+		else
+		{
+			return temp_inventory_item->GetInventoryComponent();
+		}
 		break;
 	case ECharacterInventoryType::ChestRig:
-		return InventoryComponent_ChestRig;
+		temp_inventory_item = Cast<UInventoryItem>(InventoryItemSlot_Backpack->GetItem());
+
+		if (temp_inventory_item == nullptr)
+		{
+			return nullptr;
+		}
+		else
+		{
+			return temp_inventory_item->GetInventoryComponent();
+		}
 		break;
 	default:
 		return nullptr;

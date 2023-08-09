@@ -37,15 +37,20 @@ public:
 	template<typename T>
 	static T* StaticCreateObject(UObject* outer, TSubclassOf<UItemBase> item_base_class, ItemObjectCreationMethod item_object_creation_method, FDataTableRowHandle dt_item_properties = {});
 
-	virtual bool SetProperties(FDataTableRowHandle handle);
+	//IMPORTANT: To be overriden in child classes: 
 
-	void SetItemActorClass(TSubclassOf<AItemActor> value) { ItemActorClass = value; };
+	virtual bool Initialize(FDataTableRowHandle handle);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	virtual FItemThumbnailInfo GetItemThumbnailInfoFromDT();
+
+	////To be overriden in child classes end
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	const FItemInfo& GetItemInfo() { return item_info; }
 
-	UFUNCTION(BlueprintCallable, BlueprintPure)
-	virtual FItemThumbnailInfo GetItemThumbnailInfoFromDT();
+	void SetItemActorClass(TSubclassOf<AItemActor> value) { ItemActorClass = value; };
+
 protected:
 	//We use this function to avoid code duplication
 	//But to reamain BP interface and class-specific implementation
@@ -187,7 +192,7 @@ inline ItemType* UItemBase::StaticCreateObject(UObject* outer, TSubclassOf<UItem
 			UE_LOG(LogTemp, Fatal, TEXT("Failed to create ItemObject. Maybe there is something wrong with assigned class."));
 			return nullptr;
 		}
-		if(item_object->SetProperties(dt_item_properties) == false)
+		if(item_object->Initialize(dt_item_properties) == false)
 		{
 			UE_LOG(LogTemp, Fatal, TEXT("Failed to set item properties. Maybe there is something wrong with the data table."));
 			return nullptr;

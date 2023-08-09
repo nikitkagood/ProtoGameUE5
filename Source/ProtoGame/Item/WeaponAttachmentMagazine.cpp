@@ -9,9 +9,9 @@ UWeaponAttachmentMagazine::UWeaponAttachmentMagazine()
 	item_info.UseActionText = FText::FromString("Unload");
 }
 
-bool UWeaponAttachmentMagazine::SetProperties(FDataTableRowHandle handle)
+bool UWeaponAttachmentMagazine::Initialize(FDataTableRowHandle handle)
 {
-	auto* ptr_row = handle.GetRow<DataTableType>("UWeaponAttachmentMagazine::SetProperties");
+	auto* ptr_row = handle.GetRow<DataTableType>("UWeaponAttachmentMagazine::Initialize");
 
 	if(ptr_row != nullptr)
 	{

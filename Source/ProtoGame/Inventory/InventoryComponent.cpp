@@ -26,6 +26,41 @@ UInventoryComponent::UInventoryComponent()
     Columns = 1;
 }
 
+void UInventoryComponent::Initialize(FIntPoint dimensions, FName name)
+{
+    if (IsGridInitialized() == true)
+    {
+        checkf(false, TEXT("%s object: InventoryGrid has been initialized already!"), *InventoryName.ToString());
+        return;
+    }
+
+    Rows = dimensions.X;
+    Columns = dimensions.Y;
+
+    InventoryName = name;
+}
+
+//void UInventoryComponent::Initialize(FIntPoint dimensions, FName name, float drop_distance)
+//{
+//    if (IsGridInitialized() == true)
+//    {
+//        checkf(false, TEXT("%s object: InventoryGrid has been initialized already!"), *InventoryName.ToString());
+//        return;
+//    }
+//
+//    Rows = dimensions.X;
+//    Columns = dimensions.Y;
+//
+//    InventoryName = name;
+//
+//    DropDistance = drop_distance;
+//}
+
+bool UInventoryComponent::IsGridInitialized()
+{
+    return InventoryGrid.Num() != 0;
+}
+
 bool UInventoryComponent::MoveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell, bool widget_rotation)
 {
     bool result = false;
@@ -685,7 +720,7 @@ void UInventoryComponent::UpdateStackDependencies(UItemBase* item, int32 new_sta
     ChangeMass(item->GetMassOneUnit() * new_stack_size - item->GetMassTotal());
 }
 
-TScriptInterface<IInventoryInterface> UInventoryComponent::GetOuterUpstreamInventory() const
-{
-    return GetOuter();
-}
+//TScriptInterface<IInventoryInterface> UInventoryComponent::GetOuterUpstreamInventory() const
+//{
+//    return GetOuter();
+//}

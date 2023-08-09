@@ -27,6 +27,7 @@ class UInventoryManager;
 class UInventoryComponent;
 class UInvSpecialSlotComponent;
 class UItemBase;
+class UInventoryItem;
 class AItemActor;
 
 
@@ -93,16 +94,11 @@ class PROTOGAME_API AGameCharacterBase : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Inventory)
 	UInventoryComponent* InventoryComponent_Pockets;
 
-	//Only pointer, inventory itself has to be created in a corresponding item
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Inventory)
-	UInventoryComponent* InventoryComponent_Backpack;
-
-	//Only pointer, inventory itself has to be created in a corresponding item
+	UInvSpecialSlotComponent* InventoryItemSlot_Backpack;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Inventory)
-	UInventoryComponent* InventoryComponent_ChestRig;
-
-	//UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = Inventory)
-	//TArray<UInventoryComponent*> InventoryComponents_Additional;
+	UInvSpecialSlotComponent* InventoryItemSlot_ChestRig;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Inventory)
 	UInvSpecialSlotComponent* PrimaryGunSlot;

@@ -16,7 +16,7 @@ UGunRifle::UGunRifle()
 {
 }
 
-bool UGunRifle::SetProperties(FDataTableRowHandle handle)
+bool UGunRifle::Initialize(FDataTableRowHandle handle)
 { 
 	auto* ptr_row = handle.GetRow<DataTableType>("SetProperties_GunRifle");
 
@@ -35,6 +35,7 @@ bool UGunRifle::SetProperties(FDataTableRowHandle handle)
 
 	return false;
 }
+
 FItemThumbnailInfo UGunRifle::GetItemThumbnailInfoFromDT()
 {
 	return GetItemThumbnailInfoFromDT_Impl<DataTableType>();

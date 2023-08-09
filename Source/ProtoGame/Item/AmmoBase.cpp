@@ -8,7 +8,7 @@
 //
 //}
 
-bool UAmmoBase::SetProperties(FDataTableRowHandle handle)
+bool UAmmoBase::Initialize(FDataTableRowHandle handle)
 {
 	auto* ptr_row = handle.GetRow<DataTableType>("SetProperties_AmmoBase");
 

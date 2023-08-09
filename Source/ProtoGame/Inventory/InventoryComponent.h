@@ -24,7 +24,16 @@ public:
 	UInventoryComponent();
 
 	UFUNCTION(BlueprintCallable)
+	void Initialize(FIntPoint dimensions, FName name = "");
+	//void Initialize(FIntPoint dimensions, FName name = "", float drop_distance);
+
+	bool IsGridInitialized();
+
+	UFUNCTION(BlueprintCallable)
 	FIntPoint GetDimensions() { return { Rows, Columns }; };
+
+	UFUNCTION(BlueprintCallable)
+	void SetInventoryName(FName name) { InventoryName = name; }
 
 	//Move item internally
 	UFUNCTION(BlueprintCallable)
@@ -60,7 +69,7 @@ public:
 	virtual bool ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell) override;
 	virtual void UpdateStackDependencies(UItemBase* item, int32 new_stack_size) override;
 	virtual void UpdateInventory() override { OnInventoryUpdated.Broadcast(); };
-	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const override;
+	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const override { checkf(false, TEXT("Inventory Component is designed to be within another class. It doesn't belong anywhere by itself.")); return nullptr; };
 	//IInventoryInterface end
 
 	UPROPERTY(BlueprintAssignable)
@@ -86,9 +95,6 @@ protected:
 
     UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly, Category = "Inventory", meta = (AllowPrivateAccess = true))
 	int32 FreeSpaceLeft;
-
-	//Do not set it manually
-	//Max precision is 
 
 	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly, Category = "Inventory", meta = (AllowPrivateAccess = true))
 	float Mass;

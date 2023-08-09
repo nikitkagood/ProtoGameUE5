@@ -18,7 +18,7 @@ UWeaponGun::UWeaponGun()
 	}
 }
 
-//bool UWeaponGun::SetProperties(FDataTableRowHandle handle)
+//bool UWeaponGun::Initialize(FDataTableRowHandle handle)
 //{ 
 	//auto* ptr_row = handle.GetRow<FWeaponTable>("SetProperties_WeaponGun");
 

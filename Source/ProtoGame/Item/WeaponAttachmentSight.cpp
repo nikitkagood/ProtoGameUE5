@@ -9,9 +9,9 @@
 //
 //}
 
-bool UWeaponAttachmentSight::SetProperties(FDataTableRowHandle handle)
+bool UWeaponAttachmentSight::Initialize(FDataTableRowHandle handle)
 {
-	auto* ptr_row = handle.GetRow<DataTableType>("UWeaponAttachmentSight::SetProperties");
+	auto* ptr_row = handle.GetRow<DataTableType>("UWeaponAttachmentSight::Initialize");
 
 	if(ptr_row != nullptr)
 	{
