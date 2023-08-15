@@ -8,6 +8,8 @@
 #include "InvSpecialSlot.h"
 #include "WeaponSpecialSlotComponent.h"
 
+#include <functional>
+
 UInventoryManager::UInventoryManager()
 {
 	PrimaryComponentTick.bCanEverTick = false;
@@ -52,12 +54,6 @@ bool UInventoryManager::MoveItemToInventory(UItemBase* item, EManagerInventoryTy
 				is_accpetable_inventory = false;
 			}
 			break;
-		case EManagerInventoryType::SpecialSlot_Weapon:
-			if (!i.GetObject()->IsA(UWeaponSpecialSlotComponent::StaticClass()))
-			{
-				is_accpetable_inventory = false;
-			}
-			break;
 		case EManagerInventoryType::InventoryComponent:
 			if (!i.GetObject()->IsA(UInventoryComponent::StaticClass()))
 			{
@@ -77,18 +73,84 @@ bool UInventoryManager::MoveItemToInventory(UItemBase* item, EManagerInventoryTy
 	return result;
 }
 
-bool UInventoryManager::MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination)
+bool UInventoryManager::AddItemFromWorld(UItemBase* item, EManagerInventoryType inventory_type)
 {
-	TScriptInterface<IInventoryInterface> current_inv = item->GetOuterUpstreamInventory();
+	//typedef bool (*Predicate_AddItemFromWorld) (TScriptInterface<IInventoryInterface> inv);
 
-	if (current_inv == nullptr)
+	auto AddItemFromWorld_if = [&](std::function<bool(TScriptInterface<IInventoryInterface>)> predicate)
 	{
-		checkf(false, TEXT("Trying to move item which isn't in any inventory"));
+		for (auto& inv : inventories)
+		{
+			if (inv == nullptr)
+			{
+				checkf(false, TEXT("Invalid inventory"));
+				continue;
+			}
+
+			if (predicate(inv) == false)
+			{
+				continue;
+			}
+
+			if (inv.GetInterface()->AddItemFromWorld(item))
+			{
+				return true;
+			}
+		}
+
 		return false;
+	};
+
+	switch (inventory_type)
+	{
+	case EManagerInventoryType::Any:
+
+		for (auto& inv : inventories)
+		{
+			if (inv.GetInterface()->AddItemFromWorld(item))
+			{
+				return true;
+			}
+		}
+
+		break;
+	case EManagerInventoryType::SpecialSlot:
+
+		if (AddItemFromWorld_if( [&](TScriptInterface<IInventoryInterface> inv)
+			{ return inv.GetObject()->IsA<UInvSpecialSlotComponent>(); }) )
+		{
+			return true;
+		}
+
+		break;
+	case EManagerInventoryType::InventoryComponent:
+
+		if (
+			AddItemFromWorld_if( [&](TScriptInterface<IInventoryInterface> inv)
+			{ return inv.GetObject()->IsA<UInventoryComponent>(); }) )
+		{
+			return true;
+		}
+		break;
+	default:
+		break;
 	}
 
-	return current_inv->MoveItemToInventory(item, destination);
+	return false;
 }
+
+//bool UInventoryManager::MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination)
+//{
+//	TScriptInterface<IInventoryInterface> current_inv = item->GetOuterUpstreamInventory();
+//
+//	if (current_inv == nullptr)
+//	{
+//		checkf(false, TEXT("Trying to move item which isn't in any inventory"));
+//		return false;
+//	}
+//
+//	return current_inv->MoveItemToInventory(item, destination);
+//}
 
 bool UInventoryManager::MoveItemToInventoryInGrid(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell)
 {
@@ -118,20 +180,18 @@ bool UInventoryManager::MoveItemToInventoryInGrid(UItemBase* item, TScriptInterf
 	return inv->MoveItemToInventoryInGrid(item, destination, new_upper_left_cell);
 }
 
-bool UInventoryManager::AddItemFromWorld(UItemBase* item)
-{
-	//TODO: Priorities. Special slots first.
-
-	for (auto& inv : inventories)
-	{
-		if(inv.GetInterface()->AddItemFromWorld(item))
-		{
-			return true;
-		}
-	}
-
-	return false;
-}
+//bool UInventoryManager::AddItemFromWorld(UItemBase* item)
+//{
+//	for (auto& inv : inventories)
+//	{
+//		if(inv.GetInterface()->AddItemFromWorld(item))
+//		{
+//			return true;
+//		}
+//	}
+//
+//	return false;
+//}
 
 bool UInventoryManager::DropItemToWorld(UItemBase* item)
 {
@@ -146,61 +206,40 @@ bool UInventoryManager::DropItemToWorld(UItemBase* item)
 	return inv->DropItemToWorld(item);
 }
 
-bool UInventoryManager::ReceiveItem(UItemBase* item)
-{
-	//for (uint8 i = TNumericLimits<uint8>::Max(); i != 0; i--)
-	//{
-	//	TArray<IInventoryInterface*> find_result;
+//bool UInventoryManager::ReceiveItem(UItemBase* item)
+//{
+//
+//	for (auto& inv : inventories)
+//	{
+//		if (inv->ReceiveItem(item) == true)
+//		{
+//			return true;
+//		}
+//	}
+//
+//	return false;
+//}
+//
+//bool UInventoryManager::ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell)
+//{
+//	for (auto& inv : inventories)
+//	{
+//		if (inv->ReceiveItemInGrid(item, new_upper_left_cell) == true)
+//		{
+//			return true;
+//		}
+//	}
+//
+//	return false;
+//}
 
-	//	inventories.MultiFind(i, find_result, true);
-
-	//	for (auto& inv : find_result)
-	//	{
-	//		if (inv->ReceiveItem(item) == true)
-	//		{
-	//			return true;
-	//		}
-	//	}
-	//}
-
-	for (auto& inv : inventories)
-	{
-		if (inv->ReceiveItem(item) == true)
-		{
-			return true;
-		}
-	}
-
-	return false;
-}
-
-bool UInventoryManager::ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell)
-{
-	for (auto& inv : inventories)
-	{
-		if (inv->ReceiveItemInGrid(item, new_upper_left_cell) == true)
-		{
-			return true;
-		}
-	}
-
-	return false;
-}
-
-void UInventoryManager::UpdateInventory()
-{
-	for (auto& inv : inventories)
-	{
-		inv->UpdateInventory();
-	}
-}
-
-TScriptInterface<IInventoryInterface> UInventoryManager::GetOuterUpstreamInventory() const
-{
-	//Iventory manager isn't really meant to be within another inventory
-	//But techically possibility remains
-	return GetOuter();
-}
+//void UInventoryManager::UpdateInventory()
+//{
+//	for (auto& inv : inventories)
+//	{
+//		inv->UpdateInventory();
+//	}
+//}
 
 void UInventoryManager::AddInventory(TScriptInterface<IInventoryInterface> inventory)
 {
@@ -218,6 +257,7 @@ void UInventoryManager::AddInventory(TScriptInterface<IInventoryInterface> inven
 
 	inventories.Add(inventory);
 }
+
 
 //void UInventoryManager::SetInventories(TArray<IInventoryInterface*>&& new_inventories)
 //{

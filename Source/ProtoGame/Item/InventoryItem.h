@@ -35,7 +35,7 @@ class PROTOGAME_API UInventoryItem : public UItemBase, public IInventoryInterfac
 private:
 	using DataTableType = FInventoryItemTable;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Inventory)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Instanced, meta = (AllowPrivateAccess = "true"), Category = Inventory)
 	TObjectPtr<UInventoryComponent> InventoryComponent;
 	
 public:
@@ -45,7 +45,10 @@ public:
 
 	virtual FItemThumbnailInfo GetItemThumbnailInfoFromDT() override;
 
-	TObjectPtr<UInventoryComponent> GetInventoryComponent() { return InventoryComponent; }
+	UFUNCTION(BlueprintCallable)
+	UInventoryComponent* GetInventoryComponent() { return InventoryComponent; }
+
+	virtual bool Interact(AActor* caller, EInteractionActions action) override;
 
 	//IInventoryInterface
 	virtual bool MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination) override;

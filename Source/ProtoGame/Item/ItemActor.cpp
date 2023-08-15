@@ -3,6 +3,8 @@
 #include "ItemActor.h"
 #include "ItemBase.h"
 
+#include "InventoryItem.h"
+
 #include "Kismet/GameplayStatics.h"
 
 AItemActor::AItemActor()
@@ -159,29 +161,59 @@ void AItemActor::SetAnimClass(TSubclassOf<UAnimInstance> anim_class)
 	SkeletalMeshComp->SetAnimClass(anim_class);
 }
 
-void AItemActor::AttachItemActorToComponent(USceneComponent* Parent, EAttachmentRule AttachmentRule, bool weld, FName SocketName)
+//void AItemActor::AttachItemActorToComponent(USceneComponent* Parent, EAttachmentRule AttachmentRule, bool weld, FName SocketName)
+//{
+//	bInteractable = false;
+//
+//	if(GetSkeletalMeshComp() != nullptr)
+//	{
+//		GetSkeletalMeshComp()->SetSimulatePhysics(false);
+//	}
+//	if(GetStaticMeshComp() != nullptr)
+//	{
+//		GetStaticMeshComp()->SetSimulatePhysics(false);
+//	}
+//
+//	AttachToComponent(Parent, { AttachmentRule, weld }, SocketName);
+//
+//	if(item_actor_mesh_type == ItemActorMeshType::StaticMesh)
+//	{
+//		GetStaticMeshComp()->AttachToComponent(Parent, { AttachmentRule, weld }, SocketName);
+//	}
+//	else //skeletal mesh
+//	{
+//		GetSkeletalMeshComp()->AttachToComponent(Parent, { AttachmentRule, weld }, SocketName);
+//	}
+//}
+
+void AItemActor::TransferNonSceneComponentOwnership(AActor* new_owner)
 {
-	bInteractable = false;
-
-	if(GetSkeletalMeshComp() != nullptr)
+	if (new_owner == this)
 	{
-		GetSkeletalMeshComp()->SetSimulatePhysics(false);
-	}
-	if(GetStaticMeshComp() != nullptr)
-	{
-		GetStaticMeshComp()->SetSimulatePhysics(false);
+		return;
 	}
 
-	AttachToComponent(Parent, { AttachmentRule, weld }, SocketName);
+	auto comps_copy = GetComponents();
 
-	if(item_actor_mesh_type == ItemActorMeshType::StaticMesh)
+	for (auto* comp : comps_copy)
 	{
-		GetStaticMeshComp()->AttachToComponent(Parent, { AttachmentRule, weld }, SocketName);
+		auto comp_owner = comp->GetOwner();
+
+		if (IsValid(comp) && comp->IsA<USceneComponent>() == false)
+		{
+			RemoveOwnedComponent(comp);
+			comp->Rename(nullptr, new_owner);
+			new_owner->AddOwnedComponent(comp);
+		}
 	}
-	else //skeletal mesh
-	{
-		GetSkeletalMeshComp()->AttachToComponent(Parent, { AttachmentRule, weld }, SocketName);
-	}
+
+}
+
+bool AItemActor::DestroyAndMoveComps(AActor* new_comp_owner)
+{
+	TransferNonSceneComponentOwnership(new_comp_owner);
+
+	return Destroy();
 }
 
 void AItemActor::BeginPlay()
@@ -225,10 +257,52 @@ bool AItemActor::OnInteract_Implementation(AActor* caller, EInteractionActions a
 		return false;
 	}
 
-	//Ask ItemObject what to do
-	//This behaviour might be reduntant and may change later
-	if(bInteractable == true && ItemObject->Interact(caller) == true)
+	if(bInteractable == true && ItemObject->Interact(caller, action) == true)
 	{
+		//auto comps_copy = GetComponents();
+
+		//for (auto* comp : comps_copy)
+		//{
+		//	auto comp_owner = comp->GetOwner();
+
+		//	if (IsValid(comp) && comp->IsA<USceneComponent>() == false)
+		//	{
+		//		RemoveOwnedComponent(comp);
+		//		comp->Rename(nullptr, caller);
+		//		caller->AddOwnedComponent(comp);
+		//	}
+		//}
+
+		//auto item_obj_outer_before_destr = ItemObject->GetOuter();
+		//auto item_obj_owner_before_destr = ItemObject->GetOwner();
+
+		//UE_LOG(LogTemp, Warning, TEXT("Obj (before destroy): Outer: %s, Owner: %s"), *item_obj_outer_before_destr->GetName(), item_obj_owner_before_destr == nullptr ? TEXT("NONE") : *item_obj_owner_before_destr->GetName())
+
+		//bool destroy_res = Destroy();
+
+		//auto item_obj_outer = ItemObject->GetOuter();
+		//auto item_obj_owner = ItemObject->GetOwner();
+		//bool is_unreachable_obj = ItemObject->IsUnreachable();
+		//bool is_valid_obj = IsValid(ItemObject);
+
+		//UE_LOG(LogTemp, Warning, TEXT("Obj (after destroy): IsUnreachable: %i, IsValid: %i, Outer: %s, Owner: %s"), is_unreachable_obj, is_valid_obj, *item_obj_outer->GetName(), item_obj_owner == nullptr ? TEXT("NONE") : *item_obj_owner->GetName())
+		//
+		//auto inv_item = Cast<UInventoryItem>(ItemObject);
+		//if (inv_item)
+		//{
+		//	auto inv_comp = inv_item->GetInventoryComponent();
+		//	
+		//	if (inv_comp)
+		//	{
+		//		bool is_unreachable = inv_comp->IsUnreachable();
+		//		bool is_pend_kill = IsValid(inv_comp);
+
+		//		UE_LOG(LogTemp, Warning, TEXT("InvComp: IsUnreachable: %i, IsValid: %i, Outer: %s, Owner: %s"), is_unreachable, is_pend_kill, *inv_comp->GetOuter()->GetName(), inv_comp->GetOwner() == nullptr ? TEXT("NONE") : *inv_comp->GetOwner()->GetName())
+		//	}
+		//}
+
+		//return DestroyAndMoveComps();
+
 		return Destroy(); //currently ItemActors are obliged to destroy themselves
 	}
 	else

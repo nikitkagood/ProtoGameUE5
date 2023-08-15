@@ -13,7 +13,8 @@
 class UWeaponAttachment;
 class UWeaponAttachmentMagazine;
 
-UCLASS(Abstract)
+//Abstract. But not marked so for inventory class compatibility system to work
+UCLASS()
 class PROTOGAME_API UWeaponBase : public UItemBase, public IInventoryInterface
 {
 	GENERATED_BODY()

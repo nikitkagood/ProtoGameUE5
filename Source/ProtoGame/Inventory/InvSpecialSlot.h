@@ -22,10 +22,10 @@ public:
 	//I.e. new inventory has already received it, but prev. inventory hasn't cleared reference yet.
 	UFUNCTION(BlueprintGetter)
 	UItemBase* GetItem() const;
-	UFUNCTION(BlueprintGetter)
-	const TArray<ItemType>& GetCompatibleTypes() const { return CompatibleTypes; }
-	UFUNCTION(BlueprintGetter)
-	TArray<ItemType>& GetCompatibleTypesRef() { return CompatibleTypes; }
+	//UFUNCTION(BlueprintGetter)
+	//const TArray<ItemType>& GetCompatibleTypes() const { return CompatibleTypes; }
+	//UFUNCTION(BlueprintGetter)
+	//TArray<ItemType>& GetCompatibleTypesRef() { return CompatibleTypes; }
 
 	//IInventoryInterface
 
@@ -37,6 +37,8 @@ public:
 	virtual void UpdateInventory() override { OnInventoryUpdated.Broadcast(); };
 	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const override;
 	//IInventoryInterface end
+
+	bool IsItemCompatible(UItemBase* item);
 private:
 	//Grid receive operation isn't supported because SpecialSlot class doesn't have any grid
 	virtual bool ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell) override { check(false); return false; };
@@ -56,11 +58,17 @@ protected:
 	void Clear(); 
 
 private:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	UItemBase* Item;
-	//TSubclassOf<UItemBase> Item = nullptr;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	bool CompatibleClassesIncludeChildren;
+
+	//0 means any; Has to be subclass of UItemBase;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	TArray<TSubclassOf<UItemBase>> CompatibleClasses;
 
 	//TODO: implement
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-	TArray<ItemType> CompatibleTypes; //0 means any
+	//UPROPERTY(EditDefaulstOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	//TArray<ItemType> CompatibleTypes; //0 means any
 };

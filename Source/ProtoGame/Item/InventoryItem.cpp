@@ -2,6 +2,7 @@
 
 
 #include "Item/InventoryItem.h"
+#include "Inventory/InventoryManager.h"
 
 UInventoryItem::UInventoryItem()
 {
@@ -26,6 +27,57 @@ bool UInventoryItem::Initialize(FDataTableRowHandle handle)
 FItemThumbnailInfo UInventoryItem::GetItemThumbnailInfoFromDT()
 {
     return GetItemThumbnailInfoFromDT_Impl<DataTableType>();
+}
+
+bool UInventoryItem::Interact(AActor* caller, EInteractionActions action)
+{
+	auto character = Cast<AGameCharacterBase>(caller);
+
+	if (character != nullptr)
+	{
+		switch (action)
+		{
+		case EInteractionActions::Unspecified:
+			if (character->GetInventoryManger()->AddItemFromWorld(this))
+			{
+				return true;
+			}
+			break;
+		case EInteractionActions::Open:
+			//Since it heavily relies on UI, it's in BP
+
+			//Take a look into contents of this inventory (while it's not equipped)
+			//character->OpenInventoryUI();
+			//create grid inv in slot
+			//interaction range check
+			break;
+		case EInteractionActions::Close:
+			//Not meaningful. There is no need to close inventory via action.
+			break;
+		case EInteractionActions::Equip:
+			if (character->GetInventoryManger()->AddItemFromWorld(this, EManagerInventoryType::SpecialSlot))
+			{
+				return true;
+			}
+			break;
+		case EInteractionActions::Take:
+			if (character->GetInventoryManger()->AddItemFromWorld(this, EManagerInventoryType::InventoryComponent))
+			{
+				return true;
+			}
+			break;
+		case EInteractionActions::Lock:
+			//Not implemented
+			break;
+		case EInteractionActions::Unlock:
+			//Not implemented
+			break;
+		default:
+			break;
+		}
+	}
+
+	return false;
 }
 
 bool UInventoryItem::MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination)

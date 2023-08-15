@@ -9,7 +9,6 @@ enum class ItemType : uint8
     BuildingMaterial    UMETA(DisplayName = "Material"),
     CraftingMaterial    UMETA(DisplayName = "CraftingMaterial"),
     Clothing            UMETA(DisplayName = "Clothing"),
-    Armor               UMETA(DisplayName = "Armor"),
     Plant               UMETA(DisplayName = "Plant"),
     RangedWeapon        UMETA(DisplayName = "RangedWeapon"),
     MeleeWeapon         UMETA(DisplayName = "MeleeWeapon"),

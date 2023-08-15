@@ -7,8 +7,8 @@
 
 #include "WeaponGun.generated.h"
 
-
-UCLASS(Abstract)
+//Abstract. But not marked so for inventory class compatibility system to work
+UCLASS()
 class PROTOGAME_API UWeaponGun : public UWeaponBase
 {
 	GENERATED_BODY()

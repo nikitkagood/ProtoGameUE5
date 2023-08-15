@@ -4,7 +4,6 @@
 #include "ItemBase.h"
 
 #include "Character/GameCharacterBase.h"
-//#include "Inventory/InventoryComponent.h"
 #include "Inventory/InventoryManager.h"
 #include "ItemActor.h"
 
@@ -30,15 +29,35 @@ bool UItemBase::Initialize(FDataTableRowHandle handle)
 }
 
 
-bool UItemBase::Interact(AActor* caller)
+bool UItemBase::Interact(AActor* caller, EInteractionActions action)
 {
 	auto ptr = Cast<AGameCharacterBase>(caller);
 
 	if(ptr != nullptr)
 	{
-		if(ptr->GetInventoryManger()->AddItemFromWorld(this))
+		switch (action)
 		{
-			return true; 
+		case EInteractionActions::Unspecified:
+			if (ptr->GetInventoryManger()->AddItemFromWorld(this))
+			{
+				return true;
+			}
+			break;
+		case EInteractionActions::Equip:
+			if (ptr->GetInventoryManger()->AddItemFromWorld(this, EManagerInventoryType::SpecialSlot))
+			{
+				return true;
+			}
+			break;
+		case EInteractionActions::Take:
+			if (ptr->GetInventoryManger()->AddItemFromWorld(this, EManagerInventoryType::InventoryComponent))
+			{
+				return true;
+			}
+			break;
+		default:
+			checkf(false, TEXT("This action is not meaningful for ItemBase"));
+			break;
 		}
 	}
 
@@ -163,11 +182,31 @@ AItemActor* UItemBase::GetOuterItemActor() const
 
 void UItemBase::SetOuterUpstreamInventory(TScriptInterface<IInventoryInterface> inventory)
 {
+	//We want to transfer ownership of ActorComponents (like InventoryComponent) since they don't follow UObject garbage collection pattern 
+
+	auto item_actor = GetOuterItemActor();
+
+	if (IsValid(item_actor))
+	{
+		auto actor_comp = Cast<UActorComponent>(inventory.GetObject());
+		if (IsValid(actor_comp))
+		{
+			item_actor->TransferNonSceneComponentOwnership(actor_comp->GetOwner());
+		}
+	}
+
 	this->Rename(nullptr, inventory.GetObject());
 }
 
 void UItemBase::SetOuterItemActor(AItemActor* item_actor)
 { 
+	auto current_item_actor = GetOuterItemActor();
+
+	if (IsValid(current_item_actor))
+	{
+		current_item_actor->TransferNonSceneComponentOwnership(item_actor);
+	}
+
 	this->Rename(nullptr, item_actor->_getUObject()); 
 }
 

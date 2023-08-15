@@ -4,6 +4,7 @@
 #include "Item/ItemBase.h"
 
 #include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/KismetMathLibrary.h"
 
 UInvSpecialSlotComponent::UInvSpecialSlotComponent()
 {
@@ -13,6 +14,12 @@ UInvSpecialSlotComponent::UInvSpecialSlotComponent()
 
 bool UInvSpecialSlotComponent::AddItem(UItemBase* item)
 {
+	if (!IsItemCompatible(item))
+	{
+		//Incompatible class
+		return false;
+	}
+
 	Item = item;
 
 	item->SetOuterUpstreamInventory(this);
@@ -137,6 +144,34 @@ bool UInvSpecialSlotComponent::ReceiveItem(UItemBase* item)
 TScriptInterface<IInventoryInterface> UInvSpecialSlotComponent::GetOuterUpstreamInventory() const
 {
 	return GetOuter();
+}
+
+bool UInvSpecialSlotComponent::IsItemCompatible(UItemBase* item)
+{
+	if (CompatibleClasses.IsEmpty())
+	{
+		return true;
+	}
+
+	if (CompatibleClassesIncludeChildren)
+	{
+		for (auto& i : CompatibleClasses)
+		{
+			if (UKismetMathLibrary::ClassIsChildOf(item->GetClass(), i))
+			{
+				return true;
+			}
+		}
+	}
+	else
+	{
+		if (CompatibleClasses.Contains(item->GetClass()))
+		{
+			return true;
+		}
+	}
+
+	return false;
 }
 
 bool UInvSpecialSlotComponent::IsOccupied() const

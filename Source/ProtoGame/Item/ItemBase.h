@@ -97,7 +97,7 @@ public:
 	UFUNCTION(BlueprintCallable)
 	AItemActor* GetOuterItemActor() const;
 	UFUNCTION(BlueprintCallable)
-	void SetOuterUpstreamInventory(TScriptInterface<IInventoryInterface> inventory);
+	virtual void SetOuterUpstreamInventory(TScriptInterface<IInventoryInterface> inventory);
 	UFUNCTION(BlueprintCallable)
 	void SetOuterItemActor(AItemActor* item_actor);
 
@@ -146,7 +146,7 @@ public:
 
 	//ItemActors ask ItemObject what to do
 	//This behaviour might be reduntant and may change later
-	virtual bool Interact(AActor* caller);
+	virtual bool Interact(AActor* caller, EInteractionActions action);
 
 	//Interfaces
 
