@@ -24,7 +24,7 @@ void UWeaponBase::DestroySKStatic(USkeletalMeshComponent* sk_comp)
 	for(auto& i : children)
 	{
 		//sometimes this check is actually needed
-		if(i != nullptr)
+		if(IsValid(i))
 		{
 			i->DestroyComponent();
 		}

@@ -66,6 +66,13 @@ class PROTOGAME_API AGameCharacterBase : public ACharacter
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = Mesh, meta = (AllowPrivateAccess = "true"))
 	USkeletalMeshComponent* StowedOnBackSkeletalMesh;
 
+	//It kinda has to be skeletal mesh but at the moment it is static
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = Mesh, meta = (AllowPrivateAccess = "true"))
+	UMeshComponent* BackpackMesh;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = Mesh, meta = (AllowPrivateAccess = "true"))
+	UMeshComponent* ChestRigMesh;
+
 	//UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = Inventory, meta = (AllowPrivateAccess = "true"))
 	//AItemActor* InHandsActor;
 

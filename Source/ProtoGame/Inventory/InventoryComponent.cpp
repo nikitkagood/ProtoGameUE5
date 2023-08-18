@@ -38,6 +38,8 @@ void UInventoryComponent::Initialize(FIntPoint dimensions, FName name)
     Columns = dimensions.Y;
 
     InventoryName = name;
+
+    InitializeInventoryGrid(Rows, Columns);
 }
 
 //void UInventoryComponent::Initialize(FIntPoint dimensions, FName name, float drop_distance)
@@ -129,10 +131,16 @@ void UInventoryComponent::BeginPlay()
 
 bool UInventoryComponent::AddItem(UItemBase* item)
 {
+    if (IsGridInitialized() == false)
+    {
+        checkf(false, TEXT("Error: cannot use uninitialized InventoryComponent"));
+        return false;
+    }
+
     if(item == nullptr)
     {
         check(false);
-        UE_LOG(LogTemp, Error, TEXT("AddItem: invalid item!"));
+        UE_LOG(LogTemp, Error, TEXT("AddItem: invalid item"));
         return false;
     }
 
@@ -207,9 +215,15 @@ bool UInventoryComponent::AddItem(UItemBase* item)
 
 bool UInventoryComponent::AddItemAt(UItemBase* item, FIntPoint new_upper_left_cell)
 {
+    if (IsGridInitialized() == false)
+    {
+        checkf(false, TEXT("Error: cannot use uninitialized InventoryComponent"));
+        return false;
+    }
+
     if(item == nullptr)
     {
-        UE_LOG(LogTemp, Error, TEXT("AddItem: invald item!"));
+        UE_LOG(LogTemp, Error, TEXT("AddItem: invald item"));
         return false;
     }
 
@@ -264,6 +278,12 @@ bool UInventoryComponent::AddItemAt(UItemBase* item, FIntPoint new_upper_left_ce
 
 bool UInventoryComponent::RemoveItem(UItemBase* item)
 {
+    if (IsGridInitialized() == false)
+    {
+        checkf(false, TEXT("Error: cannot use uninitialized InventoryComponent"));
+        return false;
+    }
+
     if(item == nullptr)
     {
         UE_LOG(LogTemp, Error, TEXT("RemoveItem: invald item"));
@@ -291,9 +311,14 @@ bool UInventoryComponent::RemoveItem(UItemBase* item)
 
 bool UInventoryComponent::RemoveItemAt(UItemBase* item, FIntPoint upper_left_cell, FIntPoint lower_right_cell)
 {
+    if (IsGridInitialized() == false)
+    {
+        checkf(false, TEXT("Error: cannot use uninitialized InventoryComponent"));
+        return false;
+    }
     if(item == nullptr)
     {
-        UE_LOG(LogTemp, Error, TEXT("RemoveItem: invalid item!"));
+        UE_LOG(LogTemp, Error, TEXT("RemoveItem: invalid item"));
         return false;
     }
     if(Items.Num() == 0)
@@ -342,9 +367,16 @@ void UInventoryComponent::SetupDefaults()
 
 void UInventoryComponent::InitializeInventoryGrid(int32 rows, int32 columns)
 {
+    if (rows < 1 || columns < 1)
+    {
+        checkf(false, TEXT("Invalid dimensions"));
+        return;
+    }
+
     if(InventoryGrid.Num() != 0)
     {
-        checkf(false, TEXT("%s object: InventoryGrid has been initialized already!"), *InventoryName.ToString() );
+        return; //Double initialization call is possible. If Initialize has been called manually and if BeginPlay->InitializeInventoryGrid
+        //checkf(false, TEXT("%s object: InventoryGrid has been initialized already!"), *InventoryName.ToString() );
     }
 
     InventoryGrid.Reserve(rows);
@@ -424,6 +456,12 @@ TPair<FIntPoint, FIntPoint> UInventoryComponent::FindItemPosition(UItemBase* ite
 
 bool UInventoryComponent::CheckSpace(FIntPoint upper_left_cell, UItemBase* item)
 {
+    if (IsGridInitialized() == false)
+    {
+        checkf(false, TEXT("Error: cannot use uninitialized InventoryComponent"));
+        return false;
+    }
+
     //whether valid cell idx at all 
     if(upper_left_cell.X < 0 || upper_left_cell.Y < 0 || upper_left_cell.X > Rows - 1 || upper_left_cell.Y > Columns - 1)
     {
@@ -455,6 +493,12 @@ bool UInventoryComponent::CheckSpace(FIntPoint upper_left_cell, UItemBase* item)
 
 bool UInventoryComponent::CheckSpaceMove(const FIntPoint upper_left_cell, UItemBase* item, FIntPoint dimensions)
 {
+    if (IsGridInitialized() == false)
+    {
+        checkf(false, TEXT("Error: cannot use uninitialized InventoryComponent"));
+        return false;
+    }
+
     //whether valid cell idx at all 
     if(upper_left_cell.X < 0 || upper_left_cell.Y < 0 || upper_left_cell.X > Rows - 1 || upper_left_cell.Y > Columns - 1)
     {
@@ -600,6 +644,12 @@ void UInventoryComponent::PrintDebugInfo()
 
 bool UInventoryComponent::MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination)
 {
+    if (IsGridInitialized() == false)
+    {
+        checkf(false, TEXT("Error: cannot use uninitialized InventoryComponent"));
+        return false;
+    }
+
     //TODO: test
     if(destination.GetObject() == this)
     {
@@ -620,6 +670,12 @@ bool UInventoryComponent::MoveItemToInventory(UItemBase* item, TScriptInterface<
 
 bool UInventoryComponent::MoveItemToInventoryInGrid(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell)
 {
+    if (IsGridInitialized() == false)
+    {
+        checkf(false, TEXT("Error: cannot use uninitialized InventoryComponent"));
+        return false;
+    }
+
     //TODO: test
     if(destination.GetObject() == this)
     {
@@ -662,16 +718,16 @@ bool UInventoryComponent::DropItemToWorld(UItemBase* item)
     }
 
     auto* item_actor = item->SpawnItemActor(GetOwner()->GetActorLocation() + GetOwner()->GetActorForwardVector() * DropDistance, GetOwner()->GetActorRotation());
-    if(item_actor == nullptr)
+    if(IsValid(item_actor) == false)
     {
         //can't spawn, do not delete from inventory
         UKismetSystemLibrary::PrintString(GetWorld(), "Drop to world is blocked", true, true, FLinearColor(130, 5, 255), 4);
         return false;
     }
 
-    RemoveItemAt(item, item->GetUpperLeftCell(), item->GetLowerRightCell());
-
     item->SetOuterItemActor(item_actor);
+
+    RemoveItemAt(item, item->GetUpperLeftCell(), item->GetLowerRightCell());
 
     return true;
 }

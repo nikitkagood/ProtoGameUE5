@@ -75,12 +75,20 @@ AGameCharacterBase::AGameCharacterBase(const class FObjectInitializer& ObjectIni
 	InHandsSkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("InHandsSkeletalMesh"));
 	InHandsSkeletalMesh->SetupAttachment(GetMesh(), TEXT("ik_hand_gun"));
 	InHandsSkeletalMesh->SetOnlyOwnerSee(false);
-	//InHandsSkeletalMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel3, ECollisionResponse::ECR_Ignore);
 
 	StowedOnBackSkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("StowedOnBackSkeletalMesh"));
 	StowedOnBackSkeletalMesh->SetupAttachment(GetMesh(), TEXT("StowedOnBackSocket"));
 	StowedOnBackSkeletalMesh->SetOnlyOwnerSee(false);
-	//StowedOnBackSkeletalMesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel3, ECollisionResponse::ECR_Ignore);
+
+	BackpackMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BackpackMesh"));
+	BackpackMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	BackpackMesh->SetupAttachment(GetMesh(), TEXT("BackpackSocket"));
+	BackpackMesh->SetOnlyOwnerSee(false);
+
+	ChestRigMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ChestRigMesh"));
+	ChestRigMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	ChestRigMesh->SetupAttachment(GetMesh(), TEXT("spine_03"));
+	ChestRigMesh->SetOnlyOwnerSee(false);
 
 	//VitalityComponent->GetOnNoHealth().AddUObject(this, &AGameCharacterBase::Death);
 }
@@ -327,7 +335,17 @@ void AGameCharacterBase::UpdateWeaponSlot(UInvSpecialSlotComponent* slot)
 {
 	if (slot == nullptr)
 	{
+		checkf(false, TEXT("Trying to update invalid special slot: is this correct?"));
 		return;
+	}
+
+	if (slot == ActiveSlot)
+	{
+		UWeaponBase::DestroySKStatic(InHandsSkeletalMesh);
+	}
+	else
+	{
+		UWeaponBase::DestroySKStatic(StowedOnBackSkeletalMesh);
 	}
 
 	auto* weapon = Cast<UWeaponGun>(slot->GetItem());
@@ -338,8 +356,6 @@ void AGameCharacterBase::UpdateWeaponSlot(UInvSpecialSlotComponent* slot)
 	}
 
 	weapon->EndFire();
-
-	UWeaponBase::DestroySKStatic(weapon->GetWeaponRepresentation());
 
 	if (slot == ActiveSlot)
 	{
@@ -352,56 +368,6 @@ void AGameCharacterBase::UpdateWeaponSlot(UInvSpecialSlotComponent* slot)
 		StowedOnBackSkeletalMesh->AttachToComponent(GetMesh(), { EAttachmentRule::SnapToTarget, true }, "StowedOnBackSocket");
 	}
 }
-
-//Not used but has to be functional
-//void AGameCharacterBase::UpdateWeaponSlots(UInvSpecialSlotComponent* new_active_slot)
-//{
-//	if (new_active_slot == nullptr)
-//	{
-//		return;
-//	}
-//
-//	EndFire();
-//
-//	if (new_active_slot == ActiveSlot)
-//	{
-//		//do nothing
-//	}
-//	else
-//	{
-//		ActiveSlot = new_active_slot;
-//
-//		UWeaponBase::DestroySKStatic(InHandsSkeletalMesh);
-//		UWeaponBase::DestroySKStatic(StowedOnBackSkeletalMesh);
-//
-//		auto active_weapon = Cast<UWeaponBase>(ActiveSlot->GetItem());
-//
-//		if (active_weapon != nullptr)
-//		{
-//			InHandsSkeletalMesh = active_weapon->CreateSKWeaponRepresentation(GetMesh());
-//			InHandsSkeletalMesh->AttachToComponent(GetMesh(), { EAttachmentRule::SnapToTarget, true }, "ik_hand_gun");
-//		}
-//
-//		UInvSpecialSlotComponent* stowed_slot;
-//
-//		if (ActiveSlot == PrimaryGunSlot)
-//		{
-//			stowed_slot = SecondaryGunSlot;
-//		}
-//		else
-//		{
-//			stowed_slot = PrimaryGunSlot;
-//		}
-//
-//		auto stowed_weapon = Cast<UWeaponBase>(stowed_slot->GetItem());
-//
-//		if (stowed_weapon != nullptr)
-//		{
-//			StowedOnBackSkeletalMesh = stowed_weapon->CreateSKWeaponRepresentation(GetMesh());
-//			StowedOnBackSkeletalMesh->AttachToComponent(GetMesh(), { EAttachmentRule::SnapToTarget, true }, "StowedOnBackSocket");
-//		}
-//	}
-//}
 
 void AGameCharacterBase::MoveForward(float Value)
 {

@@ -58,30 +58,31 @@ AItemActor* AItemActor::StaticCreateObject(UWorld* world, TSubclassOf<AItemActor
 
 	if(spawned_actor == nullptr)
 	{
+		checkf(false, TEXT("Error: AItemActor::StaticCreateObject: SpawnActorDeferred failed"));
 		return nullptr;
 	}
 
-	spawned_actor->SetItemObject(item_object);
-
-	if (item_object == nullptr)
+	if (IsValid(item_object) == false)
 	{
 		//Although ItemActors can spawn their own ItemObjects, 
 		//StaticCreateObject is meant to be used primarily with inventory and has to avoid "duping", 
 		//i.e. creating new items out of thin air
 		//This behaviour may change
-		checkf(false, TEXT("Error: Invalid ItemObject"))
+		checkf(false, TEXT("Error: AItemActor::StaticCreateObject: Invalid ItemObject"));
+		spawned_actor->Destroy();
+		return nullptr;
 	}
-	else
-	{
-		item_object->SetOuterItemActor(spawned_actor);
-	}
+
+	spawned_actor->SetItemObject(item_object);
 
 	UGameplayStatics::FinishSpawningActor(spawned_actor, { rotation, location });
 
-	if (IsValidChecked(spawned_actor))
+	if (IsValid(spawned_actor) == false)
 	{
 		return nullptr;
 	}
+
+	item_object->SetOuterItemActor(spawned_actor);
 
 	return spawned_actor;
 }
