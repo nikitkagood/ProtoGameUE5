@@ -8,7 +8,7 @@
 #include "InteractionInterface.generated.h"
 
 //Right now this is used purely visually - for outlines with custom depth stencil
-//Do not change int values
+//Do not change int values since custom depth relies on them directly
 UENUM(BlueprintType)
 enum class EInteractionType : uint8
 {
@@ -54,7 +54,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction")
 	bool IsInteractible() const;
 
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction")
+	//For example it's used to determine outline color
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent,  Category = "Interaction")
 	EInteractionType GetInteractionType() const;
 
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction")
@@ -66,6 +67,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction")
 	void StopDrawingOutline();
 
+	//What actions are available	
 	//Note that UI will show array elements in the order, so place actions accordingly
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction")
 	TArray<EInteractionActions> GetInteractionActions();

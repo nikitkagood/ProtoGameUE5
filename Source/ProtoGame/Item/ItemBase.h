@@ -96,10 +96,12 @@ public:
 	TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const; 
 	UFUNCTION(BlueprintCallable)
 	AItemActor* GetOuterItemActor() const;
+
+	//Also checks whether this Outer can be set
 	UFUNCTION(BlueprintCallable)
-	virtual void SetOuterUpstreamInventory(TScriptInterface<IInventoryInterface> inventory);
+	virtual bool SetOuterUpstreamInventory(TScriptInterface<IInventoryInterface> inventory);
 	UFUNCTION(BlueprintCallable)
-	void SetOuterItemActor(AItemActor* item_actor);
+	virtual bool SetOuterItemActor(AItemActor* item_actor);
 
 	UFUNCTION(BlueprintCallable)
 	FIntPoint GetUpperLeftCell() const { return upper_left_cell; }
@@ -123,9 +125,10 @@ public:
 	virtual class UWorld* GetWorldFromOuter() const;
 
 	UFUNCTION(BlueprintPure)
-	AActor* GetOwner() const { return Cast<AActor>(GetOuter()); };
+	virtual AActor* GetOwner() const;
 
 	//Spawn ItemActor and set it as ItemBase Outer
+	//TODO: Currently this system isn't reliable enough. Though collision is handled, it's probably still possible to spawn small objects inside walls.
 	UFUNCTION()
 	virtual AItemActor* SpawnItemActor(const FVector& location, const FRotator& rotation);
 

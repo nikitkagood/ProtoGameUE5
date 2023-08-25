@@ -27,6 +27,7 @@ struct PROTOGAME_API FInventoryItemTable : public FTableRowBase
 	FItemThumbnailInfo item_thumbnail_info;
 };
 
+//This item almost always redirects InventoryInterface calls to it's InventoryComponent
 UCLASS()
 class PROTOGAME_API UInventoryItem : public UItemBase, public IInventoryInterface
 {
@@ -48,6 +49,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	UInventoryComponent* GetInventoryComponent() { return InventoryComponent; }
 
+	virtual bool SetOuterUpstreamInventory(TScriptInterface<IInventoryInterface> inventory) override;
+
+	virtual bool SetOuterItemActor(AItemActor* item_actor) override;
+
 	virtual bool Interact(AActor* caller, EInteractionActions action) override;
 
 	//IInventoryInterface
@@ -60,5 +65,6 @@ public:
 	virtual void UpdateStackDependencies(UItemBase* item, int32 new_stack_size) override;
 	virtual void UpdateInventory() override;
 	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const override;
+	virtual AActor* GetInventoryOwner() { return InventoryComponent->GetOwner(); };
 	//IInventoryInterface end
 };

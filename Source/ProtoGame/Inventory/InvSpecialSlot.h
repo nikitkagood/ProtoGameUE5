@@ -36,6 +36,7 @@ public:
 	virtual bool ReceiveItem(UItemBase* item) override;
 	virtual void UpdateInventory() override { OnInventoryUpdated.Broadcast(); };
 	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const override;
+	virtual AActor* GetInventoryOwner() override { return GetOwner(); };
 	//IInventoryInterface end
 
 	bool IsItemCompatible(UItemBase* item);

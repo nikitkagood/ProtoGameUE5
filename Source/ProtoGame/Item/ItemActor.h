@@ -96,11 +96,11 @@ public:
 	//UFUNCTION(BlueprintCallable)
 	//void AttachItemActorToComponent(USceneComponent* Parent, EAttachmentRule AttachmentRule, bool weld, FName SocketName);
 
-	void TransferNonSceneComponentOwnership(AActor* new_owner);
+	//void TransferNonSceneComponentOwnership(AActor* new_owner);
 
 	//Called when we don't want to destroy owned components which don't represent visual state
-	UFUNCTION(BlueprintCallable)
-	bool DestroyAndMoveComps(AActor* new_comp_owner);
+	//UFUNCTION(BlueprintCallable)
+	//bool DestroyAndMoveComps(AActor* new_comp_owner);
 protected:
 	//Deffered spawn is used to set ItemObject
 	virtual void BeginPlay() override;

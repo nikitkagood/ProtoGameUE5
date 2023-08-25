@@ -180,34 +180,14 @@ AItemActor* UItemBase::GetOuterItemActor() const
 	return Cast<AItemActor>(GetOuter()); 
 }
 
-void UItemBase::SetOuterUpstreamInventory(TScriptInterface<IInventoryInterface> inventory)
+bool UItemBase::SetOuterUpstreamInventory(TScriptInterface<IInventoryInterface> inventory)
 {
-	//We want to transfer ownership of ActorComponents (like InventoryComponent) since they don't follow UObject garbage collection pattern 
-
-	auto item_actor = GetOuterItemActor();
-
-	if (IsValid(item_actor))
-	{
-		auto actor_comp = Cast<UActorComponent>(inventory.GetObject());
-		if (IsValid(actor_comp))
-		{
-			item_actor->TransferNonSceneComponentOwnership(actor_comp->GetOwner());
-		}
-	}
-
-	this->Rename(nullptr, inventory.GetObject());
+	return this->Rename(nullptr, inventory.GetObject());;
 }
 
-void UItemBase::SetOuterItemActor(AItemActor* item_actor)
+bool UItemBase::SetOuterItemActor(AItemActor* item_actor)
 { 
-	auto current_item_actor = GetOuterItemActor();
-
-	if (IsValid(current_item_actor))
-	{
-		current_item_actor->TransferNonSceneComponentOwnership(item_actor);
-	}
-
-	this->Rename(nullptr, item_actor->_getUObject()); 
+	return this->Rename(nullptr, item_actor->_getUObject()); 
 }
 
 FItemThumbnailInfo UItemBase::GetItemThumbnailInfoFromDT()
@@ -229,6 +209,18 @@ UWorld* UItemBase::GetWorldFromOuter() const
 	{
 		return nullptr; 
 	}
+}
+
+AActor* UItemBase::GetOwner() const
+{
+	auto* actor_comp_owner = Cast<UActorComponent>(GetOuter());
+
+	if (actor_comp_owner != nullptr)
+	{
+		return actor_comp_owner->GetOwner();
+	}
+
+	return Cast<AActor>(GetOuter());
 }
 
 //TODO: some items may have different dimensions, like weapons

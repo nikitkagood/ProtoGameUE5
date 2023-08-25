@@ -187,35 +187,42 @@ void AItemActor::SetAnimClass(TSubclassOf<UAnimInstance> anim_class)
 //	}
 //}
 
-void AItemActor::TransferNonSceneComponentOwnership(AActor* new_owner)
-{
-	if (new_owner == this)
-	{
-		return;
-	}
+//void AItemActor::TransferNonSceneComponentOwnership(AActor* new_owner)
+//{
+//	if (new_owner == nullptr)
+//	{
+//		checkf(false, TEXT("Error: TransferNonSceneComponentOwnership: new_owner is invalid"));
+//		return;
+//	}
+//
+//	if (new_owner == this)
+//	{
+//		checkf(false, TEXT("Owner is set to this already"))
+//		return;
+//	}
+//
+//	auto comps_copy = GetComponents();
+//
+//	for (auto* comp : comps_copy)
+//	{
+//		auto comp_owner = comp->GetOwner();
+//
+//		if (IsValid(comp) && comp->IsA<USceneComponent>() == false)
+//		{
+//			comp->Rename(nullptr, new_owner);
+//			this->RemoveOwnedComponent(comp);
+//			new_owner->AddOwnedComponent(comp);
+//		}
+//	}
+//
+//}
 
-	auto comps_copy = GetComponents();
-
-	for (auto* comp : comps_copy)
-	{
-		auto comp_owner = comp->GetOwner();
-
-		if (IsValid(comp) && comp->IsA<USceneComponent>() == false)
-		{
-			RemoveOwnedComponent(comp);
-			comp->Rename(nullptr, new_owner);
-			new_owner->AddOwnedComponent(comp);
-		}
-	}
-
-}
-
-bool AItemActor::DestroyAndMoveComps(AActor* new_comp_owner)
-{
-	TransferNonSceneComponentOwnership(new_comp_owner);
-
-	return Destroy();
-}
+//bool AItemActor::DestroyAndMoveComps(AActor* new_comp_owner)
+//{
+//	//TransferNonSceneComponentOwnership(new_comp_owner);
+//
+//	return Destroy();
+//}
 
 void AItemActor::BeginPlay()
 {

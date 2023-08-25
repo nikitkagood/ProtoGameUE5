@@ -182,7 +182,7 @@ bool UInventoryComponent::AddItem(UItemBase* item)
             free_space_coords = FindFreeSpaceInGrid(item);
         }
 
-        if(free_space_coords != NONE)
+        if(free_space_coords != NONE && item->SetOuterUpstreamInventory(this))
         {
             UpdateFreeSpaceLeft(-1 * item->GetDimensions().X * item->GetDimensions().Y);
             int32 idx = GenerateIndex();
@@ -193,7 +193,6 @@ bool UInventoryComponent::AddItem(UItemBase* item)
             item->SetUpperLeftCell(free_space_coords);
             FillSpaceInGrid(item->GetUpperLeftCell(), item->GetLowerRightCell(), idx);
 
-            item->SetOuterUpstreamInventory(this);
             item->World = GetWorld();
 
             OnInventoryUpdated.Broadcast();
@@ -254,7 +253,7 @@ bool UInventoryComponent::AddItemAt(UItemBase* item, FIntPoint new_upper_left_ce
 
     if(FreeSpaceLeft >= (item->GetDimensions().X * item->GetDimensions().Y))
     {
-        if(CheckSpace(new_upper_left_cell, item))
+        if(CheckSpace(new_upper_left_cell, item) && item->SetOuterUpstreamInventory(this))
         {
             UpdateFreeSpaceLeft(-1 * item->GetDimensions().X * item->GetDimensions().Y);
             int32 idx = GenerateIndex();
@@ -265,7 +264,6 @@ bool UInventoryComponent::AddItemAt(UItemBase* item, FIntPoint new_upper_left_ce
             item->SetUpperLeftCell(new_upper_left_cell);
             FillSpaceInGrid(item->GetUpperLeftCell(), item->GetLowerRightCell(), idx);
 
-            item->SetOuterUpstreamInventory(this);
             item->World = GetWorld();
 
             OnInventoryUpdated.Broadcast();
@@ -499,6 +497,11 @@ bool UInventoryComponent::CheckSpaceMove(const FIntPoint upper_left_cell, UItemB
         return false;
     }
 
+    if (CheckSelfRecursion(item))
+    {
+        return false;
+    }
+
     //whether valid cell idx at all 
     if(upper_left_cell.X < 0 || upper_left_cell.Y < 0 || upper_left_cell.X > Rows - 1 || upper_left_cell.Y > Columns - 1)
     {
@@ -576,6 +579,11 @@ int32 UInventoryComponent::GenerateIndex()
     }       
 }
 
+bool UInventoryComponent::CheckSelfRecursion(UItemBase* item) const
+{
+    return Cast<UItemBase>(GetOuter()) == item;
+}
+
 bool UInventoryComponent::Contains(UItemBase* item)
 {
     return Items.Contains(item);
@@ -650,9 +658,9 @@ bool UInventoryComponent::MoveItemToInventory(UItemBase* item, TScriptInterface<
         return false;
     }
 
-    //TODO: test
     if(destination.GetObject() == this)
     {
+        checkf(false, TEXT("Warning: can't move item to itself"));
         return false;
     }
 
@@ -721,7 +729,7 @@ bool UInventoryComponent::DropItemToWorld(UItemBase* item)
     if(IsValid(item_actor) == false)
     {
         //can't spawn, do not delete from inventory
-        UKismetSystemLibrary::PrintString(GetWorld(), "Drop to world is blocked", true, true, FLinearColor(130, 5, 255), 4);
+        UKismetSystemLibrary::PrintString(GetWorld(), "Actor failed to spawn. Probably because it collides with something.", true, true, FLinearColor(130, 5, 255), 4);
         return false;
     }
 
@@ -774,6 +782,25 @@ void UInventoryComponent::UpdateStackDependencies(UItemBase* item, int32 new_sta
     }
 
     ChangeMass(item->GetMassOneUnit() * new_stack_size - item->GetMassTotal());
+}
+
+
+//UItemBase* UInventoryComponent::GetOuterItem() const
+//{
+//    return Cast<UItemBase>(GetOuter());
+//}
+
+void UInventoryComponent::ChangeOwner(AActor* new_owner)
+{
+    if (IsValid(new_owner) == false)
+    {
+        checkf(false, TEXT("New owner is not valid"))
+        return;
+    }
+
+    GetOwner()->RemoveOwnedComponent(this);
+    Rename(nullptr, new_owner);
+    new_owner->AddOwnedComponent(this);
 }
 
 //TScriptInterface<IInventoryInterface> UInventoryComponent::GetOuterUpstreamInventory() const

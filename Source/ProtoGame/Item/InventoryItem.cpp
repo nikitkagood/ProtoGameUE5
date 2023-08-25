@@ -29,6 +29,35 @@ FItemThumbnailInfo UInventoryItem::GetItemThumbnailInfoFromDT()
     return GetItemThumbnailInfoFromDT_Impl<DataTableType>();
 }
 
+bool UInventoryItem::SetOuterUpstreamInventory(TScriptInterface<IInventoryInterface> inventory)
+{
+	//When we move InventoryItem, we want to transfer ownership of ActorComponents (like InventoryComponent) since they don't follow UObject garbage collection pattern
+	//We don't change ownership of SceneComponents, which represent visual state and are to be deleted if they are no longer owned by ItemActor
+
+	if (inventory.GetObject() == InventoryComponent)
+	{
+		//Self recursion
+		return false;
+	}
+
+	if (IsValid(GetInventoryComponent()))
+	{
+		GetInventoryComponent()->ChangeOwner(inventory->GetInventoryOwner());
+	}
+
+	return this->Rename(nullptr, inventory.GetObject());
+}
+
+bool UInventoryItem::SetOuterItemActor(AItemActor* item_actor)
+{
+	if (IsValid(GetInventoryComponent()))
+	{
+		GetInventoryComponent()->ChangeOwner(item_actor);
+	}
+
+	return this->Rename(nullptr, item_actor);
+}
+
 bool UInventoryItem::Interact(AActor* caller, EInteractionActions action)
 {
 	auto character = Cast<AGameCharacterBase>(caller);

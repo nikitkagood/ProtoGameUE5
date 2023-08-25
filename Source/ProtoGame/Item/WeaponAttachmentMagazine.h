@@ -39,6 +39,7 @@ public:
 	virtual bool ReceiveItem(UItemBase* item) override;
 	virtual void UpdateInventory() override { /*does nothing*/ };
 	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const override;
+	virtual AActor* GetInventoryOwner() override { return GetOwner(); };
 
 	//Mag unload on use
 	virtual bool OnUse(AActor* caller) override;

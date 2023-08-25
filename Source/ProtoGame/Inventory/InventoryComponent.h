@@ -69,8 +69,16 @@ public:
 	virtual bool ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell) override;
 	virtual void UpdateStackDependencies(UItemBase* item, int32 new_stack_size) override;
 	virtual void UpdateInventory() override { OnInventoryUpdated.Broadcast(); };
-	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const override { checkf(false, TEXT("Inventory Component is designed to be within another class. It doesn't belong anywhere by itself.")); return nullptr; };
+	//Since InventoryComponent is ActorComponent, it can only have Actors as Owner/Outer
+	//Thus you can't get hierarchy from InventoryComponent and there is no point it calling this method (at the moment at least)
+	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const override { return nullptr; };
+	virtual AActor* GetInventoryOwner() override { return GetOwner(); };
 	//IInventoryInterface end
+
+	//Inventories outer can be Item
+	//UItemBase* GetOuterItem() const;
+
+	void ChangeOwner(AActor* new_owner);
 
 	UPROPERTY(BlueprintAssignable)
 	FOnInventoryUpdated OnInventoryUpdated;
@@ -119,6 +127,12 @@ private:
 	void UpdateFreeSpaceLeft(int32 space_change);
 
 	int32 GenerateIndex();
+
+	//True means recursion found
+	//This function assumes InventoryComponent Outer = ItemObject with InventoryComponent
+	//Implementation has to be changed if Outer is something else
+	UFUNCTION(BlueprintCallable)
+	virtual bool CheckSelfRecursion(UItemBase* item) const;
 
 	UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly, Category = "Inventory", meta = (AllowPrivateAccess = true))
 	TMap<UItemBase*, int32> Items; //item pointer + it's index in the grid

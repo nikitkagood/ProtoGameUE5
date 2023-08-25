@@ -20,9 +20,13 @@ bool UInvSpecialSlotComponent::AddItem(UItemBase* item)
 		return false;
 	}
 
+	if (item->SetOuterUpstreamInventory(this) == false)
+	{
+		return false;
+	}
+
 	Item = item;
 
-	item->SetOuterUpstreamInventory(this);
 	item->World = GetWorld();
 	item->SetUpperLeftCell({ INDEX_NONE, INDEX_NONE });
 
@@ -74,7 +78,7 @@ bool UInvSpecialSlotComponent::MoveItemToInventoryInGrid(UItemBase* item, TScrip
 {
 	if(destination.GetObject() == this || item != GetItem())
 	{
-		OnInventoryUpdated.Broadcast(); //Update even if we fail since DragAndDrop operation already destroyed the widget
+		OnInventoryUpdated.Broadcast(); //Update even if we fail
 		return false;
 	}
 

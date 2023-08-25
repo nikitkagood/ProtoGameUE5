@@ -9,6 +9,17 @@
 
 class UItemBase;
 
+UENUM(BlueprintType)
+enum class EInventoryOperation : uint8
+{
+	MoveTo = 0					UMETA(DisplayName = "MoveTo (another inv)"),
+	Receive						UMETA(DisplayName = "Receive (from another inv)"),
+	AddFromWorld				UMETA(DisplayName = "AddFromWorld"),
+	DropToWorld					UMETA(DisplayName = "AddFromWorld"),
+	DestroyItem					UMETA(DisplayName = "DestroyItem"),
+};
+
+
 //to be declared in each class individually with UPROPERTY(BlueprintAssignable) due to interface limitations
 //note that any inventory is responsible for refreshing UI
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryUpdated);
@@ -57,7 +68,18 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual void UpdateInventory() = 0;
 
+	UFUNCTION(BlueprintCallable)
+	virtual AActor* GetInventoryOwner() = 0;
+
+	//Whether component always stays where it was created or it can be moved
+	UFUNCTION(BlueprintCallable)
+	virtual bool CanOwnerEverChange() { return true; };
+
+	//Whether inventory operations can be performed now
+	UFUNCTION(BlueprintCallable)
+	virtual bool IsLocked() { return false; };
+
 	//UFUNCTION(BlueprintCallable)
-	//virtual AActor* GetOuterActor() const = 0;
+	//TArray<EInventoryOperation> GetAvailableOperations();
 };
 
