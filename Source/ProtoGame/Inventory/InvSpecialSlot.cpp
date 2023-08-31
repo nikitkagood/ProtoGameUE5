@@ -14,6 +14,11 @@ UInvSpecialSlotComponent::UInvSpecialSlotComponent()
 
 bool UInvSpecialSlotComponent::AddItem(UItemBase* item)
 {
+	if (IsOccupied())
+	{
+		return false;
+	}
+
 	if (!IsItemCompatible(item))
 	{
 		//Incompatible class
