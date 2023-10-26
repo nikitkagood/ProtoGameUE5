@@ -344,7 +344,7 @@ void UInventoryComponent::ChangeMass(float value)
     UE_LOG(LogTemp, Warning, TEXT("InventoryComponent: Changed mass by: %f"), value);
 
     //To avoid floating point errors
-    if (UKismetMathLibrary::NearlyEqual_FloatFloat(Mass, 0, FItemInfo::MassMaxPrecision))
+    if (UKismetMathLibrary::NearlyEqual_FloatFloat(Mass, 0, FInventoryItemInfo::MassMaxPrecision))
     {
         Mass = 0;
     };

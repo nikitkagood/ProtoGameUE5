@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include "ItemInfo.h"
+#include "InventoryItemInfo.h"
 #include "AttachmentInfo.h"
 #include "ItemThumbnailInfo.h"
 #include "Effects/EffectBase.h"
@@ -93,11 +93,11 @@ struct PROTOGAME_API FWeaponInfo : public FTableRowBase
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true), Category = WeaponSpecifications)
 	TArray<WeaponFireMode> FireModesAvailable {WeaponFireMode::Single};
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true), Category = WeaponSpecifications)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true), Category = WeaponSpecifications)
 	WeaponFireMode FireMode = FireModesAvailable[0];
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-	AmmoCaliber caliber;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = WeaponSpecifications)
+	AmmoCaliber Caliber;
 
 	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true), Category = WeaponSpecifications)
 	//TSubclassOf<AProjectile> AmmoType;
@@ -202,7 +202,7 @@ struct PROTOGAME_API FWeaponTable : public FTableRowBase
 	GENERATED_USTRUCT_BODY()
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
-	FItemInfo item_info;
+	FInventoryItemInfo inventory_item_info;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	FWeaponInfo weapon_info;

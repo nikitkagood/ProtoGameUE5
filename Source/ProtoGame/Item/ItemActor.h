@@ -6,7 +6,7 @@
 #include "GameFramework/Actor.h"
 
 #include "Interfaces/InteractionInterface.h"
-#include "Item/ItemInfo.h"
+#include "Item/InventoryItemInfo.h"
 #include "Item/ItemThumbnailInfo.h"
 
 #include "ItemActor.generated.h"

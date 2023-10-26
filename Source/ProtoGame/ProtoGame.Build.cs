@@ -13,9 +13,9 @@ public class ProtoGame : ModuleRules
 		MinFilesUsingPrecompiledHeaderOverride = 0;
 		CppStandard = CppStandardVersion.Cpp17;
 
-		bEnforceIWYU = true;
+		IWYUSupport = IWYUSupport.Full;
 
-		PublicIncludePaths.Add("../Source/ProtoGame/");
+        PublicIncludePaths.Add("../Source/ProtoGame/");
 	}
 }
 

@@ -6,7 +6,7 @@
 
 UWeaponAttachmentMagazine::UWeaponAttachmentMagazine()
 {
-	item_info.UseActionText = FText::FromString("Unload");
+	inventory_item_info.UseActionText = FText::FromString("Unload");
 }
 
 bool UWeaponAttachmentMagazine::Initialize(FDataTableRowHandle handle)
@@ -15,7 +15,7 @@ bool UWeaponAttachmentMagazine::Initialize(FDataTableRowHandle handle)
 
 	if(ptr_row != nullptr)
 	{
-		item_info = ptr_row->item_info;
+		inventory_item_info = ptr_row->inventory_item_info;
 		attachment_info = ptr_row->attachment_info;
 		attachment_magazine_info = ptr_row->attachment_magazine_info;
 

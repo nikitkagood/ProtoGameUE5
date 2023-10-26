@@ -3,7 +3,7 @@
 #pragma once
 
 #include "Engine/DataTable.h"
-#include "ItemInfo.h"
+#include "InventoryItemInfo.h"
 #include "AmmoInfo.h"
 #include "ItemThumbnailInfo.h"
 #include "AmmoBase.h"
@@ -166,7 +166,7 @@ struct PROTOGAME_API FAttachmentMagazineTable : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
-	FItemInfo item_info;
+	FInventoryItemInfo inventory_item_info;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	FItemThumbnailInfo item_thumbnail_info;
@@ -197,7 +197,7 @@ struct PROTOGAME_API FAttachmentSightTable : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
-	FItemInfo item_info;
+	FInventoryItemInfo inventory_item_info;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	FItemThumbnailInfo item_thumbnail_info;

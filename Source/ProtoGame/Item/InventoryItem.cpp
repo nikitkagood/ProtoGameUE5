@@ -15,7 +15,7 @@ bool UInventoryItem::Initialize(FDataTableRowHandle handle)
 
     if (ptr_row != nullptr)
     {
-        item_info = ptr_row->item_info;
+        inventory_item_info = ptr_row->inventory_item_info;
         InventoryComponent->Initialize(ptr_row->InventoryDimensions, ptr_row->InventoryName);
 
         return true;

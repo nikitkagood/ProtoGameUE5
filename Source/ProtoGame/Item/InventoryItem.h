@@ -15,7 +15,7 @@ struct PROTOGAME_API FInventoryItemTable : public FTableRowBase
 	GENERATED_BODY()
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
-	FItemInfo item_info;
+	FInventoryItemInfo inventory_item_info;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	FIntPoint InventoryDimensions;

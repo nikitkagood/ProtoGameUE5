@@ -15,7 +15,7 @@ bool UWeaponAttachmentSight::Initialize(FDataTableRowHandle handle)
 
 	if(ptr_row != nullptr)
 	{
-		item_info = ptr_row->item_info;
+		inventory_item_info = ptr_row->inventory_item_info;
 		attachment_info = ptr_row->attachment_info;
 		attachment_sight_info = ptr_row->attachment_sight_info;
 

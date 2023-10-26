@@ -22,7 +22,7 @@ class PROTOGAME_API UWeaponBase : public UItemBase, public IInventoryInterface
 public:
 	UWeaponBase() = default;
 
-	virtual bool Initialize(FDataTableRowHandle handle) override { check(false); return nullptr; };
+	virtual bool Initialize(FDataTableRowHandle handle) override { check(false); return false; };
 
 	virtual FItemThumbnailInfo GetItemThumbnailInfoFromDT() override { check(false); return {}; };
 

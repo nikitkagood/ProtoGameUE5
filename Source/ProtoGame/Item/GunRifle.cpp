@@ -22,7 +22,7 @@ bool UGunRifle::Initialize(FDataTableRowHandle handle)
 
 	if(ptr_row != nullptr)
 	{
-		item_info = ptr_row->item_info;
+		inventory_item_info = ptr_row->inventory_item_info;
 		weapon_info = ptr_row->weapon_info;
 
 		for(auto& i : ptr_row->attachment_slots)

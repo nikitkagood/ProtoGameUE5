@@ -21,7 +21,7 @@ bool UItemBase::Initialize(FDataTableRowHandle handle)
 
 	if(ptr_row != nullptr)
 	{
-		item_info = ptr_row->item_info;
+		inventory_item_info = ptr_row->inventory_item_info;
 		return true;
 	}
 
@@ -79,7 +79,7 @@ void UItemBase::SetCurrentStackSize(int32 new_size)
 		inventory->UpdateStackDependencies(this, new_size);
 	}
 
-	item_info.CurrentStackSize = new_size;
+	inventory_item_info.CurrentStackSize = new_size;
 }
 
 AItemActor* UItemBase::SpawnItemActor(const FVector& location, const FRotator& rotation)
@@ -94,7 +94,7 @@ AItemActor* UItemBase::SpawnItemActorVisualOnly(const FVector& location, const F
 
 void UItemBase::Rotate()
 {
-	Swap(item_info.Dimensions.X, item_info.Dimensions.Y);
+	Swap(inventory_item_info.Dimensions.X, inventory_item_info.Dimensions.Y);
 	bRotated = !bRotated;
 }
 
@@ -120,15 +120,15 @@ bool UItemBase::StackAdd(UItemBase* other)
 
 	if(stack_remainder <= 0)
 	{
-		this->item_info.CurrentStackSize += other->GetCurrentStackSize();
-		other->item_info.CurrentStackSize = 0;
+		this->inventory_item_info.CurrentStackSize += other->GetCurrentStackSize();
+		other->inventory_item_info.CurrentStackSize = 0;
 
 		return true;
 	}
 	else
 	{
-		this->item_info.CurrentStackSize = this->GetMaxStackSize();
-		other->item_info.CurrentStackSize = stack_remainder;
+		this->inventory_item_info.CurrentStackSize = this->GetMaxStackSize();
+		other->inventory_item_info.CurrentStackSize = stack_remainder;
 
 		return true;
 	}
@@ -148,7 +148,7 @@ USkeletalMesh* UItemBase::GetSkeletalMeshFromItemActorCDO() const
 
 UItemBase* UItemBase::StackGet(int32 amount, UObject* new_outer)
 {
-	int32 remainder = item_info.CurrentStackSize - amount;
+	int32 remainder = inventory_item_info.CurrentStackSize - amount;
 
 	if(amount < 1 || remainder < 0)
 	{
@@ -162,9 +162,9 @@ UItemBase* UItemBase::StackGet(int32 amount, UObject* new_outer)
 
 	//UItemBase* new_obj = DuplicateObject<UItemBase>(this, new_outer);
 	UItemBase* new_obj = StaticCreateObject<UItemBase>(new_outer, this->GetClass(), ItemObjectCreationMethod::CreateItemObjectFromDataTable, ItemActorClass.GetDefaultObject()->GetItemProperites());
-	new_obj->item_info.CurrentStackSize = amount;
+	new_obj->inventory_item_info.CurrentStackSize = amount;
 
-	//this->item_info.CurrentStackSize = remainder;
+	//this->inventory_item_info.CurrentStackSize = remainder;
 	this->SetCurrentStackSize(remainder);
 
 	return new_obj;
@@ -226,9 +226,9 @@ AActor* UItemBase::GetOwner() const
 //TODO: some items may have different dimensions, like weapons
 bool operator==(const UItemBase& lhs, const UItemBase& rhs)
 {
-	return (lhs.item_info.NameShort.EqualTo(rhs.item_info.NameShort, ETextComparisonLevel::Quinary) 
-		&& lhs.item_info.Mass == rhs.item_info.Mass
-		&& lhs.item_info.BasePrice == rhs.item_info.BasePrice
-		&& lhs.item_info.Dimensions == rhs.item_info.Dimensions
+	return (lhs.inventory_item_info.NameShort.EqualTo(rhs.inventory_item_info.NameShort, ETextComparisonLevel::Quinary) 
+		&& lhs.inventory_item_info.Mass == rhs.inventory_item_info.Mass
+		&& lhs.inventory_item_info.BasePrice == rhs.inventory_item_info.BasePrice
+		&& lhs.inventory_item_info.Dimensions == rhs.inventory_item_info.Dimensions
 		);
 }

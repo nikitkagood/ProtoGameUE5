@@ -8,7 +8,7 @@
 #include "Interfaces/InteractionInterface.h"
 #include "Interfaces/UseInterface.h"
 #include "EnumItemTypes.h"
-#include "ItemInfo.h"
+#include "InventoryItemInfo.h"
 #include "ItemActor.h"
 
 #include "ItemBase.generated.h"
@@ -47,7 +47,7 @@ public:
 	////To be overriden in child classes end
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
-	const FItemInfo& GetItemInfo() { return item_info; }
+	const FInventoryItemInfo& GetInventoryItemInfo() { return inventory_item_info; }
 
 	void SetItemActorClass(TSubclassOf<AItemActor> value) { ItemActorClass = value; };
 
@@ -60,29 +60,29 @@ protected:
 public:
 
 	UFUNCTION(BlueprintCallable)
-	const FText& GetItemName() const { return item_info.Name; }
+	const FText& GetItemName() const { return inventory_item_info.Name; }
 	UFUNCTION(BlueprintCallable)
-	const FText& GetItemNameShort() const { return item_info.NameShort; }
+	const FText& GetItemNameShort() const { return inventory_item_info.NameShort; }
 	UFUNCTION(BlueprintCallable)
-	const FText& GetDescription() const { return item_info.Description; };
+	const FText& GetDescription() const { return inventory_item_info.Description; };
 	UFUNCTION(BlueprintCallable)
-	const FText& GetUseActionText() const { return item_info.UseActionText; };
+	const FText& GetUseActionText() const { return inventory_item_info.UseActionText; };
     UFUNCTION(BlueprintCallable)
-	ItemType GetType() const { return item_info.Type; };
+	ItemType GetType() const { return inventory_item_info.Type; };
 	UFUNCTION(BlueprintCallable)
-	float GetMassOneUnit() const { return item_info.Mass; };
+	float GetMassOneUnit() const { return inventory_item_info.Mass; };
 	UFUNCTION(BlueprintCallable)
-	float GetMassTotal() const { return item_info.Mass * item_info.CurrentStackSize; };
+	float GetMassTotal() const { return inventory_item_info.Mass * inventory_item_info.CurrentStackSize; };
 	UFUNCTION(BlueprintCallable)
-	virtual FIntPoint GetDimensions() const { return item_info.Dimensions; };
+	virtual FIntPoint GetDimensions() const { return inventory_item_info.Dimensions; };
 	UFUNCTION(BlueprintCallable)
-	int32 GetCurrentStackSize() const { return item_info.CurrentStackSize; };
+	int32 GetCurrentStackSize() const { return inventory_item_info.CurrentStackSize; };
 	UFUNCTION(BlueprintCallable)
-	int32 GetMaxStackSize() const { return item_info.MaxStackSize; };
+	int32 GetMaxStackSize() const { return inventory_item_info.MaxStackSize; };
 	UFUNCTION(BlueprintCallable)
-	TSoftObjectPtr<UTexture2DDynamic> GetThumbnail() const { return item_info.Thumbnail; };
+	TSoftObjectPtr<UTexture2DDynamic> GetThumbnail() const { return inventory_item_info.Thumbnail; };
 	UFUNCTION(BlueprintCallable)
-	void SetThumbnail(UTexture2DDynamic* dynamic_texture) { item_info.Thumbnail = dynamic_texture; };
+	void SetThumbnail(UTexture2DDynamic* dynamic_texture) { inventory_item_info.Thumbnail = dynamic_texture; };
 
 	UFUNCTION(BlueprintCallable)
 	UStaticMesh* GetStaticMeshFromItemActorCDO() const;
@@ -160,7 +160,7 @@ protected:
 	void SetCurrentStackSize(int32 new_size);
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, NoClear, meta = (AllowPrivateAccess = true))
-	FItemInfo item_info;
+	FInventoryItemInfo inventory_item_info;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	bool bRotated;

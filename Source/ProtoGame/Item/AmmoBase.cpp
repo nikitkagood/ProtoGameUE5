@@ -14,7 +14,7 @@ bool UAmmoBase::Initialize(FDataTableRowHandle handle)
 
 	if(ptr_row != nullptr)
 	{
-		item_info = ptr_row->item_info;
+		inventory_item_info = ptr_row->inventory_item_info;
 		ammo_info = ptr_row->ammo_info;
 
 		return true;
