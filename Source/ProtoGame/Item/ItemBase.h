@@ -57,6 +57,8 @@ protected:
 	template<typename DataTableType>
 	FItemThumbnailInfo GetItemThumbnailInfoFromDT_Impl();
 
+	void SetCurrentStackSize(int32 new_size);
+
 public:
 
 	UFUNCTION(BlueprintCallable)
@@ -157,8 +159,6 @@ public:
 	virtual bool OnUse(AActor* caller) override;
 
 protected:
-	void SetCurrentStackSize(int32 new_size);
-
     UPROPERTY(EditAnywhere, BlueprintReadWrite, NoClear, meta = (AllowPrivateAccess = true))
 	FInventoryItemInfo inventory_item_info;
 

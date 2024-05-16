@@ -3,10 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "EnumItemTypes.h"
 #include "Engine/DataTable.h"
 #include "Engine/Texture2DDynamic.h"
 
+#include "EnumItemTypes.h"
 #include "ItemThumbnailInfo.h"
 
 #include "InventoryItemInfo.generated.h"

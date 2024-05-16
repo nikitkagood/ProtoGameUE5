@@ -3,6 +3,7 @@
 
 #include "Item/InventoryItem.h"
 #include "Inventory/InventoryManager.h"
+#include "Character/GameCharacterBase.h"
 
 UInventoryItem::UInventoryItem()
 {
