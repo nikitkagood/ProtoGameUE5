@@ -7,35 +7,56 @@
 
 #include "VBFUnitInfo.generated.h"
 
-//Contains basic information about items
-//Stored in ItemObject
-USTRUCT(BlueprintType)
+//class UVBFUnitBase;
+
+USTRUCT(Blueprintable, BlueprintType)
 struct PROTOGAME_API FVBFUnitInfo : public FTableRowBase
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	FText DisplayName = FText::FromString("DefaultDisplayName");
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	FText DisplayName = FText::FromString("DefaultUnitDisplayName");
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, NoClear, meta = (AllowPrivateAccess = true))
-	bool IsEverCommandable;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	bool IsEverCommandable = true;
 
 	//Movement
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	//Position on a map as if in a world, not a grid
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	FVector Position;
 
 	//Things cannot occupy the same space so we have to account for it
+	//Also may be useful for other things
 	//In meters
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	FIntPoint Size;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true, ClampMin = 0, UIMax = 100))
+	FVector Size {1., 1., 1.};
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	//In m/s
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	float Speed;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	//In m/s
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true, ClampMin = 0, UIMax = 1000))
 	float MaxSpeed;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	FRotator Rotation;
+};
+
+USTRUCT(BlueprintType)
+struct PROTOGAME_API FVBFUnitInfoTable : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	FVBFUnitInfoTable();
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, NoClear, meta = (AllowPrivateAccess = true))
+	TSubclassOf<class UVBFUnitBase> unit_class;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	UTexture2D* thumbnail;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	FVBFUnitInfo inventory_item_info;
 };

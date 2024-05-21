@@ -5,7 +5,11 @@
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
 
+#include "VBFUnitBase.h"
+
 #include "VBFMap.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnMapUpdated);
 
 UCLASS(Blueprintable, BlueprintType, DefaultToInstanced)
 class PROTOGAME_API UVBFMap : public UObject
@@ -18,7 +22,15 @@ public:
 	UTexture2D* GetHeightMap() { return height_map; }
 	const UTexture2D* GetHeightMap() const { return height_map; }
 
-private:
+	UFUNCTION(BlueprintCallable)
+	const TArray<UVBFUnitBase*> GetUnitsOnMap() const { return UnitsOnMap; }
+
+	virtual void UpdateMap() { OnMapUpdated.Broadcast(); };
+
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, NoClear, meta = (AllowPrivateAccess = true))
+	TArray<UVBFUnitBase*> UnitsOnMap;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, NoClear, meta = (AllowPrivateAccess = true))
 	UTexture2D* height_map;
 	//TArray<TArray<FFloat16>> height_map;
@@ -31,4 +43,7 @@ private:
 
 	//TArray<TArray<???>> roads_map;
 	//TArray<TArray<???>> terrain_feature_map;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnMapUpdated OnMapUpdated;
 };
