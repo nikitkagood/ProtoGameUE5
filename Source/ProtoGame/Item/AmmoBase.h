@@ -21,7 +21,7 @@ public:
 	virtual FItemThumbnailInfo GetItemThumbnailInfoFromDT() override;
 
 	UFUNCTION(BlueprintCallable)
-	AmmoCaliber GetCaliber() const { return ammo_info.caliber; };
+	EAmmoCaliber GetCaliber() const { return ammo_info.caliber; };
 
 	UFUNCTION(BlueprintCallable)
 	TSubclassOf<AProjectile> GetProjectileClass() const { return ammo_info.projectile_class; };

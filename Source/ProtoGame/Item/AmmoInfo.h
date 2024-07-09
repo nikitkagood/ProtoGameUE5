@@ -10,7 +10,7 @@
 class AProjectile;
 
 UENUM(BlueprintType)
-enum class AmmoCaliber : uint8
+enum class EAmmoCaliber : uint8
 {
 	None = 0				UMETA(DisplayName = "None"),
 	//rifle
@@ -38,7 +38,7 @@ struct PROTOGAME_API FAmmoInfo : public FTableRowBase
 	TSubclassOf<AProjectile> projectile_class;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-	AmmoCaliber caliber;
+	EAmmoCaliber caliber;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	float initial_velocity;

@@ -2,8 +2,3 @@
 
 
 #include "VirtualBattlefield/VBFMap.h"
-
-UVBFMap::UVBFMap()
-{
-    
-}

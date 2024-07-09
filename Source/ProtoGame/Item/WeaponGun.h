@@ -23,7 +23,7 @@ public:
 	virtual TSubclassOf<UAnimInstance> GetAnimClass() const { return weapon_info.AnimClass; };
 
     UFUNCTION(BlueprintCallable, BlueprintPure)
-	WeaponFireMode GetFireMode() const { return weapon_info.FireMode; }
+	EWeaponFireMode GetFireMode() const { return weapon_info.FireMode; }
 
 	virtual AItemActor* SpawnItemActor(const FVector& location, const FRotator& rotation) override;
 
@@ -149,5 +149,5 @@ protected:
 	//Saved for quick access
 	int32 MagazineAttachmentIdx;
 
-	int8 Firing : 1;
+	bool Firing;
 };

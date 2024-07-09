@@ -14,7 +14,7 @@ class AProjectile;
 class UWeaponAttachment;
 
 UENUM(BlueprintType)
-enum class WeaponFireMode : uint8
+enum class EWeaponFireMode : uint8
 {
 	//safe is for special occasions only, by default it's redundant
 	Safe = 0			UMETA(DisplayName = "Safe"),
@@ -91,13 +91,13 @@ struct PROTOGAME_API FWeaponInfo : public FTableRowBase
 	UAmmoBase* Chamber;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true), Category = WeaponSpecifications)
-	TArray<WeaponFireMode> FireModesAvailable {WeaponFireMode::Single};
+	TArray<EWeaponFireMode> FireModesAvailable { EWeaponFireMode::Single };
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true), Category = WeaponSpecifications)
-	WeaponFireMode FireMode = FireModesAvailable[0];
+	EWeaponFireMode FireMode = FireModesAvailable[0];
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = WeaponSpecifications)
-	AmmoCaliber Caliber;
+	EAmmoCaliber Caliber;
 
 	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true), Category = WeaponSpecifications)
 	//TSubclassOf<AProjectile> AmmoType;

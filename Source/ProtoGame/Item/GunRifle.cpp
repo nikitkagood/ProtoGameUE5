@@ -12,10 +12,6 @@
 
 #include "Kismet/GameplayStatics.h"
 
-UGunRifle::UGunRifle()
-{
-}
-
 bool UGunRifle::Initialize(FDataTableRowHandle handle)
 { 
 	auto* ptr_row = handle.GetRow<DataTableType>("SetProperties_GunRifle");
@@ -50,38 +46,38 @@ void UGunRifle::StartFire()
 
 		switch(weapon_info.FireMode)
 		{
-		case WeaponFireMode::Single:
+		case EWeaponFireMode::Single:
 			OnFire();
 			break;
-		case WeaponFireMode::Auto:
+		case EWeaponFireMode::Auto:
 			GetWorld()->GetTimerManager().SetTimer(OnFireTimerHandle, this, &UGunRifle::OnFire, rate, true, 0.f);
 			break;
-		case WeaponFireMode::AutoSlow:
+		case EWeaponFireMode::AutoSlow:
 			GetWorld()->GetTimerManager().SetTimer(OnFireTimerHandle, this, &UGunRifle::OnFire, rate / 2, true, 0.f);
 			break;
-		case WeaponFireMode::TwoRoundBurst:
+		case EWeaponFireMode::TwoRoundBurst:
 			GetWorld()->GetTimerManager().SetTimer(OnFireTimerHandle, this, &UGunRifle::OnFire, rate, true, 0.f);
 			GetWorld()->GetTimerManager().SetTimer(BurstFireTimerHandle, this, &UGunRifle::EndFire, rate, false, rate * 2);
 			break;
-		case WeaponFireMode::ThreeRoundBurst:
+		case EWeaponFireMode::ThreeRoundBurst:
 			GetWorld()->GetTimerManager().SetTimer(OnFireTimerHandle, this, &UGunRifle::OnFire, rate, true, 0.f);
 			GetWorld()->GetTimerManager().SetTimer(BurstFireTimerHandle, this, &UGunRifle::EndFire, rate, false, rate * 3);
 			break;
-		case WeaponFireMode::FourRoundBurst:
+		case EWeaponFireMode::FourRoundBurst:
 			GetWorld()->GetTimerManager().SetTimer(OnFireTimerHandle, this, &UGunRifle::OnFire, rate, true, 0.f);
 			GetWorld()->GetTimerManager().SetTimer(BurstFireTimerHandle, this, &UGunRifle::EndFire, rate, false, rate * 4);
 			break;
-		case WeaponFireMode::FiveRoundBurst:
+		case EWeaponFireMode::FiveRoundBurst:
 			GetWorld()->GetTimerManager().SetTimer(OnFireTimerHandle, this, &UGunRifle::OnFire, rate, true, 0.f);
 			GetWorld()->GetTimerManager().SetTimer(BurstFireTimerHandle, this, &UGunRifle::EndFire, rate, false, rate * 5);
 			break;
-		case WeaponFireMode::SpecialMode1:
+		case EWeaponFireMode::SpecialMode1:
 			OnFire();
 			break;
-		case WeaponFireMode::SpecialMode2:
+		case EWeaponFireMode::SpecialMode2:
 			OnFire();
 			break;
-		case WeaponFireMode::SpecialMode3:
+		case EWeaponFireMode::SpecialMode3:
 			OnFire();
 			break;
 		default:

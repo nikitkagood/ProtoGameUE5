@@ -15,7 +15,7 @@ class PROTOGAME_API UGunRifle : public UWeaponGun
 private:
 	using DataTableType = FWeaponTable;
 public:
-	UGunRifle();
+	//UGunRifle();
 
 	virtual bool Initialize(FDataTableRowHandle handle) override;
 

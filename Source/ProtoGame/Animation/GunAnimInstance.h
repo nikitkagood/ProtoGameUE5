@@ -10,7 +10,7 @@
 //DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateAnimInstance);
 
 class UWeaponGun;
-enum class WeaponFireMode : uint8;
+enum class EWeaponFireMode : uint8;
 
 UCLASS()
 class PROTOGAME_API UGunAnimInstance : public UAnimInstance
@@ -19,7 +19,7 @@ class PROTOGAME_API UGunAnimInstance : public UAnimInstance
 
 public:
 	void SetWeaponGun(UWeaponGun* Gun) { WeaponGun = Gun; };
-	void SetFireMode(WeaponFireMode Mode) { FireMode = Mode; };
+	void SetFireMode(EWeaponFireMode Mode) { FireMode = Mode; };
 
 	//UPROPERTY(BlueprintAssignable)
 	//FUpdateAnimInstance OnAnimInstanceUpdated;
@@ -29,5 +29,5 @@ protected:
 	UWeaponGun* WeaponGun;
 
 	UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly, NoClear)
-	WeaponFireMode FireMode;
+	EWeaponFireMode FireMode;
 };

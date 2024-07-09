@@ -6,6 +6,7 @@
 #include "UObject/NoExportTypes.h"
 
 #include "VBFUnitBase.h"
+#include "VBFFaction.h"
 
 #include "VBFMap.generated.h"
 
@@ -17,8 +18,6 @@ class PROTOGAME_API UVBFMap : public UObject
 	GENERATED_BODY()
 	
 public:
-	UVBFMap();
-
 	UTexture2D* GetHeightMap() { return height_map; }
 	const UTexture2D* GetHeightMap() const { return height_map; }
 
@@ -28,6 +27,9 @@ public:
 	virtual void UpdateMap() { OnMapUpdated.Broadcast(); };
 
 protected:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, NoClear, meta = (AllowPrivateAccess = true))
+	FIntPoint Dimensions;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, NoClear, meta = (AllowPrivateAccess = true))
 	TArray<UVBFUnitBase*> UnitsOnMap;
 
@@ -36,10 +38,10 @@ protected:
 	//TArray<TArray<FFloat16>> height_map;
 
 	//value represents forest density
-	TArray<TArray<uint8>> forest_map;
+	//TArray<TArray<uint8>> forest_map;
 
 	//value represents water depth
-	TArray<TArray<uint8>> water_map;
+	//TArray<TArray<uint8>> water_map;
 
 	//TArray<TArray<???>> roads_map;
 	//TArray<TArray<???>> terrain_feature_map;

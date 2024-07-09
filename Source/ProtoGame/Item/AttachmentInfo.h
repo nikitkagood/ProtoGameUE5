@@ -144,7 +144,7 @@ struct PROTOGAME_API FAttachmentMagazineInfo : public FTableRowBase
 	}
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-	AmmoCaliber caliber;
+	EAmmoCaliber caliber;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	int32 capacity = 0;
