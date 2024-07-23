@@ -16,7 +16,7 @@ struct PROTOGAME_API FVBFUnitLandInfo : public FTableRowBase
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float UnitLandTestValue;
-	
+
 	//TArray<VBFWeapon>;
 };
 
@@ -25,9 +25,11 @@ struct PROTOGAME_API FVBFUnitLandInfoTable : public FTableRowBase
 {
 	GENERATED_BODY()
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	FVBFUnitLandInfo unit_land_info;
+	FVBFUnitLandInfoTable();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	FVBFUnitInfoTable unit_info;
+	FVBFUnitInfoTable unit_info_table;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	FVBFUnitLandInfo unit_land_info;
 };

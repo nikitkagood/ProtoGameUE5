@@ -15,33 +15,41 @@ struct PROTOGAME_API FVBFUnitInfo : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
-	FText DisplayName = FText::FromString("DefaultUnitDisplayName");
+	FText Name = FText::FromString("DefaultUnitName");
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	bool IsEverCommandable = true;
 
-	//Movement
+	UPROPERTY(EditInstanceOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	FVector Location;
 
-	//Position on a map as if in a world, not a grid
+	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	FRotator Rotation;
+
+	//In m/s
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-	FVector Position;
+	double Speed;
+
+	//In m/s
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true, ClampMin = 0, UIMax = 1000))
+	double MaxSpeed;
 
 	//Things cannot occupy the same space so we have to account for it
 	//Also may be useful for other things
 	//In meters
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true, ClampMin = 0, UIMax = 100))
-	FVector Size {1., 1., 1.};
+	FVector Size{ 1., 1., 1. };
+};
 
-	//In m/s
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-	float Speed;
-
-	//In m/s
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true, ClampMin = 0, UIMax = 1000))
-	float MaxSpeed;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
-	FRotator Rotation;
+		
+UENUM(BlueprintType)
+enum class EUnitMeshType : uint8
+{
+	None = 0				UMETA(DisplayName = "None"),
+	//Explicitly state that mesh logic comes from somewhere else
+	UseExternalSettings 	UMETA(DisplayName = "Use External Settings"),
+	UseStaticMesh			UMETA(DisplayName = "Use Static Mesh"),
+	UseSkeletalMesh			UMETA(DisplayName = "Use Skeletal Mesh"),
 };
 
 USTRUCT(BlueprintType)
@@ -51,12 +59,24 @@ struct PROTOGAME_API FVBFUnitInfoTable : public FTableRowBase
 
 	FVBFUnitInfoTable();
 
+	//Mandatory. Used in ConstructVBFUnit.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, NoClear, meta = (AllowPrivateAccess = true))
-	TSubclassOf<class UVBFUnitBase> unit_class;
+	TSubclassOf<class UVBFUnitBase> UnitClass;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	UTexture2D* thumbnail;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
-	FVBFUnitInfo inventory_item_info;
+	EUnitMeshType MeshType;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	UStaticMesh* StaticMesh;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	USkeletalMesh* SkeletalMesh;
+
+
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	FVBFUnitInfo unit_info;
 };

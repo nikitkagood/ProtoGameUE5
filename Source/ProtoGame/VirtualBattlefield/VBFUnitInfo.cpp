@@ -7,5 +7,6 @@
 
 FVBFUnitInfoTable::FVBFUnitInfoTable()
 {
-    unit_class = StaticClass<UVBFUnitBase>();
+    UnitClass = StaticClass<UVBFUnitBase>();
+    MeshType = EUnitMeshType::None;
 }
