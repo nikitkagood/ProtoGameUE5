@@ -19,31 +19,31 @@ class PROTOGAME_API IVBFUnitInterface
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "GetSet")
-	FText GetName() const;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "GetSet")
-	FVector GetLocation() const;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "GetSet")
-	FRotator GetRotation() const;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "GetSet")
-	double GetSpeed() const;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "GetSet")
-	double GetMaxSpeed() const;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "GetSet")
-	bool SetName(const FText& name);
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "GetSet")
-	bool SetLocation(const FVector& new_position);
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "GetSet")
-	bool SetRotation(const FRotator& new_rotation);
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "GetSet")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Get")
+	FText GetName() const;															 
+																					 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Get")
+	FVector GetLocation() const;													 
+																					 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Get")
+	FRotator GetRotation() const;													 
+																					 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Get")
+	double GetSpeed() const;														 
+																					 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Get")
+	double GetMaxSpeed() const;														 
+																					 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Set")
+	bool SetName(const FText& name);												 
+																					 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Set")
+	bool SetLocation(const FVector& new_position);									 
+																					 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Set")
+	bool SetRotation(const FRotator& new_rotation);									 
+																					 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Set")
 	bool SetSpeed();
 
 	//UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "GetSet")
@@ -56,57 +56,68 @@ public:
 
 	//Destroy this unit for gameplay purposes
 	//Cannot fail
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Utility")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Utility")
 	void DestroyUnit();
 
 	//Override to set unit actor class
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Utility")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Utility")
 	TSubclassOf<AActor> GetUnitActorClass();
 
 	//Only world representation (i.e. actor) is affected, should not affect unit for gameplay purposes
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Utility")
-	bool SpawnUnitActor(UWorld* world, const FVector& location, const FRotator& rotation);
+	//In BP there is no easy way to get World, so it comes from Unit Object
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Utility")
+	bool SpawnUnitActor(const FTransform& transform, FDataTableRowHandle handle, UWorld* world_optional = nullptr);
 
 	//Only world representation (i.e. actor) is affected, should not affect unit for gameplay purposes
 	//Cannot fail
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Utility")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Utility")
 	void DespawnUnitActor();
 
 	//What to display in UI
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Utility")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Utility")
 	TArray<FString> GetDisplayData();
+
+	//False if unit is purely virtual
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Utility")
+	bool IsInWorld() const;
 
 	//Commands
 
 	//Only tries to reach destination, not guaranteed
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Commands")
-	bool TryMoveTo(FVector location);
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Commands")
-	bool Stop();
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Commands")
-	bool MoveAndAttack(FVector location);
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Commands")
-	bool Attack(UObject* target);
-
-	//Gameplay
-	
-	//Won't be selectable, won't take commands
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Gameplay")
-	bool IsEverCommandable() const;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Gameplay")
-	bool IsEverMovable() const;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Gameplay")
-	bool CanMove() const;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Gameplay")
-	bool CanEverAttack() const;
-
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Gameplay")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Commands")
+	bool TryMoveTo(FVector location);												 
+																					 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Commands")
+	bool Stop();																	 
+																					 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Commands")
+	bool MoveAndAttack(FVector location);											 
+																					 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Commands")
+	bool Attack(UObject* target);													 
+																					 
+	//Gameplay																		 
+																					 
+	//Won't be selectable, won't take commands (ever)								 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Gameplay")
+	bool IsEverCommandable() const;													 
+																					 
+	bool IsEverCommandable_Implementation() const { return true; };					 
+																					 
+	//Won't be selectable, won't take commands (now)								 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Gameplay")
+	bool IsCommandable() const;														 
+																					 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Gameplay")
+	bool IsEverMovable() const;														 
+																					 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Gameplay")
+	bool CanMove() const;															 
+																					 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Gameplay")
+	bool CanEverAttack() const;														 
+																					 
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Gameplay")
 	bool CanAttack() const;
 
 

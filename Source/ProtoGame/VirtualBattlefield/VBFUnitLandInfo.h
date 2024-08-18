@@ -6,6 +6,7 @@
 #include "Engine/DataTable.h"
 
 #include "VBFUnitInfo.h"
+#include "VBFWeapon.h"
 
 #include "VBFUnitLandInfo.generated.h"
 
@@ -15,9 +16,7 @@ struct PROTOGAME_API FVBFUnitLandInfo : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	float UnitLandTestValue;
-
-	//TArray<VBFWeapon>;
+	TArray<UVBFWeapon*> Weapons;
 };
 
 USTRUCT(BlueprintType)

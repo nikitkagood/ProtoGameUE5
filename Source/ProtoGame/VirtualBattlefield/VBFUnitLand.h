@@ -19,10 +19,11 @@ public:
 protected:
 	virtual bool Initialize(FDataTableRowHandle handle) override;
 public:
+	bool SpawnUnitActor_Implementation(const FTransform& transform, FDataTableRowHandle handle, UWorld* world_optional = nullptr);
 
 	//virtual bool TryMoveTo(FVector new_position) override;
 
 protected:
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true, ExposeOnSpawn = true))
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	FVBFUnitLandInfo unit_land_info;
 };

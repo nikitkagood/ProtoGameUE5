@@ -18,16 +18,25 @@ class PROTOGAME_API UVBFUnitBase : public UObject, public IVBFUnitInterface
 {
     GENERATED_BODY()
 public:
-    //What type data table has which stores information needed for this class
+    //What type data table this has, which stores required information
+    //Selected DT type == DataTableType required for GetRow<DataTableType> to work
     using DataTableType = FVBFUnitInfoTable;
 
     //If outer is empty, GetTransientPackage() will be used
     //UFUNCTION(BlueprintCallable)
     //static UVBFUnitBase* ConstructVBFUnit(UObject* outer, FDataTableRowHandle handle);
 
-protected:
+    UFUNCTION(BlueprintCallable)
     virtual bool Initialize(FDataTableRowHandle handle);
 public:
+
+    UFUNCTION(BlueprintCallable)
+    virtual class UWorld* GetWorldFromOuter() const;
+
+    UFUNCTION(BlueprintPure)
+    virtual AActor* GetOwner() const;
+
+    AVBFActorBase* GetVBFActor() { return vbf_unit_actor; };
 
     //IVBFUnitInterface
 
@@ -53,7 +62,10 @@ public:
 
     TSubclassOf<AActor> GetUnitActorClass_Implementation();
 
-    bool SpawnUnitActor_Implementation(UWorld* world, const FVector& location, const FRotator& rotation);
+    //General implementation
+    //Since I found no way to dynamically change DataTableType, 
+    //this is purely for example and has to be overriden
+    bool SpawnUnitActor_Implementation(const FTransform& transform, FDataTableRowHandle handle, UWorld* world_optional = nullptr);
 
     void DespawnUnitActor_Implementation();
 
@@ -89,6 +101,11 @@ private:
 protected:
     //UPROPERTY(EditInstanceOnly, BlueprintReadWrite, NoClear, meta = (AllowPrivateAccess = true, ExposeOnSpawn = true))
     //FDataTableRowHandle DT_handle;
+
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+    UStreamableRenderAsset* StreamableAssetTest;
+
 
     UPROPERTY(VisibleAnywhere, BlueprintReadOnly, NoClear, meta = (AllowPrivateAccess = true))
     AVBFActorBase* vbf_unit_actor;
