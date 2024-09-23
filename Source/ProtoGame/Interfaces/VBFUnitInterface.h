@@ -14,6 +14,10 @@ class UVBFUnitInterface : public UInterface
 	GENERATED_BODY()
 };
 
+
+//REMINDER: use Execute_*MethodName*(this) when calling interface functions in cpp
+
+//Interface that defines what is needed for a unit
 class PROTOGAME_API IVBFUnitInterface
 {
 	GENERATED_BODY()
@@ -60,8 +64,8 @@ public:
 	void DestroyUnit();
 
 	//Override to set unit actor class
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Utility")
-	TSubclassOf<AActor> GetUnitActorClass();
+	//UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Utility")
+	//TSubclassOf<AActor> GetUnitActorClass();
 
 	//Only world representation (i.e. actor) is affected, should not affect unit for gameplay purposes
 	//In BP there is no easy way to get World, so it comes from Unit Object
@@ -84,15 +88,19 @@ public:
 	//Commands
 
 	//Only tries to reach destination, not guaranteed
+	//Doesn't stop to attack
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Commands")
-	bool TryMoveTo(FVector location);												 
-																					 
+	bool TryMoveTo(const FVector& location);
+
+	//Will stop to attack
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Commands")
-	bool Stop();																	 
-																					 
+	bool AttackMove(const FVector& location);
+					
+	//Stops movement and resets target if it was set by player
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Commands")
-	bool MoveAndAttack(FVector location);											 
-																					 
+	bool StopMovementAndTarget();																	 
+	
+	//Choose a certain target manually
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Commands")
 	bool Attack(UObject* target);													 
 																					 

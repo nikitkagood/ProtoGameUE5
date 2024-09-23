@@ -63,6 +63,9 @@ struct PROTOGAME_API FVBFUnitInfoTable : public FTableRowBase
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, NoClear, meta = (AllowPrivateAccess = true))
 	TSubclassOf<class UVBFUnitBase> UnitClass;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, NoClear, meta = (AllowPrivateAccess = true))
+	TSubclassOf<class AVBFActorBase> UnitActorClass;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	UTexture2D* thumbnail;
 

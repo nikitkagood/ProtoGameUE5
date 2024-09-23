@@ -9,6 +9,17 @@
 
 #include "VBFWeapon.generated.h"
 
+//A wrapper around TArray
+USTRUCT(BlueprintType)
+struct PROTOGAME_API FVBFWeaponsArray
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	TArray<UVBFWeapon*> Weapons;
+};
+
+
 USTRUCT(BlueprintType)
 struct FVBFWeaponInfo : public FTableRowBase
 {

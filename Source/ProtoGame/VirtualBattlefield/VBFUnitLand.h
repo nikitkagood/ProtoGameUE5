@@ -21,7 +21,7 @@ protected:
 public:
 	bool SpawnUnitActor_Implementation(const FTransform& transform, FDataTableRowHandle handle, UWorld* world_optional = nullptr);
 
-	//virtual bool TryMoveTo(FVector new_position) override;
+	bool TryMoveTo_Implementation(const FVector& location);
 
 protected:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true))

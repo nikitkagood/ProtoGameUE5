@@ -1,8 +1,10 @@
 // Nikita Belov, All rights reserved
 
 #include "VBFUnitBase.h"
+
 #include "Kismet/KismetMathLibrary.h"
 #include "Math/UnrealMathUtility.h"
+#include "Kismet/GameplayStatics.h"
 
 bool UVBFUnitBase::Initialize(FDataTableRowHandle handle)
 {
@@ -52,10 +54,10 @@ void UVBFUnitBase::DestroyUnit_Implementation()
     this->MarkAsGarbage();
 }
 
-TSubclassOf<AActor> UVBFUnitBase::GetUnitActorClass_Implementation()
-{
-    return AVBFActorBase::StaticClass();
-}
+//TSubclassOf<AActor> UVBFUnitBase::GetUnitActorClass_Implementation()
+//{
+//    return AVBFActorBase::StaticClass();
+//}
 
 bool UVBFUnitBase::SpawnUnitActor_Implementation(const FTransform& transform, FDataTableRowHandle handle, UWorld* world_optional)
 {
@@ -82,18 +84,19 @@ bool UVBFUnitBase::SpawnUnitActor_Implementation(const FTransform& transform, FD
         return false;
     }
 
-    auto* actor_ptr = AVBFActorBase::StaticCreateObject(world_to_use, Execute_GetUnitActorClass(this), this, transform);
-
-    if (actor_ptr == nullptr)
-    {
-        return false;
-    }
-
     auto* ptr_row = handle.GetRow<DataTableType>("UVBFUnitBase::SpawnUnitActor_Implementation");
 
     if (ptr_row == nullptr)
     {
         checkf(false, TEXT("UVBFUnitBase::SpawnUnitActor_Implementation: ptr_row == nullptr, cannot get info from DT"))
+            return false;
+    }
+
+    //auto* actor_ptr = AVBFActorBase::StaticCreateObject(world_to_use, Execute_GetUnitActorClass(this), this, transform);
+    auto* actor_ptr = AVBFActorBase::StaticCreateObjectDeferred(world_to_use, ptr_row->UnitActorClass, this, transform);
+
+    if (actor_ptr == nullptr)
+    {
         return false;
     }
 
@@ -130,6 +133,9 @@ bool UVBFUnitBase::SpawnUnitActor_Implementation(const FTransform& transform, FD
         return false;
     }
 
+
+    UGameplayStatics::FinishSpawningActor(actor_ptr, transform);
+
     vbf_unit_actor = actor_ptr;
 
     return true;
@@ -154,6 +160,16 @@ bool UVBFUnitBase::IsEverMovable_Implementation() const
 
     return false;
 }
+bool UVBFUnitBase::CanMove_Implementation() const
+{
+    return Execute_IsEverMovable(this);
+}
+
+bool UVBFUnitBase::IsCommandable_Implementation() const
+{
+    return Execute_IsEverCommandable(this);
+}
+
 FVector UVBFUnitBase::GetDirection() const
 {
     return UKismetMathLibrary::GetForwardVector(vbf_unit_info.Rotation);

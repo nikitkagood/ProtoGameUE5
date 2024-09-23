@@ -60,7 +60,7 @@ public:
    
     void DestroyUnit_Implementation();
 
-    TSubclassOf<AActor> GetUnitActorClass_Implementation();
+    //TSubclassOf<AActor> GetUnitActorClass_Implementation();
 
     //General implementation
     //Since I found no way to dynamically change DataTableType, 
@@ -69,8 +69,11 @@ public:
 
     void DespawnUnitActor_Implementation();
 
-
     bool IsEverMovable_Implementation() const;
+
+    bool CanMove_Implementation() const;
+
+    bool IsCommandable_Implementation() const;
 
     bool IsEverCommandable_Implementation() const { return vbf_unit_info.IsEverCommandable; };
 

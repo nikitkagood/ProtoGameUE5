@@ -3,10 +3,9 @@
 
 #include "VBFUnitInfo.h"
 
-#include "VBFUnitBase.h"
-
 FVBFUnitInfoTable::FVBFUnitInfoTable()
 {
     UnitClass = StaticClass<UVBFUnitBase>();
+    UnitActorClass = StaticClass<AVBFActorBase>();
     MeshType = EUnitMeshType::None;
 }
