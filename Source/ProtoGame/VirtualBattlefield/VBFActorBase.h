@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "GameFramework/FloatingPawnMovement.h"
 #include "Interfaces/VBFUnitInterface.h"
+#include "Pawn/MoverNavPawn.h"
 
 #include "VBFActorBase.generated.h"
 
@@ -13,7 +14,7 @@ class UVBFUnitBase;
 class UPawnMovement;
 
 UCLASS(Blueprintable, BlueprintType, DefaultToInstanced)
-class PROTOGAME_API AVBFActorBase : public APawn
+class PROTOGAME_API AVBFActorBase : public AMoverNavPawn
 {
 	GENERATED_BODY()
 	
@@ -43,7 +44,7 @@ public:
 
 	//~ Begin APawn Interface.
 	//virtual void PostInitializeComponents() override;
-	virtual UPawnMovementComponent* GetMovementComponent() const override;
+	//virtual UPawnMovementComponent* GetMovementComponent() const override;
 	//virtual UPrimitiveComponent* GetMovementBase() const override final { return BasedMovement.MovementBase; }
 	//virtual float GetDefaultHalfHeight() const override;
 	//virtual void TurnOff() override;
@@ -67,14 +68,6 @@ protected:
 	//It's either Static or Skeletal
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	TObjectPtr<UMeshComponent> MeshComponent;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
-	TObjectPtr<UCapsuleComponent> CapsuleComponent;
-
-	//TODO: UFloatingPawnMovement is insufficient (doesn't implement gravity), while CharacterMovementComponent is an overkill and is hardcoded for ACharacter
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
-	TObjectPtr<UPawnMovement> MovementComponent;
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	//UStreamableRenderAsset* MeshRenderAsset;

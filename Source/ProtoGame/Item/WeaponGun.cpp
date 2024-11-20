@@ -379,7 +379,7 @@ USkeletalMeshComponent* UWeaponGun::CreateSKWeaponRepresentation(USceneComponent
 	sk_comp->SetGenerateOverlapEvents(false);
 
 	sk_comp->SetSkeletalMesh(GetSkeletalMeshFromItemActorCDO(), true);
-	sk_comp->SetAnimClass(GetAnimClass());
+	sk_comp->SetAnimInstanceClass(GetAnimClass());
 
 	sk_comp->RegisterComponent();
 
@@ -407,7 +407,7 @@ USkeletalMeshComponent* UWeaponGun::CreateSKForSceneCapture(USceneComponent* out
 	sk_comp->SetGenerateOverlapEvents(false);
 
 	sk_comp->SetSkeletalMesh(GetSkeletalMeshFromItemActorCDO(), true);
-	sk_comp->SetAnimClass(GetAnimClass());
+	sk_comp->SetAnimInstanceClass(GetAnimClass());
 
 	sk_comp->RegisterComponent();
 

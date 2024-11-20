@@ -14,6 +14,7 @@
 class UItemBase;
 class UStaticMeshComponent;
 class UDataTable;
+class UAnimInstance;
 
 UENUM(BlueprintType)
 enum class ItemObjectCreationMethod : uint8

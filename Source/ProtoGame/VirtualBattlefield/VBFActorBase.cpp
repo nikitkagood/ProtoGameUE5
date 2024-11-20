@@ -15,19 +15,15 @@ AVBFActorBase::AVBFActorBase()
 {
 	//SetRootComponent(CreateDefaultSubobject<USceneComponent>(TEXT("DefaultSceneComponent")));
 
-	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CapsuleCollisionComponent"));
-	CapsuleComponent->InitCapsuleSize(34.0f, 88.0f);
-	CapsuleComponent->SetCollisionProfileName(UCollisionProfile::BlockAllDynamic_ProfileName);
-	CapsuleComponent->CanCharacterStepUpOn = ECB_No;
-	CapsuleComponent->SetShouldUpdatePhysicsVolume(true);
-	CapsuleComponent->SetCanEverAffectNavigation(false);
-	CapsuleComponent->bDynamicObstacle = true;
+	//CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CapsuleCollisionComponent"));
+	//CapsuleComponent->InitCapsuleSize(34.0f, 88.0f);
+	//CapsuleComponent->SetCollisionProfileName(UCollisionProfile::BlockAllDynamic_ProfileName);
+	//CapsuleComponent->CanCharacterStepUpOn = ECB_No;
+	//CapsuleComponent->SetShouldUpdatePhysicsVolume(true);
+	//CapsuleComponent->SetCanEverAffectNavigation(false);
+	//CapsuleComponent->bDynamicObstacle = true;
 
-	SetRootComponent(CapsuleComponent);
-
-	MovementComponent = CreateDefaultSubobject<UPawnMovement>("CustomPawnMovement");
-	//MovementComponent = CreateDefaultSubobject<UCharacterMovementComponent>("CharacterMovementComponent");
-	MovementComponent->UpdatedComponent = GetRootComponent();
+	//SetRootComponent(CapsuleComponent);
 
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -81,9 +77,6 @@ void AVBFActorBase::BeginPlay()
 
 bool AVBFActorBase::SetupMeshComponent(UStreamableRenderAsset* render_asset)
 {
-	//TODO TEST
-	return true;
-
 	if (render_asset == nullptr)
 	{
 		return false;
@@ -161,12 +154,6 @@ TScriptInterface<IVBFUnitInterface> AVBFActorBase::GetVBFUnitInterface(bool& is_
 	is_valid = true;
 
 	return TScriptInterface<IVBFUnitInterface>(vbf_unit);
-}
-
-UPawnMovementComponent* AVBFActorBase::GetMovementComponent() const
-{
-	//return Cast<UPawnMovementComponent>(MovementComponent);
-	return MovementComponent;
 }
 
 //void AVBFActorBase::PostInitializeComponents()

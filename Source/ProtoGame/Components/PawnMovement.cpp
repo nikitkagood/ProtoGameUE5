@@ -217,6 +217,9 @@ void UPawnMovement::TickComponent(float DeltaTime, ELevelTick TickType, FActorCo
 
 UPawnMovement::UPawnMovement()
 {
+	SetComponentTickInterval(1.f / 30.f);
+	SetAsyncPhysicsTickEnabled(true);
+
 	//default values
 	NavAgentProps.bCanWalk = true;
 	NavAgentProps.bCanCrouch = false;
@@ -1025,9 +1028,9 @@ bool UPawnMovement::CanStopPathFollowing() const
 
 float UPawnMovement::GetPathFollowingBrakingDistance(float MaxSpeedParam) const
 {
-	if (bUseFixedBrakingDistanceForPaths)
+	if (NavMovementProperties.bUseFixedBrakingDistanceForPaths)
 	{
-		return FixedPathBrakingDistance;
+		return NavMovementProperties.FixedPathBrakingDistance;
 	}
 
 	const float BrakingDeceleration = FMath::Abs(GetBrakingDeceleration());

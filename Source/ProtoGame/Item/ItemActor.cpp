@@ -159,7 +159,7 @@ void AItemActor::StopDrawingOutline_Implementation()
 
 void AItemActor::SetAnimClass(TSubclassOf<UAnimInstance> anim_class)
 {
-	SkeletalMeshComp->SetAnimClass(anim_class);
+	SkeletalMeshComp->SetAnimInstanceClass(anim_class);
 }
 
 //void AItemActor::AttachItemActorToComponent(USceneComponent* Parent, EAttachmentRule AttachmentRule, bool weld, FName SocketName)

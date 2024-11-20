@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/FloatingPawnMovement.h"
+#include "WorldCollision.h"
 
 #include "PawnMovement.generated.h"
 
@@ -31,11 +32,12 @@ enum class PawnMovementMode
 	Custom		UMETA(DisplayName = "Custom"),
 };
 
+//DEPRECATED: UPawnMovement isn't finished and Mover is used instead
 //General movement component for Pawns (pretty much a better CharacterMovementComponent)
 //Aimed to be lightweight, as fast as possible and async, more features and customizibility
 // 
 //Features missing: some movement modes, Root Motion, replication
-UCLASS(Blueprintable, BlueprintType, meta = (BlueprintSpawnableComponent))
+UCLASS(meta = (Deprecated))
 class PROTOGAME_API UPawnMovement : public UFloatingPawnMovement
 {
 	GENERATED_BODY()

@@ -19,6 +19,7 @@ class UCameraComponent;
 class UAnimMontage;
 class USoundBase;
 class UCharacterMovementComponent;
+class UMeshComponent;
 //custom
 class UCustomCharacterMovementComponent;
 class UVitalityComponent;
