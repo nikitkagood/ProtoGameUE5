@@ -67,38 +67,38 @@ bool UVBFUnitLand::SpawnUnitActor_Implementation(const FTransform& transform, FD
         return false;
     }
 
-    UStreamableRenderAsset* temp_render_asset = nullptr;
+    //UStreamableRenderAsset* temp_render_asset = nullptr;
 
-    switch (ptr_row->unit_info_table.MeshType)
-    {
-    case EUnitMeshType::UseStaticMesh:
-        if (ptr_row->unit_info_table.StaticMesh == nullptr)
-        {
-            checkf(false, TEXT("UVBFUnitLand::SpawnUnitActor_Implementation: Cannot initialize mesh - it is not set in DataTable"))
-        }
+    //switch (ptr_row->unit_info_table.MeshType)
+    //{
+    //case EUnitMeshType::UseStaticMesh:
+    //    if (ptr_row->unit_info_table.StaticMesh == nullptr)
+    //    {
+    //        checkf(false, TEXT("UVBFUnitLand::SpawnUnitActor_Implementation: Cannot initialize mesh - it is not set in DataTable"))
+    //    }
 
-        temp_render_asset = ptr_row->unit_info_table.StaticMesh;
-        break;
-    case EUnitMeshType::UseSkeletalMesh:
-        if (ptr_row->unit_info_table.SkeletalMesh == nullptr)
-        {
-            checkf(false, TEXT("UVBFUnitLand::SpawnUnitActor_Implementation: Cannot initialize mesh - it is not set in DataTable"))
-        }
+    //    temp_render_asset = ptr_row->unit_info_table.StaticMesh;
+    //    break;
+    //case EUnitMeshType::UseSkeletalMesh:
+    //    if (ptr_row->unit_info_table.SkeletalMesh == nullptr)
+    //    {
+    //        checkf(false, TEXT("UVBFUnitLand::SpawnUnitActor_Implementation: Cannot initialize mesh - it is not set in DataTable"))
+    //    }
 
-        temp_render_asset = ptr_row->unit_info_table.SkeletalMesh;
-        break;
-    case EUnitMeshType::UseExternalSettings:
-        break;
-    default:
-        break;
-    }
+    //    temp_render_asset = ptr_row->unit_info_table.SkeletalMesh;
+    //    break;
+    //case EUnitMeshType::UseExternalSettings:
+    //    break;
+    //default:
+    //    break;
+    //}
 
-    bool result = actor_ptr->Initialize(temp_render_asset);
+    //bool result = actor_ptr->Initialize(temp_render_asset);
 
-    if (result == false)
-    {
-        return false;
-    }
+    //if (result == false)
+    //{
+    //    return false;
+    //}
 
     UGameplayStatics::FinishSpawningActor(actor_ptr, transform);
 

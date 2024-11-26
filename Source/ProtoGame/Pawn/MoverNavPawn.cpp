@@ -4,6 +4,7 @@
 #include "DefaultMovementSet/CharacterMoverComponent.h"
 #include "DefaultMovementSet/NavMoverComponent.h"
 #include "GameFramework/PlayerController.h"
+#include "DefaultMovementSet/Settings/CommonLegacyMovementSettings.h"
 
 struct FMoverInputCmdContext;
 struct FCharacterDefaultInputs;
@@ -20,6 +21,13 @@ AMoverNavPawn::AMoverNavPawn()
 	PrimaryActorTick.bCanEverTick = true;
 
 	SetReplicatingMovement(false);	// disable Actor-level movement replication, since our Mover component will handle it
+
+	//Navigation system uses 44 deg, default value is 0.71 which is smaller than exactly 44 deg
+	//thus Navigation may sent Pawn into a place where it will get stuck
+	//That's why we set 0.7195 - tiny bit more than 44 deg 
+	//Since Mover variable access is complicated, it's easier to set in BP
+	//auto* settings_ptr = CharacterMoverComponent->FindSharedSettings_Mutable<UCommonLegacyMovementSettings>();
+	//if (settings_ptr) {	settings_ptr->MaxWalkSlopeCosine = 0.7195; }
 }
 
 // Called when the game starts or when spawned
@@ -80,6 +88,8 @@ void AMoverNavPawn::ProduceInput_Implementation(int32 SimTimeMs, FMoverInputCmdC
 	//CharacterInputs is what has to be set in order for things to work
 	FCharacterDefaultInputs& CharacterInputs = OutInputCmd.InputCollection.FindOrAddMutableDataByType<FCharacterDefaultInputs>();
 
+	CharacterMoverComponent->GetMovementIntent();
+
 	if (Controller == nullptr)
 	{
 		if (GetLocalRole() == ENetRole::ROLE_Authority && GetRemoteRole() == ENetRole::ROLE_SimulatedProxy)
@@ -130,23 +140,28 @@ void AMoverNavPawn::ProduceInput_Implementation(int32 SimTimeMs, FMoverInputCmdC
 	{
 		FRotator Rotator = CharacterInputs.ControlRotation;
 		FVector FinalDirectionalIntent;
-		//if (const UCharacterMoverComponent* MoverComp = GetMoverComponent())
-		if (const UCharacterMoverComponent* MoverComp = CharacterMoverComponent)
-		{
-			if (MoverComp->IsOnGround() || MoverComp->IsFalling())
-			{
-				const FVector RotationProjectedOntoUpDirection = FVector::VectorPlaneProject(Rotator.Vector(), MoverComp->GetUpDirection()).GetSafeNormal();
-				Rotator = RotationProjectedOntoUpDirection.Rotation();
-			}
 
-			FinalDirectionalIntent = Rotator.RotateVector(CachedMoveInputIntent);
+		if (CharacterMoverComponent->IsOnGround() || CharacterMoverComponent->IsFalling())
+		{
+			const FVector RotationProjectedOntoUpDirection = FVector::VectorPlaneProject(Rotator.Vector(), CharacterMoverComponent->GetUpDirection()).GetSafeNormal();
+			Rotator = RotationProjectedOntoUpDirection.Rotation();
 		}
 
+		FinalDirectionalIntent = Rotator.RotateVector(CachedMoveInputIntent);
+
+		//Through series of experiments, it was discovered that interpolation here does nothing useful
 		CharacterInputs.SetMoveInput(EMoveInputType::DirectionalIntent, FinalDirectionalIntent);
 	}
 	else
 	{
-		CharacterInputs.SetMoveInput(EMoveInputType::Velocity, CachedMoveInputVelocity);
+		if (bInterpolateMoveInput && !FMath::IsNearlyZero(CharacterMoverComponent->GetMovementIntent().SquaredLength(), 0.05))
+		{
+			CharacterInputs.SetMoveInput(EMoveInputType::Velocity, FMath::VInterpTo(CharacterMoverComponent->GetMovementIntent(), CachedMoveInputVelocity, GetWorld()->DeltaTimeSeconds, MovementVelocityInterpSpd));
+		}
+		else
+		{
+			CharacterInputs.SetMoveInput(EMoveInputType::Velocity, CachedMoveInputVelocity);
+		}
 	}
 
 	// Normally cached input is cleared by OnMoveCompleted input event but that won't be called if movement came from nav movement
@@ -169,6 +184,7 @@ void AMoverNavPawn::ProduceInput_Implementation(int32 SimTimeMs, FMoverInputCmdC
 		{
 			// set the intent to the actors movement direction
 			CharacterInputs.OrientationIntent = CharacterInputs.GetMoveInput().GetSafeNormal();
+			//CharacterInputs.OrientationIntent = FMath::VInterpConstantTo(CharacterInputs.OrientationIntent, CharacterInputs.GetMoveInput().GetSafeNormal(), GetWorld()->DeltaTimeSeconds, MovementInterpolationSpeed);
 		}
 		else
 		{
@@ -277,5 +293,15 @@ FVector AMoverNavPawn::GetNavAgentLocation() const
 	}
 
 	return AgentLocation;
+}
+
+const FMoverDefaultSyncState* AMoverNavPawn::GetMoverSyncState() const
+{
+	return CharacterMoverComponent ? CharacterMoverComponent->GetSyncState().SyncStateCollection.FindDataByType<FMoverDefaultSyncState>() : nullptr;
+}
+
+FMoverDefaultSyncState* AMoverNavPawn::GetMoverSyncStateMutable() const
+{
+	return CharacterMoverComponent ? CharacterMoverComponent->GetSyncState().SyncStateCollection.FindMutableDataByType<FMoverDefaultSyncState>() : nullptr;
 }
 

@@ -36,6 +36,7 @@ AVBFActorBase* AVBFActorBase::StaticCreateObjectDeferred(UWorld* world, TSubclas
 	if (actor_class != nullptr
 		&& UKismetMathLibrary::ClassIsChildOf(actor_class, AVBFActorBase::StaticClass()) == false)
 	{
+		checkf(false, TEXT("Error: AVBFActorBase::StaticCreateObjectDeferred: not a valid class for Actor"));
 		return nullptr;
 	}
 
@@ -75,61 +76,69 @@ void AVBFActorBase::BeginPlay()
 	
 }
 
-bool AVBFActorBase::SetupMeshComponent(UStreamableRenderAsset* render_asset)
-{
-	if (render_asset == nullptr)
-	{
-		return false;
-	}
-
-	if (IsValid(MeshComponent))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("AVBFActorBase::SetupMeshComponent: MeshComponent is set already"))
-			return false;
-	}
-
-	if (render_asset->GetClass() == UStaticMesh::StaticClass())
-	{
-		MeshComponent = NewObject<UStaticMeshComponent>(this, UStaticMeshComponent::StaticClass(), TEXT("StaticMeshComp"));
-
-		auto* StaticMeshComp = Cast<UStaticMeshComponent>(MeshComponent);
-		StaticMeshComp->SetStaticMesh(Cast<UStaticMesh>(render_asset));
-
-		MeshComponent->SetEnableGravity(false);
-		MeshComponent->SetSimulatePhysics(false);
-		MeshComponent->CanCharacterStepUpOn = ECanBeCharacterBase::ECB_No;
-		MeshComponent->SetGenerateOverlapEvents(true);
-		MeshComponent->SetCollisionProfileName("BlockAllDynamic");
-	}
-	else if (render_asset->GetClass() == USkeletalMesh::StaticClass())
-	{
-		MeshComponent = NewObject<USkeletalMeshComponent>(this, USkeletalMeshComponent::StaticClass(), TEXT("SkeletalMeshComp"));
-
-		auto* SkeletalMeshComp = Cast<USkeletalMeshComponent>(MeshComponent);
-
-		SkeletalMeshComp->SetSkeletalMeshAsset(Cast<USkeletalMesh>(render_asset));
-		SkeletalMeshComp->bCollideWithAttachedChildren = false;
-
-		MeshComponent->SetEnableGravity(false);
-		MeshComponent->SetSimulatePhysics(false);
-		MeshComponent->CanCharacterStepUpOn = ECanBeCharacterBase::ECB_No;
-		MeshComponent->SetGenerateOverlapEvents(true);
-		MeshComponent->SetCollisionProfileName("BlockAllDynamic");
-	}
-	else
-	{
-		return false;
-	}
-
-	//UE_LOG(LogTemp, Warning, TEXT("TEST: RelativeTransform: %s"), *GetRootComponent()->GetRelativeTransform().ToString())
-	//MeshComponent->SetupAttachment(GetRootComponent(), {});
-	MeshComponent->SetRelativeTransform(GetRootComponent()->GetRelativeTransform());
-	//FAttachmentTransformRules rules { EAttachmentRule::SnapToTarget, true };
-	//MeshComponent->AttachToComponent(GetRootComponent(), rules);
-	MeshComponent->RegisterComponent();
-
-	return true;
-}
+//bool AVBFActorBase::SetupMeshComponent(UStreamableRenderAsset* render_asset)
+//{
+//	if (render_asset == nullptr)
+//	{
+//		return false;
+//	}
+//
+//	if (IsValid(MeshComponent))
+//	{
+//		UE_LOG(LogTemp, Warning, TEXT("AVBFActorBase::SetupMeshComponent: MeshComponent is set already"))
+//			return false;
+//	}
+//
+//	if (render_asset->GetClass() == UStaticMesh::StaticClass())
+//	{
+//		MeshComponent = NewObject<UStaticMeshComponent>(this, UStaticMeshComponent::StaticClass(), TEXT("StaticMeshComp"));
+//
+//		auto* StaticMeshComp = Cast<UStaticMeshComponent>(MeshComponent);
+//		StaticMeshComp->SetStaticMesh(Cast<UStaticMesh>(render_asset));
+//
+//		MeshComponent->SetEnableGravity(false);
+//		MeshComponent->SetSimulatePhysics(false);
+//		MeshComponent->CanCharacterStepUpOn = ECanBeCharacterBase::ECB_No;
+//		MeshComponent->SetGenerateOverlapEvents(true);
+//		MeshComponent->SetCollisionProfileName("BlockAllDynamic");
+//	}
+//	else if (render_asset->GetClass() == USkeletalMesh::StaticClass())
+//	{
+//		MeshComponent = NewObject<USkeletalMeshComponent>(this, USkeletalMeshComponent::StaticClass(), TEXT("SkeletalMeshComp"));
+//
+//		auto* SkeletalMeshComp = Cast<USkeletalMeshComponent>(MeshComponent);
+//
+//		SkeletalMeshComp->SetSkeletalMeshAsset(Cast<USkeletalMesh>(render_asset));
+//		SkeletalMeshComp->bCollideWithAttachedChildren = false;
+//
+//		MeshComponent->SetEnableGravity(false);
+//		MeshComponent->SetSimulatePhysics(false);
+//		MeshComponent->CanCharacterStepUpOn = ECanBeCharacterBase::ECB_No;
+//		MeshComponent->SetGenerateOverlapEvents(true);
+//		MeshComponent->SetCollisionProfileName("BlockAllDynamic");
+//	}
+//	else
+//	{
+//		return false;
+//	}
+//
+//	//UE_LOG(LogTemp, Warning, TEXT("TEST: RelativeTransform: %s"), *GetRootComponent()->GetRelativeTransform().ToString())
+//	//MeshComponent->SetupAttachment(GetRootComponent(), {});
+//	if (GetRootComponent() != nullptr)
+//	{
+//		MeshComponent->SetRelativeTransform(GetRootComponent()->GetRelativeTransform());
+//	}
+//	else
+//	{
+//		UE_LOG(LogTemp, Warning, TEXT("AVBFActorBase::SetupMeshComponent: failed to set relative transform: Root is null"));
+//	}
+//
+//	//FAttachmentTransformRules rules { EAttachmentRule::SnapToTarget, true };
+//	//MeshComponent->AttachToComponent(GetRootComponent(), rules);
+//	MeshComponent->RegisterComponent();
+//
+//	return true;
+//}
 
 // Called every frame
 void AVBFActorBase::Tick(float DeltaTime)
@@ -138,10 +147,11 @@ void AVBFActorBase::Tick(float DeltaTime)
 
 }
 
-bool AVBFActorBase::Initialize(UStreamableRenderAsset* render_asset)
-{
-	return SetupMeshComponent(render_asset);
-}
+//bool AVBFActorBase::Initialize(UStreamableRenderAsset* render_asset)
+//{
+//	//return SetupMeshComponent(render_asset);
+//	return true;
+//}
 
 TScriptInterface<IVBFUnitInterface> AVBFActorBase::GetVBFUnitInterface(bool& is_valid)
 {

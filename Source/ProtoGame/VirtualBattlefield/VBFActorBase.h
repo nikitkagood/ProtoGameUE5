@@ -26,8 +26,8 @@ public:
 
 	virtual void Tick(float DeltaTime) override;
 
-	UFUNCTION()
-	virtual bool Initialize(UStreamableRenderAsset* render_asset);
+	//UFUNCTION()
+	//virtual bool Initialize(UStreamableRenderAsset* render_asset);
 
 	UFUNCTION(BlueprintCallable)
 	TScriptInterface<IVBFUnitInterface> GetVBFUnitInterface(bool& is_valid);
@@ -62,12 +62,12 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	UFUNCTION(BlueprintCallable)
-	bool SetupMeshComponent(UStreamableRenderAsset* render_asset);
+	//UFUNCTION(BlueprintCallable)
+	//bool SetupMeshComponent(UStreamableRenderAsset* render_asset);
 
 	//It's either Static or Skeletal
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
-	TObjectPtr<UMeshComponent> MeshComponent;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	//TObjectPtr<UMeshComponent> MeshComponent;
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	//UStreamableRenderAsset* MeshRenderAsset;

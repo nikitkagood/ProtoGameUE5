@@ -100,38 +100,38 @@ bool UVBFUnitBase::SpawnUnitActor_Implementation(const FTransform& transform, FD
         return false;
     }
 
-    UStreamableRenderAsset* temp_render_asset = nullptr;
+ //   UStreamableRenderAsset* temp_render_asset = nullptr;
 
-    switch (ptr_row->MeshType)
-	{
-	case EUnitMeshType::UseStaticMesh:
-		if (ptr_row->StaticMesh == nullptr)
-		{
-			checkf(false, TEXT("UVBFUnitBase::SpawnUnitActor_Implementation: Cannot initialize mesh - it is not set in DataTable"))
-		}
+ //   switch (ptr_row->MeshType)
+	//{
+	//case EUnitMeshType::UseStaticMesh:
+	//	if (ptr_row->StaticMesh == nullptr)
+	//	{
+	//		checkf(false, TEXT("UVBFUnitBase::SpawnUnitActor_Implementation: Cannot initialize mesh - it is not set in DataTable"))
+	//	}
 
-        temp_render_asset = ptr_row->StaticMesh;
-		break;
-	case EUnitMeshType::UseSkeletalMesh:
-		if (ptr_row->SkeletalMesh == nullptr)
-		{
-			checkf(false, TEXT("UVBFUnitBase::SpawnUnitActor_Implementation: Cannot initialize mesh - it is not set in DataTable"))
-		}
+ //       temp_render_asset = ptr_row->StaticMesh;
+	//	break;
+	//case EUnitMeshType::UseSkeletalMesh:
+	//	if (ptr_row->SkeletalMesh == nullptr)
+	//	{
+	//		checkf(false, TEXT("UVBFUnitBase::SpawnUnitActor_Implementation: Cannot initialize mesh - it is not set in DataTable"))
+	//	}
 
-        temp_render_asset = ptr_row->SkeletalMesh;
-		break;
-	case EUnitMeshType::UseExternalSettings:
-		break;
-	default:
-		break;
-	}
+ //       temp_render_asset = ptr_row->SkeletalMesh;
+	//	break;
+	//case EUnitMeshType::UseExternalSettings:
+	//	break;
+	//default:
+	//	break;
+	//}
 
-    bool result = actor_ptr->Initialize(temp_render_asset);
+    //bool result = actor_ptr->Initialize(temp_render_asset);
 
-    if (result == false)
-    {
-        return false;
-    }
+    //if (result == false)
+    //{
+    //    return false;
+    //}
 
 
     UGameplayStatics::FinishSpawningActor(actor_ptr, transform);

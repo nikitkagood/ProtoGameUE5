@@ -22,6 +22,8 @@ class UCharacterMoverComponent;
 //-NavWalking is just simplified Walking and isn't mandatory even when AI navigation is used
 //-CachedMoveInputIntent and CachedMoveInputVelocity are for RequestMoveByIntent/Velocity, they can be cut out
 
+//Pawn that uses Mover and NavMover
+//TODO: When intent suddenly changes in completely opposite direction it looks weird
 UCLASS()
 class PROTOGAME_API AMoverNavPawn : public APawn, public IMoverInputProducerInterface
 {
@@ -43,6 +45,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	//~ Begin IMoverInputProducerInterface
+	
 	//Option to override it in BP has been removed for simplicity
 	virtual void ProduceInput_Implementation(int32 SimTimeMs, FMoverInputCmdContext& OutInputCmd) override;
 	//~ End IMoverInputProducerInterface
@@ -59,7 +62,24 @@ public:
 	UFUNCTION(BlueprintCallable, Category = MoverNavPawn)
 	virtual void RequestMoveByVelocity(const FVector& DesiredVelocity) { CachedMoveInputVelocity = DesiredVelocity; }
 
+	//Mover has an unusual variable access. They are stored in a SyncState.
+	const FMoverDefaultSyncState* GetMoverSyncState() const;
+
+protected:
+	FMoverDefaultSyncState* GetMoverSyncStateMutable() const;
+
 public:
+	//Using interpolation to smooth change in velocity direction
+	//Note that it's not going to interpolate when MovementInput is too small
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = MoverNavPawn)
+	bool bInterpolateMoveInput = true;
+
+	//Speed of interpolation. The value heavily depends on type of interpolation function.
+	//VInterpTo: 0.002 is suitable for something on foot and almost instantly changes direction
+	//VInterpConstTO: more like 45 or so
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = MoverNavPawn)
+	float MovementVelocityInterpSpd = 0.002;
+
 	// Whether or not we author our movement inputs relative to whatever base we're standing on, or leave them in world space
 	UPROPERTY(BlueprintReadWrite, Category = MoverNavPawn)
 	bool bUseBaseRelativeMovement = true;
@@ -93,7 +113,10 @@ protected:
 	TObjectPtr<UNavMoverComponent> NavMoverComponent;
 
 private:
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = MoverNavPawn)
 	FVector CachedMoveInputIntent;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = MoverNavPawn)
 	FVector CachedMoveInputVelocity;
 
 	FVector LastAffirmativeMoveInput = FVector::ZeroVector;	// Movement input (intent or velocity) the last time we had one that wasn't zero
