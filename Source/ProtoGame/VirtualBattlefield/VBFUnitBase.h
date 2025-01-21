@@ -9,12 +9,13 @@
 #include "VBFActorBase.h"
 
 #include "Interfaces/VBFUnitInterface.h"
+#include "Interfaces/DisplayInfo.h"
 
 #include "VBFUnitBase.generated.h"
 
 //Virtual Battlefield unit base class
 UCLASS(Blueprintable, BlueprintType, DefaultToInstanced, Abstract, ClassGroup = VirtualBattlefield, Meta = (BlueprintSpawnableComponent = false))
-class PROTOGAME_API UVBFUnitBase : public UObject, public IVBFUnitInterface
+class PROTOGAME_API UVBFUnitBase : public UObject, public IVBFUnitInterface, public IDisplayInfo
 {
     GENERATED_BODY()
 public:
@@ -26,8 +27,16 @@ public:
     //UFUNCTION(BlueprintCallable)
     //static UVBFUnitBase* ConstructVBFUnit(UObject* outer, FDataTableRowHandle handle);
 
+    //Mostly for setting necessary data from DataTable
+    //"override completely" is used pattern (opposed to Super::Initialize() ... *this class*)
+    // - to avoid lots of method calls
     UFUNCTION(BlueprintCallable)
     virtual bool Initialize(FDataTableRowHandle handle);
+
+    //TODO: think of efficient way of doing this
+    //Update UnitObject with Actor data
+    //UFUNCTION(BlueprintCallable)
+    //virtual bool SyncWithActor();
 public:
 
     UFUNCTION(BlueprintCallable)
@@ -41,22 +50,16 @@ public:
     //IVBFUnitInterface
 
     FText GetName_Implementation() const { return vbf_unit_info.Name; }
-
     FVector GetLocation_Implementation() const { return vbf_unit_info.Location; };
-
     FRotator GetRotation_Implementation() const { return vbf_unit_info.Rotation; };
 
     double GetSpeed_Implementation() const { return vbf_unit_info.Speed; };
-
     double GetMaxSpeed_Implementation() const { return vbf_unit_info.MaxSpeed; };
 
 
     bool SetName_Implementation(const FText& name) { vbf_unit_info.Name = name; return true; };
-
     bool SetLocation_Implementation(const FVector& new_position) { vbf_unit_info.Location = new_position; return true; };
-
     bool SetRotation_Implementation(const FRotator& new_rotation) { vbf_unit_info.Rotation = new_rotation; return true; };
-
    
     void DestroyUnit_Implementation();
 
@@ -65,17 +68,24 @@ public:
     //General implementation
     //Since I found no way to dynamically change DataTableType, 
     //this is purely for example and has to be overriden
-    bool SpawnUnitActor_Implementation(const FTransform& transform, FDataTableRowHandle handle, UWorld* world_optional = nullptr);
-
+    bool SpawnUnitActor_Implementation(const FTransform& transform, const FVector& normal, FDataTableRowHandle handle, UWorld* world_optional = nullptr);
     void DespawnUnitActor_Implementation();
 
-    bool IsEverMovable_Implementation() const;
 
-    bool CanMove_Implementation() const;
+    bool TryMoveTo_Implementation(const FVector& location) { return false; };
+    bool AttackMove_Implementation(const FVector& location) { return false; };
+    bool StopMovement_ResetPlayerTarget_Implementation() { return false; };
+    bool Attack_Implementation(UObject* target) { return false; };
+
+
+    bool IsEverMovable_Implementation() const { return false; };
+
+    bool CanMove_Implementation() const { return false; };
 
     bool IsCommandable_Implementation() const;
 
     bool IsEverCommandable_Implementation() const { return vbf_unit_info.IsEverCommandable; };
+
 
 
     //IVBFUnitInterface end

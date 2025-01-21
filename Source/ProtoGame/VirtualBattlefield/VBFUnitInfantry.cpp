@@ -5,11 +5,11 @@
 
 bool UVBFUnitInfantry::Initialize(FDataTableRowHandle handle)
 {
-    auto* ptr_row = handle.GetRow<DataTableType>("UVBFUnitLand::Initialize");
+    auto* ptr_row = handle.GetRow<DataTableType>("UVBFUnitInfantry::Initialize");
 
     if (ptr_row == nullptr)
     {
-        checkf(false, TEXT("UVBFUnitLand::Initialize failed to get row from DataTable"))
+        checkf(false, TEXT("UVBFUnitInfantry::Initialize failed to get row from DataTable"))
             return false;
     }
 

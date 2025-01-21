@@ -297,6 +297,15 @@ void AGameCharacterBase::EndFireActive()
 
 bool AGameCharacterBase::EquipGun(UItemBase* item)
 {
+	//TODO: Trying to resolve SkeletalMesh bone container not valid crash
+	//return false;
+
+	if (IsValid(GetMesh()))
+	{
+		checkf(false, TEXT("AGameCharacterBase::EquipGun: Main Mesh not valid"));
+		return false;
+	}
+
 	if(item->IsA<UWeaponGun>() == false)
 	{
 		return false;
@@ -333,9 +342,15 @@ void AGameCharacterBase::UpdateAllWeaponSlots()
 
 void AGameCharacterBase::UpdateWeaponSlot(UInvSpecialSlotComponent* slot)
 {
+	if (IsValid(GetMesh()))
+	{
+		checkf(false, TEXT("AGameCharacterBase::UpdateWeaponSlot: Main Mesh not valid"));
+		return;
+	}
+
 	if (slot == nullptr)
 	{
-		checkf(false, TEXT("Trying to update invalid special slot: is this correct?"));
+		checkf(false, TEXT("Trying to update invalid special slot"));
 		return;
 	}
 

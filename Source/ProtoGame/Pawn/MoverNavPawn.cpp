@@ -6,6 +6,8 @@
 #include "GameFramework/PlayerController.h"
 #include "DefaultMovementSet/Settings/CommonLegacyMovementSettings.h"
 
+DEFINE_LOG_CATEGORY(LogMoverPawn)
+
 struct FMoverInputCmdContext;
 struct FCharacterDefaultInputs;
 
@@ -103,21 +105,6 @@ void AMoverNavPawn::ProduceInput_Implementation(int32 SimTimeMs, FMoverInputCmdC
 		return;
 	}
 
-	//Skipped
-	//if (USpringArmComponent* SpringComp = FindComponentByClass<USpringArmComponent>())
-	//{
-	//	// This is not best practice: do not search for component every frame
-	//	SpringComp->bUsePawnControlRotation = true;
-	//}
-
-	CharacterInputs.ControlRotation = FRotator::ZeroRotator;
-
-	APlayerController* PC = Cast<APlayerController>(Controller);
-	if (PC)
-	{
-		CharacterInputs.ControlRotation = PC->GetControlRotation();
-	}
-
 	bool bRequestedNavMovement = false;
 	if (NavMoverComponent)
 	{
@@ -176,6 +163,8 @@ void AMoverNavPawn::ProduceInput_Implementation(int32 SimTimeMs, FMoverInputCmdC
 	const bool bHasAffirmativeMoveInput = (CharacterInputs.GetMoveInput().Size() >= RotationMagMin);
 
 	// Figure out intended orientation
+	CharacterInputs.ControlRotation = Controller->GetControlRotation();
+
 	CharacterInputs.OrientationIntent = FVector::ZeroVector;
 
 	if (bHasAffirmativeMoveInput)

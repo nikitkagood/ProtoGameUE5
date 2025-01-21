@@ -15,9 +15,9 @@ class PROTOGAME_API UVBFUnitInfantry : public UVBFUnitLand
 
 	using DataTableType = FVBFUnitInfantryInfoTable;
 
-protected:
-	virtual bool Initialize(FDataTableRowHandle handle) override;
 public:
+	virtual bool Initialize(FDataTableRowHandle handle) override;
+
 	//bool SpawnUnitActor_Implementation(const FTransform& transform, FDataTableRowHandle handle, UWorld* world_optional = nullptr);
 
 

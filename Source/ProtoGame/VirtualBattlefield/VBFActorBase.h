@@ -14,13 +14,14 @@ class UVBFUnitBase;
 class UPawnMovement;
 
 UCLASS(Blueprintable, BlueprintType, DefaultToInstanced)
-class PROTOGAME_API AVBFActorBase : public AMoverNavPawn
+class PROTOGAME_API AVBFActorBase : public AMoverNavPawn // IVBFUnitInterface is added via composition
 {
 	GENERATED_BODY()
 	
 public:	
 	AVBFActorBase();
 
+	//Spawn Actor deferred
 	//UGameplayStatics::FinishSpawningActor has to be called manually
 	static AVBFActorBase* StaticCreateObjectDeferred(UWorld* world, TSubclassOf<AActor> actor_class, UVBFUnitBase* unit_object, const FTransform& transform, ESpawnActorCollisionHandlingMethod collision_handling = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn);
 
@@ -29,11 +30,12 @@ public:
 	//UFUNCTION()
 	//virtual bool Initialize(UStreamableRenderAsset* render_asset);
 
+	//Since VBF unit actually implements this interface and we don't want to implement lots of new methods
+	//that just reroute interface calls
 	UFUNCTION(BlueprintCallable)
 	TScriptInterface<IVBFUnitInterface> GetVBFUnitInterface(bool& is_valid);
 
 	UVBFUnitBase* GetVBFUnit() { return vbf_unit; };
-
 	const UVBFUnitBase* GetVBFUnit() const { return vbf_unit; };
 
 	UFUNCTION()
@@ -72,7 +74,6 @@ protected:
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	//UStreamableRenderAsset* MeshRenderAsset;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	TObjectPtr<UVBFUnitBase> vbf_unit;
-
 };

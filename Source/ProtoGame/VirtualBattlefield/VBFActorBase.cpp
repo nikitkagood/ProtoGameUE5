@@ -58,9 +58,7 @@ AVBFActorBase* AVBFActorBase::StaticCreateObjectDeferred(UWorld* world, TSubclas
 
 	//FVector closest_point;
 	//auto distance_to_collision = spawned_actor->ActorGetDistanceToCollision(transform.GetLocation(), ECollisionChannel::ECC_WorldStatic, closest_point);
-
 	//UE_LOG(LogTemp, Warning, TEXT("ActorGetDistanceToCollision: %d, closest point: %s"), distance_to_collision, *closest_point.ToString());
-
 
 	//TODO: test ownership of UVBFUnitBase
 	//unit_object->Rename(nullptr, world);

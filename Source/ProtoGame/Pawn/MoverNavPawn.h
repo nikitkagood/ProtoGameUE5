@@ -8,6 +8,8 @@
 
 #include "MoverNavPawn.generated.h"
 
+DECLARE_LOG_CATEGORY_EXTERN(LogMoverPawn, Log, All);
+
 class UNavMoverComponent;
 class UCharacterMoverComponent;
 
@@ -65,6 +67,13 @@ public:
 	//Mover has an unusual variable access. They are stored in a SyncState.
 	const FMoverDefaultSyncState* GetMoverSyncState() const;
 
+
+	//UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = MoverNavPawn)
+	//bool GetDesiredRotationRef(FRotator& OutRotation);
+	//FRotator* GetDesiredRotationPtr(bool& OutResult);
+
+	//Set where ProduceInput will source it's desired rotation from
+	//bool SetDesiredRotationRef(FRotator& OutRotation);
 protected:
 	FMoverDefaultSyncState* GetMoverSyncStateMutable() const;
 
@@ -84,15 +93,12 @@ public:
 	UPROPERTY(BlueprintReadWrite, Category = MoverNavPawn)
 	bool bUseBaseRelativeMovement = true;
 
-	/**
-	 * If true, rotate the Character toward the direction the actor is moving
-	 */
+	//If true, rotate the Character toward the direction the actor is moving
+	//If false controller values will be used
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = MoverNavPawn)
 	bool bOrientRotationToMovement = true;
 
-	/**
-	 * If true, the actor will remain vertical despite any rotation applied to the actor
-	 */
+	// canceling out any z intent if the actor is supposed to remain vertical
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = MoverNavPawn)
 	bool bShouldRemainVertical = true;
 

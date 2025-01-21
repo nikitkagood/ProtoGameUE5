@@ -68,6 +68,9 @@ enum class EVBFDamageType : uint8
 	Thermal,
 	Chemical,
 	Electrical,
+
+	//Some other logic that bypasses provided implementations
+	Custom,
 };
 
 UENUM(BlueprintType)
@@ -78,14 +81,10 @@ enum class EWeaponAccuracyType : uint8
 	Constant,					
 	//Degrees, thus accuracy just linearly decreases
 	Linear,			
-	//Accuracy changes based on distance and controlled via numerical breakpoints
-	DistanceBreakpointsCurve,
-
-	//TODO:It's not actually implemented yet cause breakpoints seems simplier
 	//Accuracy changes based on distance and controlled via curve
-	//DistanceCurve	UMETA(DisplayName = "DistanceCurve"),
+	Curve	UMETA(DisplayName = "Curve"),
 
-	//Some other logic
+	//Some other logic that bypasses provided implementations
 	Custom,
 };
 
@@ -204,7 +203,7 @@ public:
 	//double MOAToMils(double MOA) { return MOA / 3, 4377; };
 
 	//Hit chance of weapon itself, unaffected by anything else
-	//Obviously this is an approximation. Actually firing any projectiles against complex shapes is different.
+	//This is an approximation. Actually firing any projectiles against complex shapes is different.
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
 	double GetWeaponHitChance(double target_distance, const FVector& target_location, const FVector& target_size, double target_speed) const;
 

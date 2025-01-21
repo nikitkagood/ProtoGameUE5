@@ -67,12 +67,12 @@ public:
 	//UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Utility")
 	//TSubclassOf<AActor> GetUnitActorClass();
 
-	//Only world representation (i.e. actor) is affected, should not affect unit for gameplay purposes
-	//In BP there is no easy way to get World, so it comes from Unit Object
+	//Spawns Unit Actor in the world
+	//Tries to adjust spawn location
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Utility")
-	bool SpawnUnitActor(const FTransform& transform, FDataTableRowHandle handle, UWorld* world_optional = nullptr);
+	bool SpawnUnitActor(const FTransform& transform, const FVector& normal, FDataTableRowHandle handle, UWorld* world_optional = nullptr);
 
-	//Only world representation (i.e. actor) is affected, should not affect unit for gameplay purposes
+	//Despawn Unit Actor
 	//Cannot fail
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Utility")
 	void DespawnUnitActor();
@@ -81,7 +81,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Utility")
 	TArray<FString> GetDisplayData();
 
-	//False if unit is purely virtual
+	//True if unit has in-world representation, usually it means spawned Actor
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Utility")
 	bool IsInWorld() const;
 
@@ -98,7 +98,7 @@ public:
 					
 	//Stops movement and resets target if it was set by player
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Commands")
-	bool StopMovementAndTarget();																	 
+	bool StopMovement_ResetPlayerTarget();																	 
 	
 	//Choose a certain target manually
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "IVBFUnitInterface Commands")

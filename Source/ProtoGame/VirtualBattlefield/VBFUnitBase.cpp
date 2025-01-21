@@ -59,7 +59,7 @@ void UVBFUnitBase::DestroyUnit_Implementation()
 //    return AVBFActorBase::StaticClass();
 //}
 
-bool UVBFUnitBase::SpawnUnitActor_Implementation(const FTransform& transform, FDataTableRowHandle handle, UWorld* world_optional)
+bool UVBFUnitBase::SpawnUnitActor_Implementation(const FTransform& transform, const FVector& normal, FDataTableRowHandle handle, UWorld* world_optional)
 {
     if (IsValid(vbf_unit_actor) == true)
     {
@@ -149,20 +149,6 @@ void UVBFUnitBase::DespawnUnitActor_Implementation()
     }
 
     vbf_unit_actor->Destroy();
-}
-
-bool UVBFUnitBase::IsEverMovable_Implementation() const
-{
-    if(vbf_unit_info.MaxSpeed > 0)
-    {
-        return true;
-    }
-
-    return false;
-}
-bool UVBFUnitBase::CanMove_Implementation() const
-{
-    return Execute_IsEverMovable(this);
 }
 
 bool UVBFUnitBase::IsCommandable_Implementation() const

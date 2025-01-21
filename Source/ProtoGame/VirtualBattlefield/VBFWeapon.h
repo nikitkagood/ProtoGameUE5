@@ -35,7 +35,7 @@ struct FVBFWeaponInfo : public FTableRowBase
 	uint8 WeaponType;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	bool IsActive;
+	bool IsActive = true;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TArray<FVBFDamageInfo> DamageInfo;
@@ -44,16 +44,16 @@ struct FVBFWeaponInfo : public FTableRowBase
 	//The less the better
 	//1 mil at 100m = 10cm
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	double AccuracyMilliradians;
+	double AccuracyMilliradians = 0;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	double InitialVelocity;
+	double InitialVelocity = 1;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	int64 AmmoMax = 1;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	int64 AmmoLeft;
+	int64 AmmoLeft = 0;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	const UObject* Target;

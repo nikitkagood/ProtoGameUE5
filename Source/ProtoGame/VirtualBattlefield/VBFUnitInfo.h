@@ -26,18 +26,18 @@ struct PROTOGAME_API FVBFUnitInfo : public FTableRowBase
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	FRotator Rotation;
 
-	//In m/s
+	//In UE units: m/s
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	double Speed;
 
-	//In m/s
+	//In UE units: m/s
+	//MaxSpeed of 0 is used to indicate that unit cannot move at all
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true, ClampMin = 0, UIMax = 1000))
 	double MaxSpeed;
 
 	//Things cannot occupy the same space so we have to account for it
-	//Also may be useful for other things
-	//In meters
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true, ClampMin = 0, UIMax = 100))
+	//Also may be useful for other things like accuracy calculations
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true, ClampMin = 0.01, UIMax = 5000))
 	FVector Size{ 1., 1., 1. };
 };
 

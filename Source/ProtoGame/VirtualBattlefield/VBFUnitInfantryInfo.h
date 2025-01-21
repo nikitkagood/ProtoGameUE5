@@ -16,12 +16,12 @@ struct PROTOGAME_API FVBFUnitInfantryInfo : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	int32 MaxSoldierCount = 6;
+	int32 MaxSoldierCount = 1;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	int32 SoldierCount = MaxSoldierCount;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	TArray<UVBFWeapon*> Weapons;
 };
 
@@ -29,6 +29,8 @@ USTRUCT(BlueprintType)
 struct PROTOGAME_API FVBFUnitInfantryInfoTable : public FTableRowBase
 {
 	GENERATED_BODY()
+
+	FVBFUnitInfantryInfoTable();
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	FVBFUnitLandInfoTable unit_land_table;
