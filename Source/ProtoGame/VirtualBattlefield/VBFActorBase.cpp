@@ -4,7 +4,7 @@
 #include "VirtualBattlefield/VBFActorBase.h"
 
 #include "VBFUnitBase.h"
-#include "Components/PawnMovement.h"
+//#include "Components/PawnMovement.h"
 
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/GameplayStatics.h"

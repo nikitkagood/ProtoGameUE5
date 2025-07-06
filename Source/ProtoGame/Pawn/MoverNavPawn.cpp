@@ -105,18 +105,20 @@ void AMoverNavPawn::ProduceInput_Implementation(int32 SimTimeMs, FMoverInputCmdC
 		return;
 	}
 
+	//TODO: Unreal 5.6 changed variables, needs fixing
+	//ConsumeNavMovementData?
 	bool bRequestedNavMovement = false;
 	if (NavMoverComponent)
 	{
-		bRequestedNavMovement = NavMoverComponent->bRequestedNavMovement;
+		//bRequestedNavMovement = NavMoverComponent->bRequestedNavMovement; //removed from engine
 		if (bRequestedNavMovement)
 		{
-			CachedMoveInputIntent = NavMoverComponent->CachedNavMoveInputIntent;
-			CachedMoveInputVelocity = NavMoverComponent->CachedNavMoveInputVelocity;
+			//CachedMoveInputIntent = NavMoverComponent->CachedNavMoveInputIntent;
+			//CachedMoveInputVelocity = NavMoverComponent->CachedNavMoveInputVelocity;
 
-			NavMoverComponent->bRequestedNavMovement = false;
-			NavMoverComponent->CachedNavMoveInputIntent = FVector::ZeroVector;
-			NavMoverComponent->CachedNavMoveInputVelocity = FVector::ZeroVector;
+			//NavMoverComponent->bRequestedNavMovement = false;
+			//NavMoverComponent->CachedNavMoveInputIntent = FVector::ZeroVector;
+			//NavMoverComponent->CachedNavMoveInputVelocity = FVector::ZeroVector;
 		}
 	}
 
