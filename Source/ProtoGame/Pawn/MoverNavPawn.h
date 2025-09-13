@@ -90,7 +90,7 @@ public:
 	float MovementVelocityInterpSpd = 0.002;
 
 	// Whether or not we author our movement inputs relative to whatever base we're standing on, or leave them in world space
-	UPROPERTY(BlueprintReadWrite, Category = MoverNavPawn)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = MoverNavPawn)
 	bool bUseBaseRelativeMovement = true;
 
 	//If true, rotate the Character toward the direction the actor is moving
@@ -110,7 +110,7 @@ public:
 	bool bMaintainLastInputOrientation = false;
 
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = Movement)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Transient, Category = Movement)
 	TObjectPtr<UCharacterMoverComponent> CharacterMoverComponent;
 
 	//Not initialized by default. To be added in BP.

@@ -31,7 +31,7 @@ public:
 	//virtual bool Initialize(UStreamableRenderAsset* render_asset);
 
 	//Since VBF unit actually implements this interface and we don't want to implement lots of new methods
-	//that just reroute interface calls
+	// that just reroute interface calls
 	UFUNCTION(BlueprintCallable)
 	TScriptInterface<IVBFUnitInterface> GetVBFUnitInterface(bool& is_valid);
 

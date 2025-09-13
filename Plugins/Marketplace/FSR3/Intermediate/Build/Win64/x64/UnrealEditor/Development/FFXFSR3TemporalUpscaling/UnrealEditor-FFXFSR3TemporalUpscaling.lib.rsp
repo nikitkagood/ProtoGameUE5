@@ -1,0 +1,12 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UnrealEditor-FFXFSR3TemporalUpscaling.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"C:/UE_Projects/Git/ProtoGameUE5/Intermediate/Build/Win64/x64/ProtoGameEditor/Development/UnrealEd/SharedPCH.UnrealEd.Project.ValApi.ValExpApi.Cpp20.h.obj"
+"C:/UE_Projects/Git/ProtoGameUE5/Plugins/Marketplace/FSR3/Intermediate/Build/Win64/x64/UnrealEditor/Development/FFXFSR3TemporalUpscaling/Module.FFXFSR3TemporalUpscaling.cpp.obj"
+"C:/UE_Projects/Git/ProtoGameUE5/Plugins/Marketplace/FSR3/Intermediate/Build/Win64/x64/UnrealEditor/Development/FFXFSR3TemporalUpscaling/Default.rc2.res"
+/OUT:"C:/UE_Projects/Git/ProtoGameUE5/Plugins/Marketplace/FSR3/Intermediate/Build/Win64/x64/UnrealEditor/Development/FFXFSR3TemporalUpscaling/UnrealEditor-FFXFSR3TemporalUpscaling.lib"

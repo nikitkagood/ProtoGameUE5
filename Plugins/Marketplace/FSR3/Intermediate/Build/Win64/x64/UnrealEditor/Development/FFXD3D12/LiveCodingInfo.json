@@ -1,0 +1,10 @@
+{
+	"RemapUnityFiles": 
+	{
+		"Module.FFXD3D12.cpp.obj": [
+			"PerModuleInline.gen.cpp.obj",
+			"FFXD3D12Includes.cpp.obj",
+			"FFXD3D12Module.cpp.obj"
+		]
+	}
+}

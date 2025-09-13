@@ -1,0 +1,11 @@
+{
+	"RemapUnityFiles": 
+	{
+		"Module.FFXShared.cpp.obj": [
+			"PerModuleInline.gen.cpp.obj",
+			"FFXShared.cpp.obj",
+			"FFXSharedBackend.cpp.obj",
+			"FFXSharedModule.cpp.obj"
+		]
+	}
+}

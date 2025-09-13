@@ -342,7 +342,7 @@ void AGameCharacterBase::UpdateAllWeaponSlots()
 
 void AGameCharacterBase::UpdateWeaponSlot(UInvSpecialSlotComponent* slot)
 {
-	if (IsValid(GetMesh()))
+	if (!IsValid(GetMesh()))
 	{
 		checkf(false, TEXT("AGameCharacterBase::UpdateWeaponSlot: Main Mesh not valid"));
 		return;

@@ -1,0 +1,13 @@
+{
+	"RemapUnityFiles": 
+	{
+		"Module.FFXRHIBackend.cpp.obj": [
+			"PerModuleInline.gen.cpp.obj",
+			"FFXRHIApi.cpp.obj",
+			"FFXRHIBackend.cpp.obj",
+			"FFXRHIBackendModule.cpp.obj",
+			"FFXRHIBackendShaders.cpp.obj",
+			"FFXRHIBackendSubPass.cpp.obj"
+		]
+	}
+}

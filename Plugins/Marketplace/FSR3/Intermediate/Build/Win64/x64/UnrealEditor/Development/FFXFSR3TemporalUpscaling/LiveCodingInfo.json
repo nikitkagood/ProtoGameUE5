@@ -1,0 +1,24 @@
+{
+	"RemapUnityFiles": 
+	{
+		"Module.FFXFSR3TemporalUpscaling.cpp.obj": [
+			"PerModuleInline.gen.cpp.obj",
+			"FFXFSR3TemporalUpscaler.cpp.obj",
+			"FFXFSR3TemporalUpscalerHistory.cpp.obj",
+			"FFXFSR3TemporalUpscalerProxy.cpp.obj",
+			"FFXFSR3TemporalUpscaling.cpp.obj",
+			"FFXFSR3ViewExtension.cpp.obj",
+			"FFXRHIBackendFSRAccumulatePass.cpp.obj",
+			"FFXRHIBackendFSRAutogenReactiveMaskPass.cpp.obj",
+			"FFXRHIBackendFSRDebugViewPass.cpp.obj",
+			"FFXRHIBackendFSRLumaInstabilityPass.cpp.obj",
+			"FFXRHIBackendFSRLumaPyramidPass.cpp.obj",
+			"FFXRHIBackendFSRPrepareInputs.cpp.obj",
+			"FFXRHIBackendFSRPrepareReactivity.cpp.obj",
+			"FFXRHIBackendFSRRCASPass.cpp.obj",
+			"FFXRHIBackendFSRShaders.cpp.obj",
+			"FFXRHIBackendFSRShadingChangePass.cpp.obj",
+			"FFXRHIBackendFSRShadingChangePyramidPass.cpp.obj"
+		]
+	}
+}

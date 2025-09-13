@@ -84,9 +84,6 @@ void AMoverNavPawn::ProduceInput_Implementation(int32 SimTimeMs, FMoverInputCmdC
 	// answers and will depend on the game and its specific needs. In general, at this time, I'd recommend aim assist and lock on 
 	// targeting systems to happen /outside/ of the system, i.e, here. But I can think of scenarios where that may not be ideal too.
 
-	//FVector CachedMoveInputIntent;
-	//FVector CachedMoveInputVelocity;
-
 	//CharacterInputs is what has to be set in order for things to work
 	FCharacterDefaultInputs& CharacterInputs = OutInputCmd.InputCollection.FindOrAddMutableDataByType<FCharacterDefaultInputs>();
 
@@ -110,16 +107,7 @@ void AMoverNavPawn::ProduceInput_Implementation(int32 SimTimeMs, FMoverInputCmdC
 	bool bRequestedNavMovement = false;
 	if (NavMoverComponent)
 	{
-		//bRequestedNavMovement = NavMoverComponent->bRequestedNavMovement; //removed from engine
-		if (bRequestedNavMovement)
-		{
-			//CachedMoveInputIntent = NavMoverComponent->CachedNavMoveInputIntent;
-			//CachedMoveInputVelocity = NavMoverComponent->CachedNavMoveInputVelocity;
-
-			//NavMoverComponent->bRequestedNavMovement = false;
-			//NavMoverComponent->CachedNavMoveInputIntent = FVector::ZeroVector;
-			//NavMoverComponent->CachedNavMoveInputVelocity = FVector::ZeroVector;
-		}
+		bRequestedNavMovement = NavMoverComponent->ConsumeNavMovementData(CachedMoveInputIntent, CachedMoveInputVelocity);
 	}
 
 	// Favor velocity input 
@@ -127,31 +115,42 @@ void AMoverNavPawn::ProduceInput_Implementation(int32 SimTimeMs, FMoverInputCmdC
 
 	if (bUsingInputIntentForMove)
 	{
-		FRotator Rotator = CharacterInputs.ControlRotation;
-		FVector FinalDirectionalIntent;
-
-		if (CharacterMoverComponent->IsOnGround() || CharacterMoverComponent->IsFalling())
-		{
-			const FVector RotationProjectedOntoUpDirection = FVector::VectorPlaneProject(Rotator.Vector(), CharacterMoverComponent->GetUpDirection()).GetSafeNormal();
-			Rotator = RotationProjectedOntoUpDirection.Rotation();
-		}
-
-		FinalDirectionalIntent = Rotator.RotateVector(CachedMoveInputIntent);
-
-		//Through series of experiments, it was discovered that interpolation here does nothing useful
+		const FVector FinalDirectionalIntent = CharacterInputs.ControlRotation.RotateVector(CachedMoveInputIntent);
 		CharacterInputs.SetMoveInput(EMoveInputType::DirectionalIntent, FinalDirectionalIntent);
 	}
 	else
 	{
-		if (bInterpolateMoveInput && !FMath::IsNearlyZero(CharacterMoverComponent->GetMovementIntent().SquaredLength(), 0.05))
-		{
-			CharacterInputs.SetMoveInput(EMoveInputType::Velocity, FMath::VInterpTo(CharacterMoverComponent->GetMovementIntent(), CachedMoveInputVelocity, GetWorld()->DeltaTimeSeconds, MovementVelocityInterpSpd));
-		}
-		else
-		{
-			CharacterInputs.SetMoveInput(EMoveInputType::Velocity, CachedMoveInputVelocity);
-		}
+		CharacterInputs.SetMoveInput(EMoveInputType::Velocity, CachedMoveInputVelocity);
 	}
+
+	//pre 5.6.0 code:
+	//if (bUsingInputIntentForMove)
+	//{
+	//	FRotator Rotator = CharacterInputs.ControlRotation;
+	//	FVector FinalDirectionalIntent;
+
+	//	if (CharacterMoverComponent->IsOnGround() || CharacterMoverComponent->IsFalling())
+	//	{
+	//		const FVector RotationProjectedOntoUpDirection = FVector::VectorPlaneProject(Rotator.Vector(), CharacterMoverComponent->GetUpDirection()).GetSafeNormal();
+	//		Rotator = RotationProjectedOntoUpDirection.Rotation();
+	//	}
+
+	//	FinalDirectionalIntent = Rotator.RotateVector(CachedMoveInputIntent);
+
+	//	//Through series of experiments, it was discovered that interpolation here does nothing useful
+	//	CharacterInputs.SetMoveInput(EMoveInputType::DirectionalIntent, FinalDirectionalIntent);
+	//}
+	//else
+	//{
+	//	if (bInterpolateMoveInput && !FMath::IsNearlyZero(CharacterMoverComponent->GetMovementIntent().SquaredLength(), 0.05))
+	//	{
+	//		CharacterInputs.SetMoveInput(EMoveInputType::Velocity, FMath::VInterpTo(CharacterMoverComponent->GetMovementIntent(), CachedMoveInputVelocity, GetWorld()->DeltaTimeSeconds, MovementVelocityInterpSpd));
+	//	}
+	//	else
+	//	{
+	//		CharacterInputs.SetMoveInput(EMoveInputType::Velocity, CachedMoveInputVelocity);
+	//	}
+	//}
 
 	// Normally cached input is cleared by OnMoveCompleted input event but that won't be called if movement came from nav movement
 	if (bRequestedNavMovement)
@@ -165,9 +164,10 @@ void AMoverNavPawn::ProduceInput_Implementation(int32 SimTimeMs, FMoverInputCmdC
 	const bool bHasAffirmativeMoveInput = (CharacterInputs.GetMoveInput().Size() >= RotationMagMin);
 
 	// Figure out intended orientation
-	CharacterInputs.ControlRotation = Controller->GetControlRotation();
-
 	CharacterInputs.OrientationIntent = FVector::ZeroVector;
+
+	//pre 5.6.0
+	//CharacterInputs.ControlRotation = Controller->GetControlRotation();
 
 	if (bHasAffirmativeMoveInput)
 	{

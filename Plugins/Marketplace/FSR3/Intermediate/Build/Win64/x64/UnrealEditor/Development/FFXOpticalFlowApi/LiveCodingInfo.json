@@ -1,0 +1,10 @@
+{
+	"RemapUnityFiles": 
+	{
+		"Module.FFXOpticalFlowApi.cpp.obj": [
+			"PerModuleInline.gen.cpp.obj",
+			"FFXOpticalFlowApi.cpp.obj",
+			"FFXOpticalFlowApiModule.cpp.obj"
+		]
+	}
+}

@@ -18,6 +18,9 @@ class UVBFUnitInterface : public UInterface
 //REMINDER: use Execute_*MethodName*(this) when calling interface functions in cpp
 
 //Interface that defines what is needed for a unit
+//All things are expected to be handled properly when: 
+// 1) Unit Actor is actually spawned in the world
+// 2) Unit doesn't have Actor spawned in the world (usually for optimization reasons)
 class PROTOGAME_API IVBFUnitInterface
 {
 	GENERATED_BODY()
