@@ -91,3 +91,4 @@ Plugins/*/Intermediate/*
 # Cache files for the editor to use
 DerivedDataCache/*
 Content/MetaHumans/MH_StandardBoy.uasset
+Content/Meshes/Vehicles/MordFustang1971/MustangMach1_1971/SkeletalMeshes/MustangMach1_1971.uasset

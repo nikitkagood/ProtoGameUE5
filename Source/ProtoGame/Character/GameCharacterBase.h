@@ -8,6 +8,7 @@
 #include "GameFramework/SpringArmComponent.h"
 
 #include "Interfaces/InteractionInterface.h"
+#include "Pawn/MoverNavPawn.h"
 
 #include "GameCharacterBase.generated.h"
 
@@ -54,6 +55,8 @@ enum class ECharacterInventoryType : uint8
 };
 
 
+//Old class based on CharacterMovementComponent
+//Deprecated
 UCLASS(config=Game, BlueprintType)
 class PROTOGAME_API AGameCharacterBase : public ACharacter
 {
@@ -123,9 +126,10 @@ public:
 
 	virtual void BeginPlay();
 
+	void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+
 	virtual void Tick(float DeltaTime) override;
 
-	void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 	UInventoryManager* GetInventoryManger() const { return InventoryManager; }
@@ -308,4 +312,3 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Interaction")
 	TObjectPtr<AActor> interaction_actor;
 };
-

@@ -36,6 +36,7 @@ public:
 
 	virtual USkeletalMeshComponent* CreateSKWeaponRepresentation(USceneComponent* outer) override;
 
+    //TODO: the same code as CreateSKWeaponRepresentation; It's cause SceneCapture (item preview in UI) is still in progress
 	virtual USkeletalMeshComponent* CreateSKForSceneCapture(USceneComponent* outer) override;
 
 	//Equips and and de-equips (by calling GameCharacter)

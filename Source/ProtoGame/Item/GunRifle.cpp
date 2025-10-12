@@ -124,8 +124,11 @@ void UGunRifle::OnFire()
 			FActorSpawnParameters ActorSpawnParams;
 			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 			ActorSpawnParams.bHideFromSceneOutliner = true;
+			ActorSpawnParams.Instigator = Cast<APawn>(GetInventoryOwner()); //Simple attempt to get the Pawn as Instigator, may fail
+			ActorSpawnParams.bAllowDuringConstructionScript = false; //We should not be shooting at this point
 
-			World->SpawnActor<AProjectile>(weapon_info.Chamber->GetProjectileClass(), SK_WeaponRepresentation->GetSocketLocation("b_gun_muzzleflash"), SK_WeaponRepresentation->GetSocketRotation("b_gun_muzzleflash"), ActorSpawnParams);
+			//Usually Rotation is simply relative X-forward, but not SocketRotation due to bones may be oriented wrong
+			World->SpawnActor<AProjectile>(weapon_info.Chamber->GetProjectileClass(), SK_WeaponRepresentation->GetSocketLocation("b_gun_muzzleflash"), SK_WeaponRepresentation->GetComponentRotation(), ActorSpawnParams);
 
 			SpawnMuzzleFlash();
 

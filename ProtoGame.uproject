@@ -145,14 +145,6 @@
 			"Enabled": true
 		},
 		{
-			"Name": "MoverExamples",
-			"Enabled": true
-		},
-		{
-			"Name": "MoverTests",
-			"Enabled": true
-		},
-		{
 			"Name": "GameplayBehaviors",
 			"Enabled": true
 		},
@@ -216,10 +208,6 @@
 			"Enabled": false
 		},
 		{
-			"Name": "MetaHumanCharacter",
-			"Enabled": true
-		},
-		{
 			"Name": "FSR4",
 			"Enabled": false,
 			"SupportedTargetPlatforms": [
@@ -246,6 +234,34 @@
 			"SupportedTargetPlatforms": [
 				"Win64"
 			]
+		},
+		{
+			"Name": "ChaosMover",
+			"Enabled": true
+		},
+		{
+			"Name": "MoverAnimNext",
+			"Enabled": true
+		},
+		{
+			"Name": "MoverIntegrations",
+			"Enabled": true
+		},
+		{
+			"Name": "MoverExamples",
+			"Enabled": true
+		},
+		{
+			"Name": "MetaHuman",
+			"Enabled": true,
+			"SupportedTargetPlatforms": [
+				"Win64",
+				"Linux"
+			]
+		},
+		{
+			"Name": "MetaHumanCharacter",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [

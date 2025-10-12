@@ -17,8 +17,10 @@ AMoverNavPawn::AMoverNavPawn()
  	// Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	CharacterMoverComponent = CreateDefaultSubobject<UCharacterMoverComponent>("CharacterMoverComp");
+	CharacterMoverComponent = CreateDefaultSubobject<UCharacterMoverComponent>("Character Mover Comp");
 	ensure(CharacterMoverComponent);
+
+	NavMoverComponent = CreateDefaultSubobject<UNavMoverComponent>("Nav Mover Comp");
 
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -29,16 +31,13 @@ AMoverNavPawn::AMoverNavPawn()
 	//That's why we set 0.7195 - tiny bit more than 44 deg 
 	//Since Mover variable access is complicated, it's easier to set in BP
 	//auto* settings_ptr = CharacterMoverComponent->FindSharedSettings_Mutable<UCommonLegacyMovementSettings>();
-	//if (settings_ptr) {	settings_ptr->MaxWalkSlopeCosine = 0.7195; }
+	//if (settings_ptr) { settings_ptr->MaxWalkSlopeCosine = 0.7195; }
 }
 
 // Called when the game starts or when spawned
 void AMoverNavPawn::BeginPlay()
 {
 	Super::BeginPlay();
-	
-	NavMoverComponent = FindComponentByClass<UNavMoverComponent>();
-	ensure(NavMoverComponent);
 
 	if (APlayerController* PC = Cast<APlayerController>(Controller))
 	{
@@ -87,7 +86,7 @@ void AMoverNavPawn::ProduceInput_Implementation(int32 SimTimeMs, FMoverInputCmdC
 	//CharacterInputs is what has to be set in order for things to work
 	FCharacterDefaultInputs& CharacterInputs = OutInputCmd.InputCollection.FindOrAddMutableDataByType<FCharacterDefaultInputs>();
 
-	CharacterMoverComponent->GetMovementIntent();
+	//CharacterMoverComponent->GetLastInputCmd().InputCollection.FindMutableDataByType<FCharacterDefaultInputs>();
 
 	if (Controller == nullptr)
 	{
@@ -103,19 +102,19 @@ void AMoverNavPawn::ProduceInput_Implementation(int32 SimTimeMs, FMoverInputCmdC
 	}
 
 	//TODO: Unreal 5.6 changed variables, needs fixing
-	//ConsumeNavMovementData?
 	bool bRequestedNavMovement = false;
 	if (NavMoverComponent)
 	{
-		bRequestedNavMovement = NavMoverComponent->ConsumeNavMovementData(CachedMoveInputIntent, CachedMoveInputVelocity);
+		bRequestedNavMovement = NavMoverComponent->ConsumeNavMovementData(ControlInputVector, CachedMoveInputVelocity);
 	}
 
-	// Favor velocity input 
+	//Example suggest favoring Velocity input
+	//But we keyboard wise we favor Input intent
 	bool bUsingInputIntentForMove = CachedMoveInputVelocity.IsZero();
 
 	if (bUsingInputIntentForMove)
 	{
-		const FVector FinalDirectionalIntent = CharacterInputs.ControlRotation.RotateVector(CachedMoveInputIntent);
+		const FVector FinalDirectionalIntent = CharacterInputs.ControlRotation.RotateVector(ControlInputVector);
 		CharacterInputs.SetMoveInput(EMoveInputType::DirectionalIntent, FinalDirectionalIntent);
 	}
 	else
@@ -123,51 +122,21 @@ void AMoverNavPawn::ProduceInput_Implementation(int32 SimTimeMs, FMoverInputCmdC
 		CharacterInputs.SetMoveInput(EMoveInputType::Velocity, CachedMoveInputVelocity);
 	}
 
-	//pre 5.6.0 code:
-	//if (bUsingInputIntentForMove)
-	//{
-	//	FRotator Rotator = CharacterInputs.ControlRotation;
-	//	FVector FinalDirectionalIntent;
+	//AMoverExamplesCharacter does it this way: BindAction(MoveInputAction, ETriggerEvent::Completed, this, &AMoverExamplesCharacter::OnMoveCompleted)
+	//But we could just do this, especially since Nav movement isn't BindAction and nothing is called like this
+	ControlInputVector = FVector::ZeroVector;
+	CachedMoveInputVelocity = FVector::ZeroVector;
 
-	//	if (CharacterMoverComponent->IsOnGround() || CharacterMoverComponent->IsFalling())
-	//	{
-	//		const FVector RotationProjectedOntoUpDirection = FVector::VectorPlaneProject(Rotator.Vector(), CharacterMoverComponent->GetUpDirection()).GetSafeNormal();
-	//		Rotator = RotationProjectedOntoUpDirection.Rotation();
-	//	}
 
-	//	FinalDirectionalIntent = Rotator.RotateVector(CachedMoveInputIntent);
-
-	//	//Through series of experiments, it was discovered that interpolation here does nothing useful
-	//	CharacterInputs.SetMoveInput(EMoveInputType::DirectionalIntent, FinalDirectionalIntent);
-	//}
-	//else
-	//{
-	//	if (bInterpolateMoveInput && !FMath::IsNearlyZero(CharacterMoverComponent->GetMovementIntent().SquaredLength(), 0.05))
-	//	{
-	//		CharacterInputs.SetMoveInput(EMoveInputType::Velocity, FMath::VInterpTo(CharacterMoverComponent->GetMovementIntent(), CachedMoveInputVelocity, GetWorld()->DeltaTimeSeconds, MovementVelocityInterpSpd));
-	//	}
-	//	else
-	//	{
-	//		CharacterInputs.SetMoveInput(EMoveInputType::Velocity, CachedMoveInputVelocity);
-	//	}
-	//}
-
-	// Normally cached input is cleared by OnMoveCompleted input event but that won't be called if movement came from nav movement
-	if (bRequestedNavMovement)
-	{
-		CachedMoveInputIntent = FVector::ZeroVector;
-		CachedMoveInputVelocity = FVector::ZeroVector;
-	}
 
 	static float RotationMagMin(1e-3);
 
 	const bool bHasAffirmativeMoveInput = (CharacterInputs.GetMoveInput().Size() >= RotationMagMin);
 
 	// Figure out intended orientation
-	CharacterInputs.OrientationIntent = FVector::ZeroVector;
 
-	//pre 5.6.0
-	//CharacterInputs.ControlRotation = Controller->GetControlRotation();
+	CharacterInputs.OrientationIntent = FVector::ZeroVector;
+	CharacterInputs.ControlRotation = Controller->GetControlRotation();
 
 	if (bHasAffirmativeMoveInput)
 	{
@@ -183,12 +152,12 @@ void AMoverNavPawn::ProduceInput_Implementation(int32 SimTimeMs, FMoverInputCmdC
 			CharacterInputs.OrientationIntent = CharacterInputs.ControlRotation.Vector().GetSafeNormal();
 		}
 
-		LastAffirmativeMoveInput = CharacterInputs.GetMoveInput();
+		LastControlInputVector = CharacterInputs.GetMoveInput();
 	}
 	else if (bMaintainLastInputOrientation)
 	{
 		// There is no movement intent, so use the last-known affirmative move input
-		CharacterInputs.OrientationIntent = LastAffirmativeMoveInput;
+		CharacterInputs.OrientationIntent = LastControlInputVector;
 	}
 
 	if (bShouldRemainVertical)
@@ -197,26 +166,28 @@ void AMoverNavPawn::ProduceInput_Implementation(int32 SimTimeMs, FMoverInputCmdC
 		CharacterInputs.OrientationIntent = CharacterInputs.OrientationIntent.GetSafeNormal2D();
 	}
 
-	//CharacterInputs.bIsJumpPressed = bIsJumpPressed;
-	//CharacterInputs.bIsJumpJustPressed = bIsJumpJustPressed;
 
-	//if (bShouldToggleFlying)
-	//{
-	//	if (!bIsFlyingActive)
-	//	{
-	//		CharacterInputs.SuggestedMovementMode = DefaultModeNames::Flying;
-	//	}
-	//	else
-	//	{
-	//		CharacterInputs.SuggestedMovementMode = DefaultModeNames::Falling;
-	//	}
+	CharacterInputs.bIsJumpPressed = bIsJumpPressed;
+	CharacterInputs.bIsJumpJustPressed = bIsJumpJustPressed;
 
-	//	bIsFlyingActive = !bIsFlyingActive;
-	//}
-	//else
-	//{
-	//	CharacterInputs.SuggestedMovementMode = NAME_None;
-	//}
+	if (bIsFlyingAllowed)
+	{
+		if (bIsFlying)
+		{
+			CharacterInputs.SuggestedMovementMode = DefaultModeNames::Flying;
+		}
+		else
+		{
+			CharacterInputs.SuggestedMovementMode = DefaultModeNames::Falling;
+		}
+	}
+	else
+	{
+		//MoverExamplesCharacter but we might not need it
+		//CharacterInputs.SuggestedMovementMode = NAME_None;
+	}
+
+
 
 	// Convert inputs to be relative to the current movement base (depending on options and state)
 	CharacterInputs.bUsingMovementBase = false;
@@ -286,13 +257,47 @@ FVector AMoverNavPawn::GetNavAgentLocation() const
 	return AgentLocation;
 }
 
-const FMoverDefaultSyncState* AMoverNavPawn::GetMoverSyncState() const
+void AMoverNavPawn::AddMovementInput(FVector WorldDirection, float ScaleValue, bool bForce)
+{
+	//MovementComponent->AddInputVector(WorldDirection * ScaleValue, bForce);
+	
+	//CharacterMoverComponent
+
+	//if (PawnOwner)
+	{
+
+		if (bForce || !IsMoveInputIgnored())
+		{
+			ControlInputVector += WorldDirection * ScaleValue;
+		}
+
+	}
+}
+
+const FMoverDefaultSyncState* AMoverNavPawn::GetMoverDefaultSyncState() const
 {
 	return CharacterMoverComponent ? CharacterMoverComponent->GetSyncState().SyncStateCollection.FindDataByType<FMoverDefaultSyncState>() : nullptr;
 }
 
-FMoverDefaultSyncState* AMoverNavPawn::GetMoverSyncStateMutable() const
+FMoverDefaultSyncState* AMoverNavPawn::GetMoverDefaultSyncStateMutable() const
 {
 	return CharacterMoverComponent ? CharacterMoverComponent->GetSyncState().SyncStateCollection.FindMutableDataByType<FMoverDefaultSyncState>() : nullptr;
 }
 
+
+void AMoverNavPawn::OnJumpStarted(const FInputActionValue& Value)
+{
+	bIsJumpJustPressed = !bIsJumpPressed;
+	bIsJumpPressed = true;
+}
+
+void AMoverNavPawn::OnJumpReleased(const FInputActionValue& Value)
+{
+	bIsJumpPressed = false;
+	bIsJumpJustPressed = false;
+}
+
+void AMoverNavPawn::OnFlyTriggered(const FInputActionValue& Value)
+{
+	bIsFlying = !bIsFlying;
+}
