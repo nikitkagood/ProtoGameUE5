@@ -91,20 +91,20 @@ private:
 	UInventoryManager* InventoryManager;
 
 	//On character inventory
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Inventory")
-	UInventoryComponent* InventoryComponent_Pockets;
+	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Inventory")
+	//UInventoryComponent* InventoryComponent_Pockets;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Inventory")
-	UInvSpecialSlotComponent* InventoryItemSlot_Backpack;
+	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Inventory")
+	//UInvSpecialSlotComponent* InventoryItemSlot_Backpack;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Inventory")
-	UInvSpecialSlotComponent* InventoryItemSlot_ChestRig;
+	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Inventory")
+	//UInvSpecialSlotComponent* InventoryItemSlot_ChestRig;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Inventory")
-	UInvSpecialSlotComponent* PrimaryGunSlot;
+	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Inventory")
+	//UInvSpecialSlotComponent* PrimaryGunSlot;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Inventory")
-	UInvSpecialSlotComponent* SecondaryGunSlot;
+	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Inventory")
+	//UInvSpecialSlotComponent* SecondaryGunSlot;
 
 	//what is currently in hands
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Inventory")

@@ -27,7 +27,8 @@ struct PROTOGAME_API FInventoryItemTable : public FTableRowBase
 	FItemThumbnailInfo item_thumbnail_info;
 };
 
-//This item almost always redirects InventoryInterface calls to it's InventoryComponent
+//Item that has InventoryComponent inside
+//By default, this item redirects InventoryInterface calls to it's InventoryComponent
 UCLASS()
 class PROTOGAME_API UInventoryItem : public UItemBase, public IInventoryInterface
 {
@@ -57,7 +58,7 @@ public:
 
 	//IInventoryInterface
 	virtual bool MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination) override;
-	virtual bool MoveItemToInventoryInGrid(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) override;
+	virtual bool MoveItemToInventoryDestination(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) override;
 	virtual bool AddItemFromWorld(UItemBase* item) override;
 	virtual bool DropItemToWorld(UItemBase* item) override;
 	virtual bool ReceiveItem(UItemBase* item) override;
@@ -65,6 +66,7 @@ public:
 	virtual void UpdateStackDependencies(UItemBase* item, int32 new_stack_size) override;
 	virtual void UpdateInventory() override;
 	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const override;
-	virtual AActor* GetInventoryOwner() { return InventoryComponent->GetOwner(); };
+	virtual UObject* GetInventoryOwner() { return InventoryComponent->GetOwner(); };
+	bool SetInventoryOwner(UObject* new_owner);
 	//IInventoryInterface end
 };

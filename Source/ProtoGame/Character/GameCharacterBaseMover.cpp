@@ -69,12 +69,13 @@ AGameCharacterBaseMover::AGameCharacterBaseMover(const class FObjectInitializer&
 	RPGStatsComponent = CreateDefaultSubobject<URPGStatsComponent>(TEXT("RPG Stats Component"));
 
 	InventoryManager = CreateDefaultSubobject<UInventoryManager>(TEXT("Inventory Manager"));
-	InventoryComponent_Pockets = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent_Pockets"));
-	InventoryItemSlot_Backpack = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("InventoryItemSlot_Backpack"));
-	InventoryItemSlot_ChestRig = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("InventoryItemSlot_ChestRig"));
 
-	PrimaryGunSlot = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("Primary gun slot component"));
-	SecondaryGunSlot = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("Secondary gun slot component"));
+	//InventoryComponent_Pockets = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent_Pockets"));
+	//InventoryItemSlot_Backpack = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("InventoryItemSlot_Backpack"));
+	//InventoryItemSlot_ChestRig = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("InventoryItemSlot_ChestRig"));
+
+	//PrimaryGunSlot = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("Primary gun slot component"));
+	//SecondaryGunSlot = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("Secondary gun slot component"));
 	//It is created so it is visibile in Blueprints, otherwise it's redundant
 	ActiveSlot = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("Active slot component"));
 
@@ -108,14 +109,14 @@ void AGameCharacterBaseMover::BeginPlay()
 {
 	Super::BeginPlay();
 
-	InventoryManager->AddInventory(PrimaryGunSlot);
-	InventoryManager->AddInventory(SecondaryGunSlot);
-	InventoryManager->AddInventory(InventoryComponent_Pockets);
-	InventoryManager->AddInventory(InventoryItemSlot_Backpack);
-	InventoryManager->AddInventory(InventoryItemSlot_ChestRig);
+	//InventoryManager->AddExistingInventory(PrimaryGunSlot);
+	//InventoryManager->AddExistingInventory(SecondaryGunSlot);
+	//InventoryManager->AddExistingInventory(InventoryComponent_Pockets);
+	//InventoryManager->AddExistingInventory(InventoryItemSlot_Backpack);
+	//InventoryManager->AddExistingInventory(InventoryItemSlot_ChestRig);
 
 	//Active slot is PrimarySlot by default
-	ActiveSlot = PrimaryGunSlot;
+	//ActiveSlot = PrimaryGunSlot;
 
 	//Sweep in a loop for Interaction (outline primarily) to work
 	//TODO: maybe there is a better way
@@ -197,15 +198,15 @@ bool AGameCharacterBaseMover::EquipGun(UItemBase* item)
 	{
 		//De-equip
 		//result = item->GetOuterUpstreamInventory()->MoveItemToInventory(item, InventoryComponent);
-		result = InventoryManager->MoveItemToInventory(item, EManagerInventoryType::InventoryComponent);
+		//result = InventoryManager->MoveItemToInventory(item, EManagerInventoryType::InventoryComponent);
 	}
 	else
 	{
 		//Equip (move to SpecialSlot)
-		result = item->GetOuterUpstreamInventory()->MoveItemToInventory(item, PrimaryGunSlot);
+		//result = item->GetOuterUpstreamInventory()->MoveItemToInventory(item, PrimaryGunSlot);
 		if (result == false)
 		{
-			result = item->GetOuterUpstreamInventory()->MoveItemToInventory(item, SecondaryGunSlot);
+			//result = item->GetOuterUpstreamInventory()->MoveItemToInventory(item, SecondaryGunSlot);
 		}
 	}
 

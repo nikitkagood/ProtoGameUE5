@@ -10,7 +10,16 @@
 
 class UItemBase;
 
-UCLASS(Blueprintable, BlueprintType, DefaultToInstanced, meta=(BlueprintSpawnableComponent), ClassGroup=(Inventory))
+USTRUCT(BlueprintType)
+struct PROTOGAME_API FInvSpecialSlotCompatibleClassSettings
+{
+	GENERATED_BODY()
+
+	bool include_subclasses;
+};
+
+//Used when there is a need for one per slot item and whole InventoryComponent with a grid is too much
+UCLASS(Blueprintable, BlueprintType, DefaultToInstanced, EditInlineNew, ClassGroup = (Inventory), meta=(BlueprintSpawnableComponent, DisplayName = "Inventory Special Slot"))
 class PROTOGAME_API UInvSpecialSlotComponent : public UActorComponent, public IInventoryInterface
 {
 	GENERATED_BODY()
@@ -30,19 +39,21 @@ public:
 	//IInventoryInterface
 
 	virtual bool MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination) override;
-	virtual bool MoveItemToInventoryInGrid(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) override;
+	virtual bool MoveItemToInventoryDestination(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) override;
 	virtual bool AddItemFromWorld(UItemBase* item) override;
 	virtual bool DropItemToWorld(UItemBase* item) override;
 	virtual bool ReceiveItem(UItemBase* item) override;
+	//Simply reroute, new_upper_left_cell is ignored
+	virtual bool ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell) override { return ReceiveItem(item); };
 	virtual void UpdateInventory() override { OnInventoryUpdated.Broadcast(); };
 	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const override;
-	virtual AActor* GetInventoryOwner() override { return GetOwner(); };
+	virtual UObject* GetInventoryOwner() override { return GetOwner(); };
+	//TODO: Implement
+	virtual bool SetInventoryOwner(UObject* new_owner) override;
 	//IInventoryInterface end
 
 	bool IsItemCompatible(UItemBase* item);
-private:
-	//Grid receive operation isn't supported because SpecialSlot class doesn't have any grid
-	virtual bool ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell) override { check(false); return false; };
+
 public:
 
 	UFUNCTION(BlueprintCallable)
@@ -61,15 +72,15 @@ protected:
 private:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	UItemBase* Item;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true, ExposeOnSpawn = true))
+	FName InventoryName;
 	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
-	bool CompatibleClassesIncludeChildren;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true, ExposeOnSpawn = true))
+	//bool CompatibleClassesIncludeChildren;
 
-	//0 means any; Has to be subclass of UItemBase;
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
-	TArray<TSubclassOf<UItemBase>> CompatibleClasses;
-
-	//TODO: implement
-	//UPROPERTY(EditDefaulstOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
-	//TArray<ItemType> CompatibleTypes; //0 means any
+	//Class-based filter
+	//Emtpy means any, has to be subclass of UItemBase
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true, ExposeOnSpawn = true))
+	TMap<TSubclassOf<UItemBase>, FInvSpecialSlotCompatibleClassSettings> CompatibleClasses;
 };

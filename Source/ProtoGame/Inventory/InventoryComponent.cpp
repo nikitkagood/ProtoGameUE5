@@ -8,7 +8,7 @@
 #include "GameFramework/Character.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
-//#include <cmath>
+#include "HAL/CriticalSection.h"
 
 #include "Profiler/Profiler.h"
 
@@ -34,6 +34,8 @@ void UInventoryComponent::Initialize(FIntPoint dimensions, FName name)
         return;
     }
 
+    FScopeLock Lock(&InventoryMutex);
+
     Rows = dimensions.X;
     Columns = dimensions.Y;
 
@@ -58,7 +60,7 @@ void UInventoryComponent::Initialize(FIntPoint dimensions, FName name)
 //    DropDistance = drop_distance;
 //}
 
-bool UInventoryComponent::IsGridInitialized()
+bool UInventoryComponent::IsGridInitialized() const
 {
     return InventoryGrid.Num() != 0;
 }
@@ -137,7 +139,9 @@ bool UInventoryComponent::AddItem(UItemBase* item)
         return false;
     }
 
-    if(item == nullptr)
+    FScopeLock Lock(&InventoryMutex);
+
+    if(!IsValid(item))
     {
         check(false);
         UE_LOG(LogTemp, Error, TEXT("AddItem: invalid item"));
@@ -220,7 +224,9 @@ bool UInventoryComponent::AddItemAt(UItemBase* item, FIntPoint new_upper_left_ce
         return false;
     }
 
-    if(item == nullptr)
+    FScopeLock Lock(&InventoryMutex);
+
+    if(!IsValid(item))
     {
         UE_LOG(LogTemp, Error, TEXT("AddItem: invald item"));
         return false;
@@ -314,7 +320,8 @@ bool UInventoryComponent::RemoveItemAt(UItemBase* item, FIntPoint upper_left_cel
         checkf(false, TEXT("Error: cannot use uninitialized InventoryComponent"));
         return false;
     }
-    if(item == nullptr)
+
+    if(!IsValid(item))
     {
         UE_LOG(LogTemp, Error, TEXT("RemoveItem: invalid item"));
         return false;
@@ -340,8 +347,9 @@ bool UInventoryComponent::RemoveItemAt(UItemBase* item, FIntPoint upper_left_cel
 
 void UInventoryComponent::ChangeMass(float value)
 {
+    FScopeLock Lock(&InventoryMutex);
+
     Mass += value;
-    UE_LOG(LogTemp, Warning, TEXT("InventoryComponent: Changed mass by: %f"), value);
 
     //To avoid floating point errors
     if (UKismetMathLibrary::NearlyEqual_FloatFloat(Mass, 0, FInventoryItemInfo::MassMaxPrecision))
@@ -381,17 +389,15 @@ void UInventoryComponent::InitializeInventoryGrid(int32 rows, int32 columns)
 
     ParallelFor(rows, [&](int32 idx) 
         {
-            TArray<int32> temp;
-            temp.Init(EMPTY_SPACE, columns);
-            InventoryGrid.Add(temp);
+            InventoryGrid[idx].Init(EMPTY_SPACE, columns);
         });
 
     FreeSpaceLeft = Rows * Columns;
 }
 
-FIntPoint UInventoryComponent::FindFreeSpaceInGrid(UItemBase* item)
+FIntPoint UInventoryComponent::FindFreeSpaceInGrid(UItemBase* item) const
 {
-    LOG_DURATION(LogDurationChronoUnit::nanoseconds, __FUNCTION__);
+    //LOG_DURATION(LogDurationChronoUnit::nanoseconds, __FUNCTION__);
 
     constexpr int32 NONE = -9999;
     auto find = [NONE](int32 first, int32 last, const TArray<int32>& container, int32 value)
@@ -452,7 +458,7 @@ TPair<FIntPoint, FIntPoint> UInventoryComponent::FindItemPosition(UItemBase* ite
     return {};
 }
 
-bool UInventoryComponent::CheckSpace(FIntPoint upper_left_cell, UItemBase* item)
+bool UInventoryComponent::CheckSpace(FIntPoint upper_left_cell, UItemBase* item) const
 {
     if (IsGridInitialized() == false)
     {
@@ -501,6 +507,10 @@ bool UInventoryComponent::CheckSpaceMove(const FIntPoint upper_left_cell, UItemB
     {
         return false;
     }
+
+    
+    FScopeLock Lock(&InventoryMutex);
+
 
     //whether valid cell idx at all 
     if(upper_left_cell.X < 0 || upper_left_cell.Y < 0 || upper_left_cell.X > Rows - 1 || upper_left_cell.Y > Columns - 1)
@@ -552,9 +562,11 @@ bool UInventoryComponent::CheckSpaceMove(const FIntPoint upper_left_cell, UItemB
 
 void UInventoryComponent::FillSpaceInGrid(FIntPoint upper_left_cell, FIntPoint lower_right_cell, int32 item_idx)
 {
+    FScopeLock Lock(&InventoryMutex);
+
     for(int32 row = upper_left_cell.X; row <= lower_right_cell.X; row++)
     {
-        //TODO: Multithread
+        //TODO: Multithread maybe
         for(int32 column = upper_left_cell.Y; column <= lower_right_cell.Y; column++)
         {
             InventoryGrid[row][column] = item_idx;
@@ -564,11 +576,15 @@ void UInventoryComponent::FillSpaceInGrid(FIntPoint upper_left_cell, FIntPoint l
 
 void UInventoryComponent::UpdateFreeSpaceLeft(int32 space_change)
 {
+    FScopeLock Lock(&InventoryMutex);
+
     FreeSpaceLeft += space_change;
 }
 
 int32 UInventoryComponent::GenerateIndex()
 {
+    FScopeLock Lock(&InventoryMutex);
+
     if(free_indices.Num() > 0)
     {
         return free_indices.Pop();
@@ -584,7 +600,7 @@ bool UInventoryComponent::CheckSelfRecursion(UItemBase* item) const
     return Cast<UItemBase>(GetOuter()) == item;
 }
 
-bool UInventoryComponent::Contains(UItemBase* item)
+bool UInventoryComponent::Contains(UItemBase* item) const
 {
     return Items.Contains(item);
 }
@@ -676,7 +692,7 @@ bool UInventoryComponent::MoveItemToInventory(UItemBase* item, TScriptInterface<
     return false;
 }
 
-bool UInventoryComponent::MoveItemToInventoryInGrid(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell)
+bool UInventoryComponent::MoveItemToInventoryDestination(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell)
 {
     if (IsGridInitialized() == false)
     {
@@ -742,7 +758,7 @@ bool UInventoryComponent::DropItemToWorld(UItemBase* item)
 
 bool UInventoryComponent::ReceiveItem(UItemBase* item)
 {
-    if(item == nullptr || Items.Contains(item))
+    if(!IsValid(item) || Items.Contains(item))
     {
         return false;
     }
@@ -752,7 +768,7 @@ bool UInventoryComponent::ReceiveItem(UItemBase* item)
 
 bool UInventoryComponent::ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell)
 {
-    if(item == nullptr || Items.Contains(item))
+    if(!IsValid(item) || Items.Contains(item))
     {
         return false;
     }
@@ -790,17 +806,27 @@ void UInventoryComponent::UpdateStackDependencies(UItemBase* item, int32 new_sta
 //    return Cast<UItemBase>(GetOuter());
 //}
 
-void UInventoryComponent::ChangeOwner(AActor* new_owner)
+bool UInventoryComponent::SetInventoryOwner(UObject* new_owner)
 {
     if (IsValid(new_owner) == false)
     {
         checkf(false, TEXT("New owner is not valid"))
-        return;
+        return false;
+    }
+    
+    if (Rename(nullptr, new_owner) == false)
+    {
+        return false;
     }
 
     GetOwner()->RemoveOwnedComponent(this);
-    Rename(nullptr, new_owner);
-    new_owner->AddOwnedComponent(this);
+
+    if (auto new_owner_actor = Cast<AActor>(new_owner))
+    {
+        new_owner_actor->AddOwnedComponent(this);
+    }
+    
+    return true;
 }
 
 //TScriptInterface<IInventoryInterface> UInventoryComponent::GetOuterUpstreamInventory() const

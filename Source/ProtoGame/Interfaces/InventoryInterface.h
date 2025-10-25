@@ -9,15 +9,15 @@
 
 class UItemBase;
 
-UENUM(BlueprintType)
-enum class EInventoryOperation : uint8
-{
-	MoveTo = 0					UMETA(DisplayName = "MoveTo (another inv)"),
-	Receive						UMETA(DisplayName = "Receive (from another inv)"),
-	AddFromWorld				UMETA(DisplayName = "AddFromWorld"),
-	DropToWorld					UMETA(DisplayName = "AddFromWorld"),
-	DestroyItem					UMETA(DisplayName = "DestroyItem"),
-};
+//UENUM(BlueprintType)
+//enum class EInventoryOperation : uint8
+//{
+//	MoveTo = 0					UMETA(DisplayName = "MoveTo (another inv)"),
+//	Receive						UMETA(DisplayName = "Receive (from another inv)"),
+//	AddFromWorld				UMETA(DisplayName = "AddFromWorld"),
+//	DropToWorld					UMETA(DisplayName = "AddFromWorld"),
+//	DestroyItem					UMETA(DisplayName = "DestroyItem"),
+//};
 
 
 //to be declared in each class individually with UPROPERTY(BlueprintAssignable) due to interface limitations
@@ -35,17 +35,14 @@ class PROTOGAME_API IInventoryInterface
 	GENERATED_BODY()
 
 public:
-	UFUNCTION(BlueprintCallable)
-	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const = 0;
-
-	//UFUNCTION(BlueprintCallable)
-	//virtual FIntPoint GetInventoryDimensions() const = 0;
+	//Inventory operations
 
     UFUNCTION(BlueprintCallable)
 	virtual bool MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination) = 0;
 
-	UFUNCTION(BlueprintCallable)
-	virtual bool MoveItemToInventoryInGrid(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) = 0;
+	//new_upper_left_cell is optional, default value -1, -1 - invalid cell
+	UFUNCTION(BlueprintCallable, meta = (new_upper_left_cell = "(-1, -1)"))
+	virtual bool MoveItemToInventoryDestination(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) = 0;
 
 	UFUNCTION(BlueprintCallable)
 	virtual bool AddItemFromWorld(UItemBase* item) = 0; //add item; currently items destroy themselves
@@ -53,13 +50,32 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual bool DropItemToWorld(UItemBase* item) = 0;
 
+	//Used internally, so origin inventory can check whether destination inventory has received the item
+	//NOTE: "Destructive" operation if returns true - i.e. origin inventory has to stop containing/owning the item
+	//non-destructive if false
+	//
+	//TODO: maybe get rid of it in favor of new_upper_left_cell version
 	virtual bool ReceiveItem(UItemBase* item) = 0;
 
-	virtual bool ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell) = 0;
+	//Used internally, so origin inventory can check whether destination inventory has received the item
+	//NOTE: "Destructive" operation if returns true - i.e. origin inventory has to stop "containing" the item
+	//non-destructive if false
+	//
+	//new_upper_left_cell is optional, default value -1, -1 - invalid cell
+	virtual bool ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell = {-1, -1}) = 0;
+
+
+	//"Service" functions
+
+	UFUNCTION(BlueprintCallable)
+	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const = 0;
+
+	//UFUNCTION(BlueprintCallable)
+	//virtual FIntPoint GetInventoryDimensions() const = 0;
 
 	//Update everything which depends on stacking system. 
 	//Example: every Inventory keeps track of mass
-	virtual void UpdateStackDependencies(UItemBase* item, int32 new_stack_size) {};
+	virtual void UpdateStackDependencies(UItemBase* item, int32 new_stack_size) { };
 
 	//Force update visual representation of an inventory.
 	//Inventories ARE REQUIRED to update when they change state.
@@ -68,18 +84,57 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual void UpdateInventory() = 0;
 
+	//For example: Player, AI Pawn, TransientPackage, World etc.
 	UFUNCTION(BlueprintCallable)
-	virtual AActor* GetInventoryOwner() = 0;
+	virtual UObject* GetInventoryOwner() = 0;
 
-	//Whether component always stays where it was created or it can be moved
+	UFUNCTION(BlueprintCallable)
+	virtual bool SetInventoryOwner(UObject* new_owner) = 0;
+
+
+	//Whether component always stays where it was created or it can be moved (inventory within another inventory)
 	UFUNCTION(BlueprintCallable)
 	virtual bool CanOwnerEverChange() { return true; };
 
-	//Whether inventory operations can be performed now
-	UFUNCTION(BlueprintCallable)
-	virtual bool IsLocked() { return false; };
 
-	//UFUNCTION(BlueprintCallable)
-	//TArray<EInventoryOperation> GetAvailableOperations();
+	//TODO: not yet implemented
+	// 
+	//What a user (player, AI) can do: 
+	//not visible, visible, editable
+	//move items in, out, edit items
+	UFUNCTION(BlueprintCallable)
+	virtual void GetUserAccessRules() { return; };
+
+	//TODO: not yet implemented
+	// 
+	//What a world/game can do: 
+	//not visible, visible, editable
+	//move items in, out, edit items
+	UFUNCTION(BlueprintCallable)
+	virtual void GetWorldAccessRules() { return; };
+
+	//Safety threading/multiple access feature, 
+	//whether move items IN (or move internally in a grid) is currently allowed 
+	//i.e. not processing another IN operation
+	//
+	//Prime example is to lock the grid so items don't get placed into one space
+	UFUNCTION()
+	virtual bool IsLockGuarded_In() { return false; };
+
+	//Safety threading/multiple access feature, 
+	//whether move items OUT is currently allowed
+	//
+	//OUT operations are more simple, they don't check the space
+	//Might not actually need to lock anything
+	UFUNCTION()
+	virtual bool IsLockGuarded_Out() { return false; };
+
+	//Safety threading/multiple access feature, 
+	//whether currently can edit items inside this inventory
+	//
+	//Note: it's better to lock items individually, rather than whole inventory
+	UFUNCTION()
+	virtual bool IsLockGuarded_ItemEdit() { return false; };
+
 };
 

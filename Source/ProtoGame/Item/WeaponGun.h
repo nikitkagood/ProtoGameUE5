@@ -44,17 +44,16 @@ public:
 
 	//Inventory interface; This class supports only WeaponAttachment and AmmoBase items
 	virtual bool MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination) override;
-	virtual bool MoveItemToInventoryInGrid(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) override;
+	virtual bool MoveItemToInventoryDestination(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) override;
 	virtual bool AddItemFromWorld(UItemBase* item) override;
 	virtual bool DropItemToWorld(UItemBase* item) override;
 	virtual bool ReceiveItem(UItemBase* item) override;
+	//No grid - reroute to ReceiveItem
+	virtual bool ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell) override { return ReceiveItem(item); };
 	virtual void UpdateInventory() override { OnInventoryUpdated.Broadcast(); };
 
 	UPROPERTY(BlueprintAssignable)
 	FOnInventoryUpdated OnInventoryUpdated;
-private:
-	//Not supported
-	virtual bool ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell) override { check(false); return false; };
 
 public: 	
 	//Weapon controls

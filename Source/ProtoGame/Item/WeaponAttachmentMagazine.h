@@ -25,31 +25,33 @@ public:
 
 	virtual FItemThumbnailInfo GetItemThumbnailInfoFromDT() override;
 
+	bool Push(UAmmoBase* ammo);
+	UAmmoBase* Pop();
+
 	int32 GetCapacity() const { return attachment_magazine_info.capacity; }
-	int32 GetRoundsLeft() const { return attachment_magazine_info.storage.Num(); }
-	const FText& GetTopRoundName() const { return attachment_magazine_info.storage.Last()->GetItemName(); }
+	int32 GetAmmoLeft() const { return attachment_magazine_info.storage.Num(); }
+	const UAmmoBase* GetTopAmmo() const { return attachment_magazine_info.storage.Last(); }
+	const FText& GetTopAmmoName() const { return attachment_magazine_info.storage.Last()->GetItemName(); }
 
 	//Inventory interface
 	
-	//In Move- functions item parameter isn't used
 	virtual bool MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination) override;
-	virtual bool MoveItemToInventoryInGrid(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) override;
+	virtual bool MoveItemToInventoryDestination(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) override;
 	virtual bool AddItemFromWorld(UItemBase* item) override;
 	virtual bool DropItemToWorld(UItemBase* item) override;
 	virtual bool ReceiveItem(UItemBase* item) override;
-	virtual void UpdateInventory() override { /*does nothing*/ };
+	//No grid - reroute to ReceiveItem
+	virtual bool ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell) override { return ReceiveItem(item); };
+	//TODO: implement
+	virtual void UpdateInventory() override { return; };
 	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const override;
 	virtual AActor* GetInventoryOwner() override { return GetOwner(); };
+	bool SetInventoryOwner(UObject* new_owner);
 
 	//Mag unload on use
 	virtual bool OnUse(AActor* caller) override;
-private:
-	//Not supported
-	virtual bool ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell) override { check(false); return false; };
-public:
 
-	bool Push(UAmmoBase* ammo);
-	UAmmoBase* Pop();
 private:
+	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, meta = (AllowPrivateAccess = true))
 	FAttachmentMagazineInfo attachment_magazine_info;
 };

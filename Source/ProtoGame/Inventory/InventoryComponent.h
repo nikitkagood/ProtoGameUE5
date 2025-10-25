@@ -14,7 +14,7 @@ class ACharacter;
 class UInvSpecialSlotComponent;
 
 //Represents grid inventory
-UCLASS(BlueprintType, DefaultToInstanced, meta=(BlueprintSpawnableComponent, DisplayName = "Inventory Component"))
+UCLASS(BlueprintType, Blueprintable, DefaultToInstanced, EditInlineNew, ClassGroup = (Inventory), meta=(BlueprintSpawnableComponent, DisplayName = "Inventory Component"))
 class PROTOGAME_API UInventoryComponent : public UActorComponent, public IInventoryInterface
 {
 	GENERATED_BODY()
@@ -24,13 +24,13 @@ public:
 	UInventoryComponent();
 
 	UFUNCTION(BlueprintCallable)
-	void Initialize(FIntPoint dimensions, FName name = "");
+	void Initialize(FIntPoint dimensions, FName name = "InventoryComp_DefaultName");
 	//void Initialize(FIntPoint dimensions, FName name = "", float drop_distance);
 
-	bool IsGridInitialized();
+	bool IsGridInitialized() const;
 
 	UFUNCTION(BlueprintCallable)
-	FIntPoint GetDimensions() { return { Rows, Columns }; };
+	FIntPoint GetDimensions() const { return { Rows, Columns }; };
 
 	UFUNCTION(BlueprintCallable)
 	void SetInventoryName(FName name) { InventoryName = name; }
@@ -48,7 +48,7 @@ public:
 	bool RotateItem(UItemBase* item);
 
 	UFUNCTION(BlueprintCallable)
-	bool Contains(UItemBase* item);
+	bool Contains(UItemBase* item) const;
 
 	//for debugging, print grid values to viewport 
 	UFUNCTION(BlueprintCallable)
@@ -62,7 +62,7 @@ public:
 
 	//IInventoryInterface
 	virtual bool MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination) override;
-	virtual bool MoveItemToInventoryInGrid(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) override;
+	virtual bool MoveItemToInventoryDestination(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) override;
 	virtual bool AddItemFromWorld(UItemBase* item) override;
 	virtual bool DropItemToWorld(UItemBase* item) override;
 	virtual bool ReceiveItem(UItemBase* item) override;
@@ -73,32 +73,40 @@ public:
 	//Thus you can't get hierarchy from InventoryComponent and there is no point it calling this method (at the moment at least)
 	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const override { return nullptr; };
 	virtual AActor* GetInventoryOwner() override { return GetOwner(); };
+	bool SetInventoryOwner(UObject* new_owner);
 	//IInventoryInterface end
 
 	//Inventories outer can be Item
 	//UItemBase* GetOuterItem() const;
 
-	void ChangeOwner(AActor* new_owner);
 
 	UPROPERTY(BlueprintAssignable)
 	FOnInventoryUpdated OnInventoryUpdated;
 protected:
 	virtual void BeginPlay() override;
 
-	bool AddItem(UItemBase* item); //finds free space then adds; it doesn't destroy ItemActors, does minimal checks; Must set World and Outer
-	bool AddItemAt(UItemBase* item, FIntPoint new_upper_left_cell); //adds at pre-determined place 
-	bool RemoveItem(UItemBase* item); //finds then removes; does minimal checks; Doesn't clear World and Outer because there Add to another inventory already overrides these;
-	bool RemoveItemAt(UItemBase* item, FIntPoint upper_left_cell, FIntPoint lower_right_cell); //removes from pre-determined place
+	//Finds free space then adds
+	//It doesn't destroy ItemActors, does minimal checks
+	//Must set World and Outer
+	bool AddItem(UItemBase* item); 
+	//Adds item at pre-determined place 
+	bool AddItemAt(UItemBase* item, FIntPoint new_upper_left_cell); 
+	//Finds then removes
+	//Not lock guarded, does minimal checks 
+	//Doesn't clear World and Outer because there Add to another inventory already overrides these
+	bool RemoveItem(UItemBase* item); 
+	//Removes from pre-determined place
+	bool RemoveItemAt(UItemBase* item, FIntPoint upper_left_cell, FIntPoint lower_right_cell);
 
 	void ChangeMass(float value);
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Inventory", meta = (AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Inventory", meta = (AllowPrivateAccess = true, ExposeOnSpawn = true))
 	FName InventoryName;
 
-    UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Inventory", meta = (AllowPrivateAccess = true, ClampMin = 1))
+    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Inventory", meta = (AllowPrivateAccess = true, ClampMin = 1, ExposeOnSpawn = true))
 	int32 Rows;
 
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Inventory", meta = (AllowPrivateAccess = true, ClampMin = 1))
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Inventory", meta = (AllowPrivateAccess = true, ClampMin = 1, ExposeOnSpawn = true))
 	int32 Columns;
 
     UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly, Category = "Inventory", meta = (AllowPrivateAccess = true))
@@ -107,6 +115,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly, Category = "Inventory", meta = (AllowPrivateAccess = true))
 	float Mass;
 
+	//TODO: may not be useful
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Inventory", meta = (AllowPrivateAccess = true))
 	float DropDistance;
 
@@ -115,12 +124,12 @@ private:
 
 	void InitializeInventoryGrid(int32 rows, int32 columns); 
 
-	FIntPoint FindFreeSpaceInGrid(UItemBase* item);
+	FIntPoint FindFreeSpaceInGrid(UItemBase* item) const;
 
 	TPair<FIntPoint, FIntPoint> FindItemPosition(UItemBase* item) const;
 
-	//ñhecks for free space only, i.e. -1
-	bool CheckSpace(FIntPoint upper_left_cell, UItemBase* item);
+	//Checks for free space only, i.e. -1
+	bool CheckSpace(FIntPoint upper_left_cell, UItemBase* item) const;
 
 	void FillSpaceInGrid(FIntPoint upper_left_cell, FIntPoint lower_right_cell, int32 item_idx);
 
@@ -143,4 +152,7 @@ private:
 
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Inventory", meta = (AllowPrivateAccess = true))
 	TArray<ItemType> SupportedTypes; //TODO: not implemented yet; types this inventory can store, 0 means all
+
+
+	mutable FCriticalSection InventoryMutex;
 };

@@ -99,7 +99,7 @@ void UGunRifle::PrintWeaponStats()
 {
 	auto* mag = Cast<UWeaponAttachmentMagazine>(attachment_slots[MagazineAttachmentIdx].Value);
 
-	FString msg { "Ammo in mag: " + FString::FromInt(mag->GetRoundsLeft())};
+	FString msg { "Ammo in mag: " + FString::FromInt(mag->GetAmmoLeft())};
 	UKismetSystemLibrary::PrintString(GetWorld(), msg, true, true, FLinearColor(206, 245, 66), 2);
 }
 

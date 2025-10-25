@@ -104,11 +104,11 @@ void AGameCharacterBase::BeginPlay()
 {
 	Super::BeginPlay();
 
-	InventoryManager->AddInventory(PrimaryGunSlot);
-	InventoryManager->AddInventory(SecondaryGunSlot);
-	InventoryManager->AddInventory(InventoryComponent_Pockets);
-	InventoryManager->AddInventory(InventoryItemSlot_Backpack);
-	InventoryManager->AddInventory(InventoryItemSlot_ChestRig);
+	InventoryManager->AddExistingInventory(PrimaryGunSlot);
+	InventoryManager->AddExistingInventory(SecondaryGunSlot);
+	InventoryManager->AddExistingInventory(InventoryComponent_Pockets);
+	InventoryManager->AddExistingInventory(InventoryItemSlot_Backpack);
+	InventoryManager->AddExistingInventory(InventoryItemSlot_ChestRig);
 
 	//Active slot is PrimarySlot by default
 	ActiveSlot = PrimaryGunSlot;
@@ -316,8 +316,7 @@ bool AGameCharacterBase::EquipGun(UItemBase* item)
 	if(item->GetOuterUpstreamInventory().GetObject()->IsA<UInvSpecialSlotComponent>())
 	{
 		//De-equip
-		//result = item->GetOuterUpstreamInventory()->MoveItemToInventory(item, InventoryComponent);
-		result = InventoryManager->MoveItemToInventory(item, EManagerInventoryType::InventoryComponent);
+		result = InventoryManager->MoveItemToInventory(item, { UInventoryComponent::StaticClass() }, false);
 	}
 	else
 	{

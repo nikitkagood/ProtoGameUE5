@@ -103,7 +103,7 @@ void UWeaponGun::PrintWeaponStats()
 {
 	auto* mag = Cast<UWeaponAttachmentMagazine>(attachment_slots[MagazineAttachmentIdx].Value);
 
-	FString msg { "Ammo in mag: " + FString::FromInt(mag->GetRoundsLeft())};
+	FString msg { "Ammo in mag: " + FString::FromInt(mag->GetAmmoLeft())};
 	UKismetSystemLibrary::PrintString(GetWorld(), msg, true, true, FLinearColor(206, 245, 66), 2);
 }
 
@@ -550,7 +550,7 @@ bool UWeaponGun::MoveItemToInventory(UItemBase* item, TScriptInterface<IInventor
 	return false;
 }
 
-bool UWeaponGun::MoveItemToInventoryInGrid(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell)
+bool UWeaponGun::MoveItemToInventoryDestination(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell)
 {
 	auto* attachment = Cast<UWeaponAttachment>(item);
 

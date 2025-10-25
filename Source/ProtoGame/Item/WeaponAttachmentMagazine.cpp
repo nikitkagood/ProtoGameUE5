@@ -50,7 +50,7 @@ bool UWeaponAttachmentMagazine::MoveItemToInventory(UItemBase* item, TScriptInte
 	return false;
 }
 
-bool UWeaponAttachmentMagazine::MoveItemToInventoryInGrid(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell)
+bool UWeaponAttachmentMagazine::MoveItemToInventoryDestination(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell)
 {
 	//Item parameter isn't used
 
@@ -98,6 +98,17 @@ bool UWeaponAttachmentMagazine::ReceiveItem(UItemBase* item)
 	return Push(Cast<UAmmoBase>(item));
 }
 
+bool UWeaponAttachmentMagazine::SetInventoryOwner(UObject* new_owner)
+{
+	if (IsValid(new_owner) == false)
+	{
+		checkf(false, TEXT("New owner is not valid"))
+		return false;
+	}
+
+	return Rename(nullptr, new_owner);
+}
+
 TScriptInterface<IInventoryInterface> UWeaponAttachmentMagazine::GetOuterUpstreamInventory() const
 {
 	return GetOuter();
@@ -116,9 +127,9 @@ bool UWeaponAttachmentMagazine::OnUse(AActor* caller)
 
 	bool at_least_one = false;
 
-	int32 rounds_left = GetRoundsLeft();
+	int32 ammo_left = GetAmmoLeft();
 
-	for(int32 i = 0; i < rounds_left; i++)
+	for(int32 i = 0; i < ammo_left; i++)
 	{
 		bool local = false;
 

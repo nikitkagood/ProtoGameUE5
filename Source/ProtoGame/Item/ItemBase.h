@@ -19,9 +19,14 @@ class AItemActor;
 class IInventoryInterface;
 enum class ItemObjectCreationMethod : uint8;
 
-//This class represents items without phyisical location, world-independent.
-//It represents actual properties of an item, as opposed to ItemActor which is used to represent physical location in a world.
-//Note that items attached to a character ARE NOT considered ItemActors. They are ItemBase + SkeletalMesh (although this might change).
+//This class represents items without phyisical location, world-independent - ItemObject.
+//ItemActor - is used to represent items in a world.
+// 
+//ItemObject is supposed to contain all the information and behaviour of an Item,
+// unless it's strictly world-dependent.
+//Usually represented by an Inventory.
+//
+//You can combine ItemObject with something else, like ItemObject + SkeletalMesh = weapon in hands of a character.
 UCLASS(Blueprintable, BlueprintType, DefaultToInstanced, meta=(BlueprintSpawnableComponent), ClassGroup=Item)
 class PROTOGAME_API UItemBase : public UObject, public IUseInterface
 {

@@ -53,7 +53,7 @@ void UInvSpecialSlotComponent::Clear()
 
 UItemBase* UInvSpecialSlotComponent::GetItem() const
 {
-	if(Item == nullptr || Item->GetOuterUpstreamInventory() != this)
+	if(!IsValid(Item) || Item->GetOuterUpstreamInventory() != this)
 	{
 		return nullptr;
 	}
@@ -79,7 +79,7 @@ bool UInvSpecialSlotComponent::MoveItemToInventory(UItemBase* item, TScriptInter
 	return false;
 }
 
-bool UInvSpecialSlotComponent::MoveItemToInventoryInGrid(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell)
+bool UInvSpecialSlotComponent::MoveItemToInventoryDestination(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell)
 {
 	if(destination.GetObject() == this || item != GetItem())
 	{
@@ -155,6 +155,29 @@ TScriptInterface<IInventoryInterface> UInvSpecialSlotComponent::GetOuterUpstream
 	return GetOuter();
 }
 
+bool UInvSpecialSlotComponent::SetInventoryOwner(UObject* new_owner)
+{
+	if (IsValid(new_owner) == false)
+	{
+		checkf(false, TEXT("New owner is not valid"))
+		return false;
+	}
+
+	if (Rename(nullptr, new_owner) == false)
+	{
+		return false;
+	}
+
+	GetOwner()->RemoveOwnedComponent(this);
+
+	if (auto new_owner_actor = Cast<AActor>(new_owner))
+	{
+		new_owner_actor->AddOwnedComponent(this);
+	}
+
+	return true;
+}
+
 bool UInvSpecialSlotComponent::IsItemCompatible(UItemBase* item)
 {
 	if (CompatibleClasses.IsEmpty())
@@ -162,21 +185,19 @@ bool UInvSpecialSlotComponent::IsItemCompatible(UItemBase* item)
 		return true;
 	}
 
-	if (CompatibleClassesIncludeChildren)
+	for (auto& i : CompatibleClasses)
 	{
-		for (auto& i : CompatibleClasses)
+		if (i.Key == item->GetClass())
 		{
-			if (UKismetMathLibrary::ClassIsChildOf(item->GetClass(), i))
+			return true;
+		}
+
+		if (i.Value.include_subclasses == true)
+		{
+			if (UKismetMathLibrary::ClassIsChildOf(item->GetClass(), i.Key))
 			{
 				return true;
 			}
-		}
-	}
-	else
-	{
-		if (CompatibleClasses.Contains(item->GetClass()))
-		{
-			return true;
 		}
 	}
 
@@ -192,3 +213,4 @@ bool UInvSpecialSlotComponent::IsOccupied() const
 
 	return false;
 }
+

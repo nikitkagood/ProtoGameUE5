@@ -50,13 +50,14 @@ public:
 	//IInventoryInterface
 
 	virtual bool MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination) override { checkf(false, TEXT("Abstract class doesn't have this. Check child classes.")); return false; };
-	virtual bool MoveItemToInventoryInGrid(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) override { checkf(false, TEXT("Abstract class doesn't have this implementation. Check child classes.")); return false; };
+	virtual bool MoveItemToInventoryDestination(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) override { checkf(false, TEXT("Abstract class doesn't have this implementation. Check child classes.")); return false; };
 	virtual bool AddItemFromWorld(UItemBase* item) override { checkf(false, TEXT("Abstract class doesn't have this implementation. Check child classes.")); return false; };
 	virtual bool DropItemToWorld(UItemBase* item) override { checkf(false, TEXT("Abstract class doesn't have this implementation. Check child classes.")); return false; };
 	virtual bool ReceiveItem(UItemBase* item) override { checkf(false, TEXT("Abstract class doesn't have this implementation. Check child classes.")); return false; };
 	virtual void UpdateInventory() override { checkf(false, TEXT("Abstract class doesn't have this implementation. Check child classes.")); return; };
 	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const override;
 	virtual AActor* GetInventoryOwner() override { return GetOwner(); };
+	virtual bool SetInventoryOwner(UObject*) { checkf(false, TEXT("Abstract class doesn't have this implementation. Check child classes.")); return false; };
 private:
 	//Not supported
 	virtual bool ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell) override { checkf(false, TEXT("It's not supported. This class doesn't have any grid.")); return false; };

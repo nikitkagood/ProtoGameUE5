@@ -43,17 +43,26 @@ bool UInventoryItem::SetOuterUpstreamInventory(TScriptInterface<IInventoryInterf
 
 	if (IsValid(GetInventoryComponent()))
 	{
-		GetInventoryComponent()->ChangeOwner(inventory->GetInventoryOwner());
+		if (this->SetInventoryOwner(inventory->GetInventoryOwner()) == false)
+		{
+			return false;
+		}
 	}
 
-	return this->Rename(nullptr, inventory.GetObject());
+	return this->Rename(nullptr, inventory.GetObject());;
 }
 
 bool UInventoryItem::SetOuterItemActor(AItemActor* item_actor)
 {
 	if (IsValid(GetInventoryComponent()))
 	{
-		GetInventoryComponent()->ChangeOwner(item_actor);
+		if (GetInventoryComponent()->SetInventoryOwner(item_actor) == false)
+		{
+			return false;
+		}
+	}
+	{
+		return false;
 	}
 
 	return this->Rename(nullptr, item_actor);
@@ -115,9 +124,9 @@ bool UInventoryItem::MoveItemToInventory(UItemBase* item, TScriptInterface<IInve
     return InventoryComponent->MoveItemToInventory(item, destination);
 }
 
-bool UInventoryItem::MoveItemToInventoryInGrid(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell)
+bool UInventoryItem::MoveItemToInventoryDestination(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell)
 {
-    return InventoryComponent->MoveItemToInventoryInGrid(item, destination, new_upper_left_cell);
+    return InventoryComponent->MoveItemToInventoryDestination(item, destination, new_upper_left_cell);
 }
 
 bool UInventoryItem::AddItemFromWorld(UItemBase* item)
@@ -156,3 +165,28 @@ TScriptInterface<IInventoryInterface> UInventoryItem::GetOuterUpstreamInventory(
     res.SetInterface(Cast<IInventoryInterface>(GetOuter()));
     return res;
 }
+
+bool UInventoryItem::SetInventoryOwner(UObject* new_owner)
+{
+	if (IsValid(new_owner) == false)
+	{
+		checkf(false, TEXT("New owner is not valid"))
+		return false;
+	}
+
+	if (IsValid(GetInventoryComponent()))
+	{
+		if (GetInventoryComponent()->SetInventoryOwner(new_owner) == false)
+		{
+			return false;
+		}
+	}
+	else
+	{
+		return false;
+	}
+
+	return Rename(nullptr, new_owner);
+}
+
+
