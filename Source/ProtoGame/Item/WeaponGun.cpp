@@ -529,28 +529,28 @@ bool UWeaponGun::OnUse(AActor* caller)
 	return false;
 }
 
-bool UWeaponGun::MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination)
-{
-	auto* attachment = Cast<UWeaponAttachment>(item);
+//bool UWeaponGun::MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination)
+//{
+//	auto* attachment = Cast<UWeaponAttachment>(item);
+//
+//	if(destination.GetObject() == this || attachment == nullptr)
+//	{
+//		return false;
+//	}
+//
+//	int32 idx = attachment_slots.Find(TPair<FAttachmentSlot, UWeaponAttachment*>{ attachment->GetAttachmentSlot(), attachment });
+//
+//	if(idx != INDEX_NONE && destination->ReceiveItem(item))
+//	{
+//		attachment_slots[idx].Value = attachment;
+//
+//		return true;
+//	}
+//
+//	return false;
+//}
 
-	if(destination.GetObject() == this || attachment == nullptr)
-	{
-		return false;
-	}
-
-	int32 idx = attachment_slots.Find(TPair<FAttachmentSlot, UWeaponAttachment*>{ attachment->GetAttachmentSlot(), attachment });
-
-	if(idx != INDEX_NONE && destination->ReceiveItem(item))
-	{
-		attachment_slots[idx].Value = attachment;
-
-		return true;
-	}
-
-	return false;
-}
-
-bool UWeaponGun::MoveItemToInventoryDestination(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell)
+bool UWeaponGun::MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell)
 {
 	auto* attachment = Cast<UWeaponAttachment>(item);
 
@@ -562,7 +562,7 @@ bool UWeaponGun::MoveItemToInventoryDestination(UItemBase* item, TScriptInterfac
 
 	int32 idx = attachment_slots.Find(TPair<FAttachmentSlot, UWeaponAttachment*>{ attachment->GetAttachmentSlot(), attachment });
 
-	if(idx != INDEX_NONE && destination->ReceiveItemInGrid(item, new_upper_left_cell))
+	if(idx != INDEX_NONE && destination->ReceiveItem(item, new_upper_left_cell))
 	{
 		attachment_slots[idx].Value = attachment;
 
@@ -620,7 +620,7 @@ bool UWeaponGun::DropItemToWorld(UItemBase* item)
 	return false;
 }
 
-bool UWeaponGun::ReceiveItem(UItemBase* item)
+bool UWeaponGun::ReceiveItem(UItemBase* item, FIntPoint new_upper_left_cell)
 {
 	auto* attachment = Cast<UWeaponAttachment>(item);
 	if(attachment != nullptr)

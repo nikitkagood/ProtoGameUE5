@@ -52,13 +52,13 @@ bool UInventoryManager::MoveItemToInventory(UItemBase* item, TArray<UClass*> inv
 
 		if (inventory_types.IsEmpty())
 		{
-			result = current_inv->MoveItemToInventory(item, i);
+			result = current_inv->MoveItemToInventory(item, i, { -1, -1 });
 		}
 		else 
 		{
 			if (inventory_types.Contains(i.GetObject()->GetClass()))
 			{
-				result = current_inv->MoveItemToInventory(item, i);
+				result = current_inv->MoveItemToInventory(item, i, {-1, -1});
 			}
 		}
 
@@ -70,6 +70,19 @@ bool UInventoryManager::MoveItemToInventory(UItemBase* item, TArray<UClass*> inv
 	}
 
 	return result;
+}
+
+bool UInventoryManager::MoveItemToInventoryDestination(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell = 0)
+{
+	TScriptInterface<IInventoryInterface> inv = item->GetOuterUpstreamInventory();
+
+	if (inv == nullptr)
+	{
+		checkf(false, TEXT("Trying to move item (to destination) which isn't in any inventory"));
+		return false;
+	}
+
+	return inv->MoveItemToInventory(item, destination, new_upper_left_cell);
 }
 
 bool UInventoryManager::AddItemFromWorld(UItemBase* item, EManagerInventoryType inventory_type)
@@ -138,18 +151,6 @@ bool UInventoryManager::AddItemFromWorld(UItemBase* item, EManagerInventoryType 
 	return false;
 }
 
-bool UInventoryManager::MoveItemToInventoryDestination(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell = 0)
-{
-	TScriptInterface<IInventoryInterface> inv = item->GetOuterUpstreamInventory();
-
-	if (inv == nullptr)
-	{
-		checkf(false, TEXT("Trying to move item (to destination) which isn't in any inventory"));
-		return false;
-	}
-
-	return inv->MoveItemToInventoryDestination(item, destination, new_upper_left_cell);
-}
 
 //bool UInventoryManager::AddItemFromWorld(UItemBase* item)
 //{

@@ -30,7 +30,27 @@ FItemThumbnailInfo UWeaponAttachmentMagazine::GetItemThumbnailInfoFromDT()
 	return GetItemThumbnailInfoFromDT_Impl<DataTableType>();
 }
 
-bool UWeaponAttachmentMagazine::MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination)
+//bool UWeaponAttachmentMagazine::MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell)
+//{
+//	//Item parameter isn't used
+//
+//	if(destination.GetObject() == this)
+//	{
+//		return false;
+//	}
+//
+//	auto* res = attachment_magazine_info.storage.Last();
+//
+//	if(res != nullptr && destination->ReceiveItem(res, new_upper_left_cell))
+//	{
+//		Pop();
+//		return true;
+//	}
+//
+//	return false;
+//}
+
+bool UWeaponAttachmentMagazine::MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell)
 {
 	//Item parameter isn't used
 
@@ -41,27 +61,7 @@ bool UWeaponAttachmentMagazine::MoveItemToInventory(UItemBase* item, TScriptInte
 
 	auto* res = attachment_magazine_info.storage.Last();
 
-	if(res != nullptr && destination->ReceiveItem(res))
-	{
-		Pop();
-		return true;
-	}
-
-	return false;
-}
-
-bool UWeaponAttachmentMagazine::MoveItemToInventoryDestination(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell)
-{
-	//Item parameter isn't used
-
-	if(destination.GetObject() == this)
-	{
-		return false;
-	}
-
-	auto* res = attachment_magazine_info.storage.Last();
-
-	if(res != nullptr && destination->ReceiveItemInGrid(res, new_upper_left_cell))
+	if(res != nullptr && destination->ReceiveItem(res, new_upper_left_cell))
 	{
 		Pop();
 		return true;
@@ -93,8 +93,9 @@ bool UWeaponAttachmentMagazine::DropItemToWorld(UItemBase* item)
 	return false;
 }
 
-bool UWeaponAttachmentMagazine::ReceiveItem(UItemBase* item)
+bool UWeaponAttachmentMagazine::ReceiveItem(UItemBase* item, FIntPoint new_upper_left_cell)
 {
+
 	return Push(Cast<UAmmoBase>(item));
 }
 
@@ -133,7 +134,7 @@ bool UWeaponAttachmentMagazine::OnUse(AActor* caller)
 	{
 		bool local = false;
 
-		local = MoveItemToInventory(nullptr, upstream_inventory);
+		local = MoveItemToInventory(nullptr, upstream_inventory, {-1, -1});
 
 		if(at_least_one != true && local == true)
 		{

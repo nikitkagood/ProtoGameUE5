@@ -39,7 +39,7 @@ public:
 	UFUNCTION(BlueprintCallable, meta = (AutoCreateRefTerm = "inventory_types"))
 	bool MoveItemToInventory(UItemBase* item, TArray<UClass*> inventory_types, bool exclude_types = false);
 	//new_upper_left_cell is optional
-	UFUNCTION(BlueprintCallable, meta = (AutoCreateRefTerm = "new_upper_left_cell"))
+	UFUNCTION(BlueprintCallable, meta = (new_upper_left_cell = "(-1, -1)"))
 	bool MoveItemToInventoryDestination(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell);
 	UFUNCTION(BlueprintCallable)
 	bool AddItemFromWorld(UItemBase* item, EManagerInventoryType inventory_type = EManagerInventoryType::Any);

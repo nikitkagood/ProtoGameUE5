@@ -38,13 +38,11 @@ public:
 
 	//IInventoryInterface
 
-	virtual bool MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination) override;
-	virtual bool MoveItemToInventoryDestination(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) override;
+	virtual bool MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) override;
 	virtual bool AddItemFromWorld(UItemBase* item) override;
 	virtual bool DropItemToWorld(UItemBase* item) override;
-	virtual bool ReceiveItem(UItemBase* item) override;
-	//Simply reroute, new_upper_left_cell is ignored
-	virtual bool ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell) override { return ReceiveItem(item); };
+	//new_upper_left_cell is ignored
+	virtual bool ReceiveItem(UItemBase* item, FIntPoint new_upper_left_cell) override;
 	virtual void UpdateInventory() override { OnInventoryUpdated.Broadcast(); };
 	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const override;
 	virtual UObject* GetInventoryOwner() override { return GetOwner(); };

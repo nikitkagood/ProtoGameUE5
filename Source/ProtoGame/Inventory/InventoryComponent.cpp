@@ -666,33 +666,33 @@ void UInventoryComponent::PrintDebugInfo()
     UKismetSystemLibrary::PrintString(GetWorld(), str, true, false, FColor::White, 5);
 }
 
-bool UInventoryComponent::MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination)
-{
-    if (IsGridInitialized() == false)
-    {
-        checkf(false, TEXT("Error: cannot use uninitialized InventoryComponent"));
-        return false;
-    }
+//bool UInventoryComponent::MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination)
+//{
+//    if (IsGridInitialized() == false)
+//    {
+//        checkf(false, TEXT("Error: cannot use uninitialized InventoryComponent"));
+//        return false;
+//    }
+//
+//    if(destination.GetObject() == this)
+//    {
+//        checkf(false, TEXT("Warning: can't move item to itself"));
+//        return false;
+//    }
+//
+//    auto temp_upper_l_cell = item->GetUpperLeftCell();
+//    auto temp_lower_r_cell = item->GetLowerRightCell();
+//
+//    if(item != nullptr && Contains(item) && destination->ReceiveItem(item))
+//    {
+//        RemoveItemAt(item, temp_upper_l_cell, temp_lower_r_cell);
+//        return true;
+//    }
+//
+//    return false;
+//}
 
-    if(destination.GetObject() == this)
-    {
-        checkf(false, TEXT("Warning: can't move item to itself"));
-        return false;
-    }
-
-    auto temp_upper_l_cell = item->GetUpperLeftCell();
-    auto temp_lower_r_cell = item->GetLowerRightCell();
-
-    if(item != nullptr && Contains(item) && destination->ReceiveItem(item))
-    {
-        RemoveItemAt(item, temp_upper_l_cell, temp_lower_r_cell);
-        return true;
-    }
-
-    return false;
-}
-
-bool UInventoryComponent::MoveItemToInventoryDestination(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell)
+bool UInventoryComponent::MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell)
 {
     if (IsGridInitialized() == false)
     {
@@ -709,7 +709,7 @@ bool UInventoryComponent::MoveItemToInventoryDestination(UItemBase* item, TScrip
     auto temp_upper_l_cell = item->GetUpperLeftCell();
     auto temp_lower_r_cell = item->GetLowerRightCell();
 
-    if(item != nullptr && Contains(item) && destination->ReceiveItemInGrid(item, new_upper_left_cell))
+    if(item != nullptr && Contains(item) && destination->ReceiveItem(item, new_upper_left_cell))
     {
         RemoveItemAt(item, temp_upper_l_cell, temp_lower_r_cell);
         return true;
@@ -756,21 +756,26 @@ bool UInventoryComponent::DropItemToWorld(UItemBase* item)
     return true;
 }
 
-bool UInventoryComponent::ReceiveItem(UItemBase* item)
+//bool UInventoryComponent::ReceiveItem(UItemBase* item)
+//{
+//    if(!IsValid(item) || Items.Contains(item))
+//    {
+//        return false;
+//    }
+//
+//    return AddItem(item);
+//}
+
+bool UInventoryComponent::ReceiveItem(UItemBase* item, FIntPoint new_upper_left_cell)
 {
     if(!IsValid(item) || Items.Contains(item))
     {
         return false;
     }
 
-    return AddItem(item);
-}
-
-bool UInventoryComponent::ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell)
-{
-    if(!IsValid(item) || Items.Contains(item))
+    if (new_upper_left_cell.X <= -1 || new_upper_left_cell.Y <= -1)
     {
-        return false;
+        return AddItem(item);
     }
 
     return AddItemAt(item, new_upper_left_cell);

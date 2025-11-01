@@ -61,25 +61,25 @@ UItemBase* UInvSpecialSlotComponent::GetItem() const
 	return Item;
 }
 
-bool UInvSpecialSlotComponent::MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination)
-{
-	if(destination.GetObject() == this || item != GetItem())
-	{
-		return false;
-	}
+//bool UInvSpecialSlotComponent::MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination)
+//{
+//	if(destination.GetObject() == this || item != GetItem())
+//	{
+//		return false;
+//	}
+//
+//	if(destination->ReceiveItem(item))
+//	{
+//		Clear();
+//		return true;
+//	}
+//
+//	OnInventoryUpdated.Broadcast(); 
+//
+//	return false;
+//}
 
-	if(destination->ReceiveItem(item))
-	{
-		Clear();
-		return true;
-	}
-
-	OnInventoryUpdated.Broadcast(); 
-
-	return false;
-}
-
-bool UInvSpecialSlotComponent::MoveItemToInventoryDestination(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell)
+bool UInvSpecialSlotComponent::MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell)
 {
 	if(destination.GetObject() == this || item != GetItem())
 	{
@@ -87,7 +87,7 @@ bool UInvSpecialSlotComponent::MoveItemToInventoryDestination(UItemBase* item, T
 		return false;
 	}
 
-	if(destination->ReceiveItemInGrid(item, new_upper_left_cell))
+	if(destination->ReceiveItem(item, new_upper_left_cell))
 	{
 		Clear();
 		return true;
@@ -140,7 +140,7 @@ bool UInvSpecialSlotComponent::DropItemToWorld(UItemBase* item)
 	return true;
 }
 
-bool UInvSpecialSlotComponent::ReceiveItem(UItemBase* item)
+bool UInvSpecialSlotComponent::ReceiveItem(UItemBase* item, FIntPoint new_upper_left_cell)
 {
 	if(IsOccupied() == false)
 	{

@@ -35,13 +35,12 @@ public:
 
 	//Inventory interface
 	
-	virtual bool MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination) override;
-	virtual bool MoveItemToInventoryDestination(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) override;
+	//TODO: change implementation
+	virtual bool MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) override;
 	virtual bool AddItemFromWorld(UItemBase* item) override;
 	virtual bool DropItemToWorld(UItemBase* item) override;
-	virtual bool ReceiveItem(UItemBase* item) override;
-	//No grid - reroute to ReceiveItem
-	virtual bool ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell) override { return ReceiveItem(item); };
+	//TODO: change implementation
+	virtual bool ReceiveItem(UItemBase* item, FIntPoint new_upper_left_cell) override;
 	//TODO: implement
 	virtual void UpdateInventory() override { return; };
 	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const override;
@@ -52,6 +51,9 @@ public:
 	virtual bool OnUse(AActor* caller) override;
 
 private:
+	//TODO: add inventory function/loading mode
+	//just move or load like a person would load rounds one by one
+
 	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, meta = (AllowPrivateAccess = true))
 	FAttachmentMagazineInfo attachment_magazine_info;
 };

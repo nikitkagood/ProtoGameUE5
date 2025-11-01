@@ -321,10 +321,10 @@ bool AGameCharacterBase::EquipGun(UItemBase* item)
 	else
 	{
 		//Equip (move to SpecialSlot)
-		result = item->GetOuterUpstreamInventory()->MoveItemToInventory(item, PrimaryGunSlot);
+		result = item->GetOuterUpstreamInventory()->MoveItemToInventory(item, PrimaryGunSlot, {-1, -1});
 		if(result == false)
 		{
-			result = item->GetOuterUpstreamInventory()->MoveItemToInventory(item, SecondaryGunSlot);
+			result = item->GetOuterUpstreamInventory()->MoveItemToInventory(item, SecondaryGunSlot, {-1, -1});
 		}
 	}
 

@@ -57,12 +57,10 @@ public:
 	virtual bool Interact(AActor* caller, EInteractionActions action) override;
 
 	//IInventoryInterface
-	virtual bool MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination) override;
-	virtual bool MoveItemToInventoryDestination(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) override;
+	virtual bool MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) override;
 	virtual bool AddItemFromWorld(UItemBase* item) override;
 	virtual bool DropItemToWorld(UItemBase* item) override;
-	virtual bool ReceiveItem(UItemBase* item) override;
-	virtual bool ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell) override;
+	virtual bool ReceiveItem(UItemBase* item, FIntPoint new_upper_left_cell) override;
 	virtual void UpdateStackDependencies(UItemBase* item, int32 new_stack_size) override;
 	virtual void UpdateInventory() override;
 	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const override;

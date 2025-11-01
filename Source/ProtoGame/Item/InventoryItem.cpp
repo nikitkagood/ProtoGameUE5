@@ -119,14 +119,9 @@ bool UInventoryItem::Interact(AActor* caller, EInteractionActions action)
 	return false;
 }
 
-bool UInventoryItem::MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination)
+bool UInventoryItem::MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell)
 {
-    return InventoryComponent->MoveItemToInventory(item, destination);
-}
-
-bool UInventoryItem::MoveItemToInventoryDestination(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell)
-{
-    return InventoryComponent->MoveItemToInventoryDestination(item, destination, new_upper_left_cell);
+    return InventoryComponent->MoveItemToInventory(item, destination, new_upper_left_cell);
 }
 
 bool UInventoryItem::AddItemFromWorld(UItemBase* item)
@@ -139,14 +134,9 @@ bool UInventoryItem::DropItemToWorld(UItemBase* item)
     return InventoryComponent->DropItemToWorld(item);
 }
 
-bool UInventoryItem::ReceiveItem(UItemBase* item)
+bool UInventoryItem::ReceiveItem(UItemBase* item, FIntPoint new_upper_left_cell)
 {
-    return InventoryComponent->ReceiveItem(item);
-}
-
-bool UInventoryItem::ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell)
-{
-    return InventoryComponent->ReceiveItemInGrid(item, new_upper_left_cell);
+    return InventoryComponent->ReceiveItem(item, new_upper_left_cell);
 }
 
 void UInventoryItem::UpdateStackDependencies(UItemBase* item, int32 new_stack_size)

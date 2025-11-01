@@ -37,32 +37,30 @@ class PROTOGAME_API IInventoryInterface
 public:
 	//Inventory operations
 
-    UFUNCTION(BlueprintCallable)
-	virtual bool MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination) = 0;
+   // UFUNCTION(BlueprintCallable)
+	//virtual bool MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination) = 0;
 
 	//new_upper_left_cell is optional, default value -1, -1 - invalid cell
+	//NOT SET as standard C++ default value due to UFUNCTION
 	UFUNCTION(BlueprintCallable, meta = (new_upper_left_cell = "(-1, -1)"))
-	virtual bool MoveItemToInventoryDestination(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) = 0;
+	virtual bool MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) = 0;
 
+	//Add item from world, laying on the ground for example
+	//ANYTHING world-related is expected to be handled by Item itself
+	//Inventory is not to predict Item behavior when moved into inventory, 
+	// not even just to just delete its world representation - since this easily could be done wrong
 	UFUNCTION(BlueprintCallable)
-	virtual bool AddItemFromWorld(UItemBase* item) = 0; //add item; currently items destroy themselves
+	virtual bool AddItemFromWorld(UItemBase* item) = 0; 
 
 	UFUNCTION(BlueprintCallable)
 	virtual bool DropItemToWorld(UItemBase* item) = 0;
-
-	//Used internally, so origin inventory can check whether destination inventory has received the item
-	//NOTE: "Destructive" operation if returns true - i.e. origin inventory has to stop containing/owning the item
-	//non-destructive if false
-	//
-	//TODO: maybe get rid of it in favor of new_upper_left_cell version
-	virtual bool ReceiveItem(UItemBase* item) = 0;
 
 	//Used internally, so origin inventory can check whether destination inventory has received the item
 	//NOTE: "Destructive" operation if returns true - i.e. origin inventory has to stop "containing" the item
 	//non-destructive if false
 	//
 	//new_upper_left_cell is optional, default value -1, -1 - invalid cell
-	virtual bool ReceiveItemInGrid(UItemBase* item, FIntPoint new_upper_left_cell = {-1, -1}) = 0;
+	virtual bool ReceiveItem(UItemBase* item, FIntPoint new_upper_left_cell = {-1, -1}) = 0;
 
 
 	//"Service" functions
