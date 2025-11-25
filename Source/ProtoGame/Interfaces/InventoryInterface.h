@@ -42,7 +42,7 @@ public:
 
 	//new_upper_left_cell is optional, default value -1, -1 - invalid cell
 	//NOT SET as standard C++ default value due to UFUNCTION
-	UFUNCTION(BlueprintCallable, meta = (new_upper_left_cell = "(-1, -1)"))
+	UFUNCTION(BlueprintCallable, meta=(new_upper_left_cell="(X=-1,Y=-1)"))
 	virtual bool MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) = 0;
 
 	//Add item from world, laying on the ground for example
