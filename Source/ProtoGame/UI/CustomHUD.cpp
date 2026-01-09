@@ -4,6 +4,8 @@
 #include "UI/CustomHUD.h"
 
 #include "Engine/Canvas.h"
+#include "Engine/LocalPlayer.h"
+#include "Engine/GameViewportClient.h"
 #include "EngineUtils.h"
 
 FVector2D ACustomHUD::GetMousePositionHUD(bool& is_valid)

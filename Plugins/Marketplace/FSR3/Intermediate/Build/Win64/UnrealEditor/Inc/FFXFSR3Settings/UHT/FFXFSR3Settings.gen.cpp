@@ -8,7 +8,7 @@
 #include "FFXFSR3Settings.h"
 
 PRAGMA_DISABLE_DEPRECATION_WARNINGS
-
+static_assert(!UE_WITH_CONSTINIT_UOBJECT, "This generated code can only be compiled with !UE_WITH_CONSTINIT_OBJECT");
 void EmptyLinkFunctionForGeneratedCodeFFXFSR3Settings() {}
 
 // ********** Begin Cross Module References ********************************************************
@@ -35,7 +35,7 @@ static UEnum* EFFXFSR3QualityMode_StaticEnum()
 	}
 	return Z_Registration_Info_UEnum_EFFXFSR3QualityMode.OuterSingleton;
 }
-template<> FFXFSR3SETTINGS_API UEnum* StaticEnum<EFFXFSR3QualityMode>()
+template<> FFXFSR3SETTINGS_NON_ATTRIBUTED_API UEnum* StaticEnum<EFFXFSR3QualityMode>()
 {
 	return EFFXFSR3QualityMode_StaticEnum();
 }
@@ -70,7 +70,7 @@ struct Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3QualityMode_Statics
 		{ "EFFXFSR3QualityMode::UltraPerformance", (int64)EFFXFSR3QualityMode::UltraPerformance },
 	};
 	static const UECodeGen_Private::FEnumParams EnumParams;
-};
+}; // struct Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3QualityMode_Statics 
 const UECodeGen_Private::FEnumParams Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3QualityMode_Statics::EnumParams = {
 	(UObject*(*)())Z_Construct_UPackage__Script_FFXFSR3Settings,
 	nullptr,
@@ -103,7 +103,7 @@ static UEnum* EFFXFSR3HistoryFormat_StaticEnum()
 	}
 	return Z_Registration_Info_UEnum_EFFXFSR3HistoryFormat.OuterSingleton;
 }
-template<> FFXFSR3SETTINGS_API UEnum* StaticEnum<EFFXFSR3HistoryFormat>()
+template<> FFXFSR3SETTINGS_NON_ATTRIBUTED_API UEnum* StaticEnum<EFFXFSR3HistoryFormat>()
 {
 	return EFFXFSR3HistoryFormat_StaticEnum();
 }
@@ -129,7 +129,7 @@ struct Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3HistoryFormat_Statics
 		{ "EFFXFSR3HistoryFormat::FloatR11G11B10", (int64)EFFXFSR3HistoryFormat::FloatR11G11B10 },
 	};
 	static const UECodeGen_Private::FEnumParams EnumParams;
-};
+}; // struct Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3HistoryFormat_Statics 
 const UECodeGen_Private::FEnumParams Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3HistoryFormat_Statics::EnumParams = {
 	(UObject*(*)())Z_Construct_UPackage__Script_FFXFSR3Settings,
 	nullptr,
@@ -162,7 +162,7 @@ static UEnum* EFFXFSR3DeDitherMode_StaticEnum()
 	}
 	return Z_Registration_Info_UEnum_EFFXFSR3DeDitherMode.OuterSingleton;
 }
-template<> FFXFSR3SETTINGS_API UEnum* StaticEnum<EFFXFSR3DeDitherMode>()
+template<> FFXFSR3SETTINGS_NON_ATTRIBUTED_API UEnum* StaticEnum<EFFXFSR3DeDitherMode>()
 {
 	return EFFXFSR3DeDitherMode_StaticEnum();
 }
@@ -191,7 +191,7 @@ struct Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3DeDitherMode_Statics
 		{ "EFFXFSR3DeDitherMode::HairOnly", (int64)EFFXFSR3DeDitherMode::HairOnly },
 	};
 	static const UECodeGen_Private::FEnumParams EnumParams;
-};
+}; // struct Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3DeDitherMode_Statics 
 const UECodeGen_Private::FEnumParams Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3DeDitherMode_Statics::EnumParams = {
 	(UObject*(*)())Z_Construct_UPackage__Script_FFXFSR3Settings,
 	nullptr,
@@ -224,7 +224,7 @@ static UEnum* EFFXFSR3LandscapeHISMMode_StaticEnum()
 	}
 	return Z_Registration_Info_UEnum_EFFXFSR3LandscapeHISMMode.OuterSingleton;
 }
-template<> FFXFSR3SETTINGS_API UEnum* StaticEnum<EFFXFSR3LandscapeHISMMode>()
+template<> FFXFSR3SETTINGS_NON_ATTRIBUTED_API UEnum* StaticEnum<EFFXFSR3LandscapeHISMMode>()
 {
 	return EFFXFSR3LandscapeHISMMode_StaticEnum();
 }
@@ -253,7 +253,7 @@ struct Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3LandscapeHISMMode_Statics
 		{ "EFFXFSR3LandscapeHISMMode::StaticWPO", (int64)EFFXFSR3LandscapeHISMMode::StaticWPO },
 	};
 	static const UECodeGen_Private::FEnumParams EnumParams;
-};
+}; // struct Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3LandscapeHISMMode_Statics 
 const UECodeGen_Private::FEnumParams Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3LandscapeHISMMode_Statics::EnumParams = {
 	(UObject*(*)())Z_Construct_UPackage__Script_FFXFSR3Settings,
 	nullptr,
@@ -286,7 +286,7 @@ static UEnum* EFFXFSR3FrameGenUIMode_StaticEnum()
 	}
 	return Z_Registration_Info_UEnum_EFFXFSR3FrameGenUIMode.OuterSingleton;
 }
-template<> FFXFSR3SETTINGS_API UEnum* StaticEnum<EFFXFSR3FrameGenUIMode>()
+template<> FFXFSR3SETTINGS_NON_ATTRIBUTED_API UEnum* StaticEnum<EFFXFSR3FrameGenUIMode>()
 {
 	return EFFXFSR3FrameGenUIMode_StaticEnum();
 }
@@ -312,7 +312,7 @@ struct Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3FrameGenUIMode_Statics
 		{ "EFFXFSR3FrameGenUIMode::UIExtraction", (int64)EFFXFSR3FrameGenUIMode::UIExtraction },
 	};
 	static const UECodeGen_Private::FEnumParams EnumParams;
-};
+}; // struct Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3FrameGenUIMode_Statics 
 const UECodeGen_Private::FEnumParams Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3FrameGenUIMode_Statics::EnumParams = {
 	(UObject*(*)())Z_Construct_UPackage__Script_FFXFSR3Settings,
 	nullptr,
@@ -345,7 +345,7 @@ static UEnum* EFFXFSR3PaceRHIFrameMode_StaticEnum()
 	}
 	return Z_Registration_Info_UEnum_EFFXFSR3PaceRHIFrameMode.OuterSingleton;
 }
-template<> FFXFSR3SETTINGS_API UEnum* StaticEnum<EFFXFSR3PaceRHIFrameMode>()
+template<> FFXFSR3SETTINGS_NON_ATTRIBUTED_API UEnum* StaticEnum<EFFXFSR3PaceRHIFrameMode>()
 {
 	return EFFXFSR3PaceRHIFrameMode_StaticEnum();
 }
@@ -371,7 +371,7 @@ struct Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3PaceRHIFrameMode_Statics
 		{ "EFFXFSR3PaceRHIFrameMode::CustomPresentVSync", (int64)EFFXFSR3PaceRHIFrameMode::CustomPresentVSync },
 	};
 	static const UECodeGen_Private::FEnumParams EnumParams;
-};
+}; // struct Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3PaceRHIFrameMode_Statics 
 const UECodeGen_Private::FEnumParams Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3PaceRHIFrameMode_Statics::EnumParams = {
 	(UObject*(*)())Z_Construct_UPackage__Script_FFXFSR3Settings,
 	nullptr,
@@ -395,9 +395,6 @@ UEnum* Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3PaceRHIFrameMode()
 // ********** End Enum EFFXFSR3PaceRHIFrameMode ****************************************************
 
 // ********** Begin Class UFFXFSR3Settings *********************************************************
-void UFFXFSR3Settings::StaticRegisterNativesUFFXFSR3Settings()
-{
-}
 FClassRegistrationInfo Z_Registration_Info_UClass_UFFXFSR3Settings;
 UClass* UFFXFSR3Settings::GetPrivateStaticClass()
 {
@@ -405,7 +402,7 @@ UClass* UFFXFSR3Settings::GetPrivateStaticClass()
 	if (!Z_Registration_Info_UClass_UFFXFSR3Settings.InnerSingleton)
 	{
 		GetPrivateStaticClassBody(
-			StaticPackage(),
+			TClass::StaticPackage(),
 			TEXT("FFXFSR3Settings"),
 			Z_Registration_Info_UClass_UFFXFSR3Settings.InnerSingleton,
 			StaticRegisterNativesUFFXFSR3Settings,
@@ -901,6 +898,8 @@ struct Z_Construct_UClass_UFFXFSR3Settings_Statics
 #endif
 	};
 #endif // WITH_METADATA
+
+// ********** Begin Class UFFXFSR3Settings constinit property declarations *************************
 	static void NewProp_bEnabled_SetBit(void* Obj);
 	static const UECodeGen_Private::FBoolPropertyParams NewProp_bEnabled;
 	static void NewProp_bAutoExposure_SetBit(void* Obj);
@@ -973,12 +972,15 @@ struct Z_Construct_UClass_UFFXFSR3Settings_Statics
 	static const UECodeGen_Private::FIntPropertyParams NewProp_CustomStencilMask;
 	static const UECodeGen_Private::FIntPropertyParams NewProp_CustomStencilShift;
 	static const UECodeGen_Private::FPropertyParamsBase* const PropPointers[];
+// ********** End Class UFFXFSR3Settings constinit property declarations ***************************
 	static UObject* (*const DependentSingletons[])();
 	static constexpr FCppClassTypeInfoStatic StaticCppClassTypeInfo = {
 		TCppClassTypeTraits<UFFXFSR3Settings>::IsAbstract,
 	};
 	static const UECodeGen_Private::FClassParams ClassParams;
-};
+}; // struct Z_Construct_UClass_UFFXFSR3Settings_Statics
+
+// ********** Begin Class UFFXFSR3Settings Property Definitions ************************************
 void Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_bEnabled_SetBit(void* Obj)
 {
 	((UFFXFSR3Settings*)Obj)->bEnabled = 1;
@@ -1030,7 +1032,7 @@ void Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_bModifySlateDeltaTime_
 }
 const UECodeGen_Private::FBoolPropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_bModifySlateDeltaTime = { "bModifySlateDeltaTime", nullptr, (EPropertyFlags)0x0010000000004001, UECodeGen_Private::EPropertyGenFlags::Bool | UECodeGen_Private::EPropertyGenFlags::NativeBool, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, sizeof(bool), sizeof(UFFXFSR3Settings), &Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_bModifySlateDeltaTime_SetBit, METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_bModifySlateDeltaTime_MetaData), NewProp_bModifySlateDeltaTime_MetaData) };
 const UECodeGen_Private::FIntPropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_UIMode_Underlying = { "UnderlyingType", nullptr, (EPropertyFlags)0x0000000000000000, UECodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, 0, METADATA_PARAMS(0, nullptr) };
-const UECodeGen_Private::FEnumPropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_UIMode = { "UIMode", nullptr, (EPropertyFlags)0x0010000000004001, UECodeGen_Private::EPropertyGenFlags::Enum, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(UFFXFSR3Settings, UIMode), Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3FrameGenUIMode, METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_UIMode_MetaData), NewProp_UIMode_MetaData) }; // 3952503519
+const UECodeGen_Private::FEnumPropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_UIMode = { "UIMode", nullptr, (EPropertyFlags)0x0010000000004001, UECodeGen_Private::EPropertyGenFlags::Enum, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(UFFXFSR3Settings, UIMode), Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3FrameGenUIMode, METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_UIMode_MetaData), NewProp_UIMode_MetaData) }; // 1329161394
 void Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_bUseDistortionTexture_SetBit(void* Obj)
 {
 	((UFFXFSR3Settings*)Obj)->bUseDistortionTexture = 1;
@@ -1047,13 +1049,13 @@ void Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_bD3D12AsyncPresent_Set
 }
 const UECodeGen_Private::FBoolPropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_bD3D12AsyncPresent = { "bD3D12AsyncPresent", nullptr, (EPropertyFlags)0x0010000000004001, UECodeGen_Private::EPropertyGenFlags::Bool | UECodeGen_Private::EPropertyGenFlags::NativeBool, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, sizeof(bool), sizeof(UFFXFSR3Settings), &Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_bD3D12AsyncPresent_SetBit, METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_bD3D12AsyncPresent_MetaData), NewProp_bD3D12AsyncPresent_MetaData) };
 const UECodeGen_Private::FIntPropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_PaceMode_Underlying = { "UnderlyingType", nullptr, (EPropertyFlags)0x0000000000000000, UECodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, 0, METADATA_PARAMS(0, nullptr) };
-const UECodeGen_Private::FEnumPropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_PaceMode = { "PaceMode", nullptr, (EPropertyFlags)0x0010000000004001, UECodeGen_Private::EPropertyGenFlags::Enum, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(UFFXFSR3Settings, PaceMode), Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3PaceRHIFrameMode, METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_PaceMode_MetaData), NewProp_PaceMode_MetaData) }; // 1566853007
+const UECodeGen_Private::FEnumPropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_PaceMode = { "PaceMode", nullptr, (EPropertyFlags)0x0010000000004001, UECodeGen_Private::EPropertyGenFlags::Enum, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(UFFXFSR3Settings, PaceMode), Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3PaceRHIFrameMode, METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_PaceMode_MetaData), NewProp_PaceMode_MetaData) }; // 1988972792
 const UECodeGen_Private::FIntPropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_QualityMode_Underlying = { "UnderlyingType", nullptr, (EPropertyFlags)0x0000000000000000, UECodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, 0, METADATA_PARAMS(0, nullptr) };
-const UECodeGen_Private::FEnumPropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_QualityMode = { "QualityMode", nullptr, (EPropertyFlags)0x0010000000004001, UECodeGen_Private::EPropertyGenFlags::Enum, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(UFFXFSR3Settings, QualityMode), Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3QualityMode, METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_QualityMode_MetaData), NewProp_QualityMode_MetaData) }; // 847700602
+const UECodeGen_Private::FEnumPropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_QualityMode = { "QualityMode", nullptr, (EPropertyFlags)0x0010000000004001, UECodeGen_Private::EPropertyGenFlags::Enum, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(UFFXFSR3Settings, QualityMode), Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3QualityMode, METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_QualityMode_MetaData), NewProp_QualityMode_MetaData) }; // 1667343298
 const UECodeGen_Private::FIntPropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_HistoryFormat_Underlying = { "UnderlyingType", nullptr, (EPropertyFlags)0x0000000000000000, UECodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, 0, METADATA_PARAMS(0, nullptr) };
-const UECodeGen_Private::FEnumPropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_HistoryFormat = { "HistoryFormat", nullptr, (EPropertyFlags)0x0010000000004001, UECodeGen_Private::EPropertyGenFlags::Enum, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(UFFXFSR3Settings, HistoryFormat), Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3HistoryFormat, METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_HistoryFormat_MetaData), NewProp_HistoryFormat_MetaData) }; // 250170224
+const UECodeGen_Private::FEnumPropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_HistoryFormat = { "HistoryFormat", nullptr, (EPropertyFlags)0x0010000000004001, UECodeGen_Private::EPropertyGenFlags::Enum, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(UFFXFSR3Settings, HistoryFormat), Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3HistoryFormat, METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_HistoryFormat_MetaData), NewProp_HistoryFormat_MetaData) }; // 251372625
 const UECodeGen_Private::FIntPropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_DeDither_Underlying = { "UnderlyingType", nullptr, (EPropertyFlags)0x0000000000000000, UECodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, 0, METADATA_PARAMS(0, nullptr) };
-const UECodeGen_Private::FEnumPropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_DeDither = { "DeDither", nullptr, (EPropertyFlags)0x0010000000004001, UECodeGen_Private::EPropertyGenFlags::Enum, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(UFFXFSR3Settings, DeDither), Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3DeDitherMode, METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_DeDither_MetaData), NewProp_DeDither_MetaData) }; // 960115100
+const UECodeGen_Private::FEnumPropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_DeDither = { "DeDither", nullptr, (EPropertyFlags)0x0010000000004001, UECodeGen_Private::EPropertyGenFlags::Enum, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(UFFXFSR3Settings, DeDither), Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3DeDitherMode, METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_DeDither_MetaData), NewProp_DeDither_MetaData) }; // 1434712915
 const UECodeGen_Private::FFloatPropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_Sharpness = { "Sharpness", nullptr, (EPropertyFlags)0x0010000000004001, UECodeGen_Private::EPropertyGenFlags::Float, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(UFFXFSR3Settings, Sharpness), METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_Sharpness_MetaData), NewProp_Sharpness_MetaData) };
 void Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_bAdjustMipBias_SetBit(void* Obj)
 {
@@ -1066,7 +1068,7 @@ void Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_bForceVertexDeformatio
 }
 const UECodeGen_Private::FBoolPropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_bForceVertexDeformationOutputsVelocity = { "bForceVertexDeformationOutputsVelocity", nullptr, (EPropertyFlags)0x0010000000004001, UECodeGen_Private::EPropertyGenFlags::Bool | UECodeGen_Private::EPropertyGenFlags::NativeBool, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, sizeof(bool), sizeof(UFFXFSR3Settings), &Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_bForceVertexDeformationOutputsVelocity_SetBit, METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_bForceVertexDeformationOutputsVelocity_MetaData), NewProp_bForceVertexDeformationOutputsVelocity_MetaData) };
 const UECodeGen_Private::FIntPropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_ForceLandscapeHISMMobility_Underlying = { "UnderlyingType", nullptr, (EPropertyFlags)0x0000000000000000, UECodeGen_Private::EPropertyGenFlags::Int, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, 0, METADATA_PARAMS(0, nullptr) };
-const UECodeGen_Private::FEnumPropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_ForceLandscapeHISMMobility = { "ForceLandscapeHISMMobility", nullptr, (EPropertyFlags)0x0010000000004001, UECodeGen_Private::EPropertyGenFlags::Enum, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(UFFXFSR3Settings, ForceLandscapeHISMMobility), Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3LandscapeHISMMode, METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_ForceLandscapeHISMMobility_MetaData), NewProp_ForceLandscapeHISMMobility_MetaData) }; // 3291234643
+const UECodeGen_Private::FEnumPropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_ForceLandscapeHISMMobility = { "ForceLandscapeHISMMobility", nullptr, (EPropertyFlags)0x0010000000004001, UECodeGen_Private::EPropertyGenFlags::Enum, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(UFFXFSR3Settings, ForceLandscapeHISMMobility), Z_Construct_UEnum_FFXFSR3Settings_EFFXFSR3LandscapeHISMMode, METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_ForceLandscapeHISMMobility_MetaData), NewProp_ForceLandscapeHISMMobility_MetaData) }; // 862139148
 const UECodeGen_Private::FFloatPropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_VelocityFactor = { "VelocityFactor", nullptr, (EPropertyFlags)0x0010000000004001, UECodeGen_Private::EPropertyGenFlags::Float, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(UFFXFSR3Settings, VelocityFactor), METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_VelocityFactor_MetaData), NewProp_VelocityFactor_MetaData) };
 void Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_bReactiveMask_SetBit(void* Obj)
 {
@@ -1086,7 +1088,7 @@ const UECodeGen_Private::FBoolPropertyParams Z_Construct_UClass_UFFXFSR3Settings
 const UECodeGen_Private::FFloatPropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_TranslucencyBias = { "TranslucencyBias", nullptr, (EPropertyFlags)0x0010000000004001, UECodeGen_Private::EPropertyGenFlags::Float, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(UFFXFSR3Settings, TranslucencyBias), METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_TranslucencyBias_MetaData), NewProp_TranslucencyBias_MetaData) };
 const UECodeGen_Private::FFloatPropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_TranslucencyLuminanceBias = { "TranslucencyLuminanceBias", nullptr, (EPropertyFlags)0x0010000000004001, UECodeGen_Private::EPropertyGenFlags::Float, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(UFFXFSR3Settings, TranslucencyLuminanceBias), METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_TranslucencyLuminanceBias_MetaData), NewProp_TranslucencyLuminanceBias_MetaData) };
 const UECodeGen_Private::FFloatPropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_TranslucencyMaxDistance = { "TranslucencyMaxDistance", nullptr, (EPropertyFlags)0x0010000000004001, UECodeGen_Private::EPropertyGenFlags::Float, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(UFFXFSR3Settings, TranslucencyMaxDistance), METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_TranslucencyMaxDistance_MetaData), NewProp_TranslucencyMaxDistance_MetaData) };
-const UECodeGen_Private::FBytePropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_ReactiveShadingModelID = { "ReactiveShadingModelID", nullptr, (EPropertyFlags)0x0010000000004001, UECodeGen_Private::EPropertyGenFlags::Byte, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(UFFXFSR3Settings, ReactiveShadingModelID), Z_Construct_UEnum_Engine_EMaterialShadingModel, METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_ReactiveShadingModelID_MetaData), NewProp_ReactiveShadingModelID_MetaData) }; // 1797132865
+const UECodeGen_Private::FBytePropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_ReactiveShadingModelID = { "ReactiveShadingModelID", nullptr, (EPropertyFlags)0x0010000000004001, UECodeGen_Private::EPropertyGenFlags::Byte, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(UFFXFSR3Settings, ReactiveShadingModelID), Z_Construct_UEnum_Engine_EMaterialShadingModel, METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_ReactiveShadingModelID_MetaData), NewProp_ReactiveShadingModelID_MetaData) }; // 3465229775
 const UECodeGen_Private::FFloatPropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_ForceReactiveMaterialValue = { "ForceReactiveMaterialValue", nullptr, (EPropertyFlags)0x0010000000004001, UECodeGen_Private::EPropertyGenFlags::Float, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(UFFXFSR3Settings, ForceReactiveMaterialValue), METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_ForceReactiveMaterialValue_MetaData), NewProp_ForceReactiveMaterialValue_MetaData) };
 const UECodeGen_Private::FFloatPropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_ReactiveHistoryTranslucencyBias = { "ReactiveHistoryTranslucencyBias", nullptr, (EPropertyFlags)0x0010000000004001, UECodeGen_Private::EPropertyGenFlags::Float, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(UFFXFSR3Settings, ReactiveHistoryTranslucencyBias), METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_ReactiveHistoryTranslucencyBias_MetaData), NewProp_ReactiveHistoryTranslucencyBias_MetaData) };
 const UECodeGen_Private::FFloatPropertyParams Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_ReactiveHistoryTranslucencyLumaBias = { "ReactiveHistoryTranslucencyLumaBias", nullptr, (EPropertyFlags)0x0010000000004001, UECodeGen_Private::EPropertyGenFlags::Float, RF_Public|RF_Transient|RF_MarkAsNative, nullptr, nullptr, 1, STRUCT_OFFSET(UFFXFSR3Settings, ReactiveHistoryTranslucencyLumaBias), METADATA_PARAMS(UE_ARRAY_COUNT(NewProp_ReactiveHistoryTranslucencyLumaBias_MetaData), NewProp_ReactiveHistoryTranslucencyLumaBias_MetaData) };
@@ -1160,6 +1162,7 @@ const UECodeGen_Private::FPropertyParamsBase* const Z_Construct_UClass_UFFXFSR3S
 	(const UECodeGen_Private::FPropertyParamsBase*)&Z_Construct_UClass_UFFXFSR3Settings_Statics::NewProp_CustomStencilShift,
 };
 static_assert(UE_ARRAY_COUNT(Z_Construct_UClass_UFFXFSR3Settings_Statics::PropPointers) < 2048);
+// ********** End Class UFFXFSR3Settings Property Definitions **************************************
 UObject* (*const Z_Construct_UClass_UFFXFSR3Settings_Statics::DependentSingletons[])() = {
 	(UObject* (*)())Z_Construct_UClass_UDeveloperSettings,
 	(UObject* (*)())Z_Construct_UPackage__Script_FFXFSR3Settings,
@@ -1180,6 +1183,9 @@ const UECodeGen_Private::FClassParams Z_Construct_UClass_UFFXFSR3Settings_Static
 	0x001000A6u,
 	METADATA_PARAMS(UE_ARRAY_COUNT(Z_Construct_UClass_UFFXFSR3Settings_Statics::Class_MetaDataParams), Z_Construct_UClass_UFFXFSR3Settings_Statics::Class_MetaDataParams)
 };
+void UFFXFSR3Settings::StaticRegisterNativesUFFXFSR3Settings()
+{
+}
 UClass* Z_Construct_UClass_UFFXFSR3Settings()
 {
 	if (!Z_Registration_Info_UClass_UFFXFSR3Settings.OuterSingleton)
@@ -1188,7 +1194,7 @@ UClass* Z_Construct_UClass_UFFXFSR3Settings()
 	}
 	return Z_Registration_Info_UClass_UFFXFSR3Settings.OuterSingleton;
 }
-DEFINE_VTABLE_PTR_HELPER_CTOR(UFFXFSR3Settings);
+DEFINE_VTABLE_PTR_HELPER_CTOR_NS(, UFFXFSR3Settings);
 UFFXFSR3Settings::~UFFXFSR3Settings() {}
 // ********** End Class UFFXFSR3Settings ***********************************************************
 
@@ -1196,21 +1202,23 @@ UFFXFSR3Settings::~UFFXFSR3Settings() {}
 struct Z_CompiledInDeferFile_FID_UE_Projects_Git_ProtoGameUE5_Plugins_Marketplace_FSR3_Source_FFXFSR3Settings_Public_FFXFSR3Settings_h__Script_FFXFSR3Settings_Statics
 {
 	static constexpr FEnumRegisterCompiledInInfo EnumInfo[] = {
-		{ EFFXFSR3QualityMode_StaticEnum, TEXT("EFFXFSR3QualityMode"), &Z_Registration_Info_UEnum_EFFXFSR3QualityMode, CONSTRUCT_RELOAD_VERSION_INFO(FEnumReloadVersionInfo, 847700602U) },
-		{ EFFXFSR3HistoryFormat_StaticEnum, TEXT("EFFXFSR3HistoryFormat"), &Z_Registration_Info_UEnum_EFFXFSR3HistoryFormat, CONSTRUCT_RELOAD_VERSION_INFO(FEnumReloadVersionInfo, 250170224U) },
-		{ EFFXFSR3DeDitherMode_StaticEnum, TEXT("EFFXFSR3DeDitherMode"), &Z_Registration_Info_UEnum_EFFXFSR3DeDitherMode, CONSTRUCT_RELOAD_VERSION_INFO(FEnumReloadVersionInfo, 960115100U) },
-		{ EFFXFSR3LandscapeHISMMode_StaticEnum, TEXT("EFFXFSR3LandscapeHISMMode"), &Z_Registration_Info_UEnum_EFFXFSR3LandscapeHISMMode, CONSTRUCT_RELOAD_VERSION_INFO(FEnumReloadVersionInfo, 3291234643U) },
-		{ EFFXFSR3FrameGenUIMode_StaticEnum, TEXT("EFFXFSR3FrameGenUIMode"), &Z_Registration_Info_UEnum_EFFXFSR3FrameGenUIMode, CONSTRUCT_RELOAD_VERSION_INFO(FEnumReloadVersionInfo, 3952503519U) },
-		{ EFFXFSR3PaceRHIFrameMode_StaticEnum, TEXT("EFFXFSR3PaceRHIFrameMode"), &Z_Registration_Info_UEnum_EFFXFSR3PaceRHIFrameMode, CONSTRUCT_RELOAD_VERSION_INFO(FEnumReloadVersionInfo, 1566853007U) },
+		{ EFFXFSR3QualityMode_StaticEnum, TEXT("EFFXFSR3QualityMode"), &Z_Registration_Info_UEnum_EFFXFSR3QualityMode, CONSTRUCT_RELOAD_VERSION_INFO(FEnumReloadVersionInfo, 1667343298U) },
+		{ EFFXFSR3HistoryFormat_StaticEnum, TEXT("EFFXFSR3HistoryFormat"), &Z_Registration_Info_UEnum_EFFXFSR3HistoryFormat, CONSTRUCT_RELOAD_VERSION_INFO(FEnumReloadVersionInfo, 251372625U) },
+		{ EFFXFSR3DeDitherMode_StaticEnum, TEXT("EFFXFSR3DeDitherMode"), &Z_Registration_Info_UEnum_EFFXFSR3DeDitherMode, CONSTRUCT_RELOAD_VERSION_INFO(FEnumReloadVersionInfo, 1434712915U) },
+		{ EFFXFSR3LandscapeHISMMode_StaticEnum, TEXT("EFFXFSR3LandscapeHISMMode"), &Z_Registration_Info_UEnum_EFFXFSR3LandscapeHISMMode, CONSTRUCT_RELOAD_VERSION_INFO(FEnumReloadVersionInfo, 862139148U) },
+		{ EFFXFSR3FrameGenUIMode_StaticEnum, TEXT("EFFXFSR3FrameGenUIMode"), &Z_Registration_Info_UEnum_EFFXFSR3FrameGenUIMode, CONSTRUCT_RELOAD_VERSION_INFO(FEnumReloadVersionInfo, 1329161394U) },
+		{ EFFXFSR3PaceRHIFrameMode_StaticEnum, TEXT("EFFXFSR3PaceRHIFrameMode"), &Z_Registration_Info_UEnum_EFFXFSR3PaceRHIFrameMode, CONSTRUCT_RELOAD_VERSION_INFO(FEnumReloadVersionInfo, 1988972792U) },
 	};
 	static constexpr FClassRegisterCompiledInInfo ClassInfo[] = {
-		{ Z_Construct_UClass_UFFXFSR3Settings, UFFXFSR3Settings::StaticClass, TEXT("UFFXFSR3Settings"), &Z_Registration_Info_UClass_UFFXFSR3Settings, CONSTRUCT_RELOAD_VERSION_INFO(FClassReloadVersionInfo, sizeof(UFFXFSR3Settings), 3435614120U) },
+		{ Z_Construct_UClass_UFFXFSR3Settings, UFFXFSR3Settings::StaticClass, TEXT("UFFXFSR3Settings"), &Z_Registration_Info_UClass_UFFXFSR3Settings, CONSTRUCT_RELOAD_VERSION_INFO(FClassReloadVersionInfo, sizeof(UFFXFSR3Settings), 3464078114U) },
 	};
-};
-static FRegisterCompiledInInfo Z_CompiledInDeferFile_FID_UE_Projects_Git_ProtoGameUE5_Plugins_Marketplace_FSR3_Source_FFXFSR3Settings_Public_FFXFSR3Settings_h__Script_FFXFSR3Settings_2435362278(TEXT("/Script/FFXFSR3Settings"),
+}; // Z_CompiledInDeferFile_FID_UE_Projects_Git_ProtoGameUE5_Plugins_Marketplace_FSR3_Source_FFXFSR3Settings_Public_FFXFSR3Settings_h__Script_FFXFSR3Settings_Statics 
+static FRegisterCompiledInInfo Z_CompiledInDeferFile_FID_UE_Projects_Git_ProtoGameUE5_Plugins_Marketplace_FSR3_Source_FFXFSR3Settings_Public_FFXFSR3Settings_h__Script_FFXFSR3Settings_2221382330{
+	TEXT("/Script/FFXFSR3Settings"),
 	Z_CompiledInDeferFile_FID_UE_Projects_Git_ProtoGameUE5_Plugins_Marketplace_FSR3_Source_FFXFSR3Settings_Public_FFXFSR3Settings_h__Script_FFXFSR3Settings_Statics::ClassInfo, UE_ARRAY_COUNT(Z_CompiledInDeferFile_FID_UE_Projects_Git_ProtoGameUE5_Plugins_Marketplace_FSR3_Source_FFXFSR3Settings_Public_FFXFSR3Settings_h__Script_FFXFSR3Settings_Statics::ClassInfo),
 	nullptr, 0,
-	Z_CompiledInDeferFile_FID_UE_Projects_Git_ProtoGameUE5_Plugins_Marketplace_FSR3_Source_FFXFSR3Settings_Public_FFXFSR3Settings_h__Script_FFXFSR3Settings_Statics::EnumInfo, UE_ARRAY_COUNT(Z_CompiledInDeferFile_FID_UE_Projects_Git_ProtoGameUE5_Plugins_Marketplace_FSR3_Source_FFXFSR3Settings_Public_FFXFSR3Settings_h__Script_FFXFSR3Settings_Statics::EnumInfo));
+	Z_CompiledInDeferFile_FID_UE_Projects_Git_ProtoGameUE5_Plugins_Marketplace_FSR3_Source_FFXFSR3Settings_Public_FFXFSR3Settings_h__Script_FFXFSR3Settings_Statics::EnumInfo, UE_ARRAY_COUNT(Z_CompiledInDeferFile_FID_UE_Projects_Git_ProtoGameUE5_Plugins_Marketplace_FSR3_Source_FFXFSR3Settings_Public_FFXFSR3Settings_h__Script_FFXFSR3Settings_Statics::EnumInfo),
+};
 // ********** End Registration *********************************************************************
 
 PRAGMA_ENABLE_DEPRECATION_WARNINGS

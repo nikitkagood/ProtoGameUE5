@@ -7,6 +7,8 @@
 #include "Item/WeaponAttachment.h"
 #include "Item/WeaponAttachmentMagazine.h"
 #include "Animation/GunAnimInstance.h"
+#include "Engine/World.h"
+#include "TimerManager.h"
 
 #include "Kismet/GameplayStatics.h"
 

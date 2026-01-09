@@ -12,6 +12,7 @@
 class UAnimInstance;
 class AProjectile;
 class UWeaponAttachment;
+class UAnimMontage;
 
 UENUM(BlueprintType)
 enum class EWeaponFireMode : uint8

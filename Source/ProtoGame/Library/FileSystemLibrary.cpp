@@ -2,6 +2,8 @@
 
 
 #include "Library/FileSystemLibrary.h"
+#include "Engine/Texture.h"
+#include "TextureResource.h"
 
 bool UFileSystemLibrary::IsTextureSafeToRead(UTexture* Texture)
 {

@@ -28,6 +28,8 @@
 #include "Net/UnrealNetwork.h"
 #include "Blueprint/UserWidget.h"
 #include "DefaultMovementSet/CharacterMoverComponent.h"
+#include "Engine/SkeletalMesh.h"
+#include "Engine/World.h"
 
 
 //debug

@@ -4,10 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataTable.h"
+#include "Templates/SubclassOf.h"
 
 #include "VBFUnitInfo.generated.h"
 
-//class UVBFUnitBase;
+class USkeletalMesh;
+class UStaticMesh;
+class UTexture2D;
 
 USTRUCT(Blueprintable, BlueprintType)
 struct PROTOGAME_API FVBFUnitInfo : public FTableRowBase

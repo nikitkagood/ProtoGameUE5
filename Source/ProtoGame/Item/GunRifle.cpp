@@ -10,6 +10,8 @@
 #include "Item/WeaponAttachment.h"
 #include "Item/WeaponAttachmentMagazine.h"
 
+#include "Engine/World.h"
+#include "TimerManager.h"
 #include "Kismet/GameplayStatics.h"
 
 bool UGunRifle::Initialize(FDataTableRowHandle handle)

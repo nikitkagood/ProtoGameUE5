@@ -72,7 +72,7 @@ public:
 	//Since InventoryComponent is ActorComponent, it can only have Actors as Owner/Outer
 	//Thus you can't get hierarchy from InventoryComponent and there is no point it calling this method (at the moment at least)
 	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const override { return nullptr; };
-	virtual AActor* GetInventoryOwner() override { return GetOwner(); };
+	virtual UObject* GetInventoryOwner() override { return Cast<UObject>(GetOwner()); };
 	bool SetInventoryOwner(UObject* new_owner);
 	//IInventoryInterface end
 

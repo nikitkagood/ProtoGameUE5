@@ -25,6 +25,9 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "Net/UnrealNetwork.h"
 #include "Blueprint/UserWidget.h"
+#include "Engine/SkeletalMesh.h"
+#include "TimerManager.h"
+#include "Components/SkeletalMeshComponent.h"
 
 //debug
 #include "DrawDebugHelpers.h"
@@ -123,61 +126,61 @@ void AGameCharacterBase::SetupPlayerInputComponent(class UInputComponent* Player
 	//PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	//PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
-	if (BitmaskLib::IsBitSetPowerOfTwo(MovementToggleFlags, EMovementInputToggleFlags::SlowWalk))
-	{
-		PlayerInputComponent->BindAction("SlowWalk", IE_Pressed, this, &AGameCharacterBase::ToggleSlowWalk);
-	}
-	else
-	{
-		PlayerInputComponent->BindAction("SlowWalk", IE_Pressed, this, &AGameCharacterBase::StartSlowWalk);
-		PlayerInputComponent->BindAction("SlowWalk", IE_Released, this, &AGameCharacterBase::EndSlowWalk);
-	}
+	//if (BitmaskLib::IsBitSetPowerOfTwo(MovementToggleFlags, EMovementInputToggleFlags::SlowWalk))
+	//{
+	//	PlayerInputComponent->BindAction("SlowWalk", IE_Pressed, this, &AGameCharacterBase::ToggleSlowWalk);
+	//}
+	//else
+	//{
+	//	PlayerInputComponent->BindAction("SlowWalk", IE_Pressed, this, &AGameCharacterBase::StartSlowWalk);
+	//	PlayerInputComponent->BindAction("SlowWalk", IE_Released, this, &AGameCharacterBase::EndSlowWalk);
+	//}
 
-	if (BitmaskLib::IsBitSetPowerOfTwo(MovementToggleFlags, EMovementInputToggleFlags::Sprint))
-	{
-		PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AGameCharacterBase::ToggleSprint);
-	}
-	else
-	{
-		PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AGameCharacterBase::StartSprint);
-		PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AGameCharacterBase::EndSprint);
-	}
+	//if (BitmaskLib::IsBitSetPowerOfTwo(MovementToggleFlags, EMovementInputToggleFlags::Sprint))
+	//{
+	//	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AGameCharacterBase::ToggleSprint);
+	//}
+	//else
+	//{
+	//	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AGameCharacterBase::StartSprint);
+	//	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AGameCharacterBase::EndSprint);
+	//}
 
-	if (BitmaskLib::IsBitSetPowerOfTwo(MovementToggleFlags, EMovementInputToggleFlags::Prone))
-	{
-		PlayerInputComponent->BindAction("Prone", IE_Pressed, this, &AGameCharacterBase::ToggleProne);
-		//PlayerInputComponent->RemoveActionBinding();
-	}
-	else
-	{
-		PlayerInputComponent->BindAction("Prone", IE_Pressed, this, &AGameCharacterBase::StartProne);
-		PlayerInputComponent->BindAction("Prone", IE_Released, this, &AGameCharacterBase::EndProne);
-	}
+	//if (BitmaskLib::IsBitSetPowerOfTwo(MovementToggleFlags, EMovementInputToggleFlags::Prone))
+	//{
+	//	PlayerInputComponent->BindAction("Prone", IE_Pressed, this, &AGameCharacterBase::ToggleProne);
+	//	//PlayerInputComponent->RemoveActionBinding();
+	//}
+	//else
+	//{
+	//	PlayerInputComponent->BindAction("Prone", IE_Pressed, this, &AGameCharacterBase::StartProne);
+	//	PlayerInputComponent->BindAction("Prone", IE_Released, this, &AGameCharacterBase::EndProne);
+	//}
 
-	if (BitmaskLib::IsBitSetPowerOfTwo(MovementToggleFlags, EMovementInputToggleFlags::Crouch))
-	{
-		PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AGameCharacterBase::ToggleCrouch);
-	}
-	else
-	{
-		PlayerInputComponent->BindAction<CharInputBool>("Crouch", IE_Pressed, this, &AGameCharacterBase::Crouch, false);
-		PlayerInputComponent->BindAction<CharInputBool>("Crouch", IE_Released, this, &AGameCharacterBase::UnCrouch, false);
-	}
+	//if (BitmaskLib::IsBitSetPowerOfTwo(MovementToggleFlags, EMovementInputToggleFlags::Crouch))
+	//{
+	//	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AGameCharacterBase::ToggleCrouch);
+	//}
+	//else
+	//{
+	//	PlayerInputComponent->BindAction<CharInputBool>("Crouch", IE_Pressed, this, &AGameCharacterBase::Crouch, false);
+	//	PlayerInputComponent->BindAction<CharInputBool>("Crouch", IE_Released, this, &AGameCharacterBase::UnCrouch, false);
+	//}
 
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AGameCharacterBase::Jump);
+	//PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AGameCharacterBase::Jump);
 
-	PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AGameCharacterBase::StartFireActive);
-	PlayerInputComponent->BindAction("Fire", IE_Released, this, &AGameCharacterBase::EndFireActive);
+	//PlayerInputComponent->BindAction("Fire", IE_Pressed, this, &AGameCharacterBase::StartFireActive);
+	//PlayerInputComponent->BindAction("Fire", IE_Released, this, &AGameCharacterBase::EndFireActive);
 
-	//PlayerInputComponent->BindAction("Action", IE_Pressed, this, &AGameCharacterBase::OnAction);
+	////PlayerInputComponent->BindAction("Action", IE_Pressed, this, &AGameCharacterBase::OnAction);
 
-	//PlayerInputComponent->BindAction("DropItem", IE_Pressed, this, &AGameCharacterBase::DropItem);
+	////PlayerInputComponent->BindAction("DropItem", IE_Pressed, this, &AGameCharacterBase::DropItem);
 
-	PlayerInputComponent->BindAxis("MoveForward", this, &AGameCharacterBase::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &AGameCharacterBase::MoveRight);
+	//PlayerInputComponent->BindAxis("MoveForward", this, &AGameCharacterBase::MoveForward);
+	//PlayerInputComponent->BindAxis("MoveRight", this, &AGameCharacterBase::MoveRight);
 
-	PlayerInputComponent->BindAxis("Turn", this, &AGameCharacterBase::TurnAtRate);
-	PlayerInputComponent->BindAxis("LookUp", this, &AGameCharacterBase::LookUpAtRate);
+	//PlayerInputComponent->BindAxis("Turn", this, &AGameCharacterBase::TurnAtRate);
+	//PlayerInputComponent->BindAxis("LookUp", this, &AGameCharacterBase::LookUpAtRate);
 }
 
 void AGameCharacterBase::Tick(float DeltaTime)

@@ -2,6 +2,8 @@
 
 
 #include "Interfaces/DisplayInfo.h"
+#include "Engine/Texture2D.h"
+#include "Curves/CurveFloat.h" 
 
 //TMap<FText, UClass*> IGetDisplayInfo::GetDisplayInfo_Implementation() const
 //{

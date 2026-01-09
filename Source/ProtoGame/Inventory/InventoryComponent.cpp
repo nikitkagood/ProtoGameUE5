@@ -9,6 +9,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "HAL/CriticalSection.h"
+#include "Async/ParallelFor.h"
 
 #include "Profiler/Profiler.h"
 

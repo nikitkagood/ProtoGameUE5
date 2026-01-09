@@ -13,6 +13,8 @@
 
 #include "VBFUnitBase.generated.h"
 
+class UStreamableRenderAsset;
+
 //Virtual Battlefield unit base class
 UCLASS(Blueprintable, BlueprintType, DefaultToInstanced, Abstract, ClassGroup = VirtualBattlefield, Meta = (BlueprintSpawnableComponent = false))
 class PROTOGAME_API UVBFUnitBase : public UObject, public IVBFUnitInterface, public IDisplayInfo

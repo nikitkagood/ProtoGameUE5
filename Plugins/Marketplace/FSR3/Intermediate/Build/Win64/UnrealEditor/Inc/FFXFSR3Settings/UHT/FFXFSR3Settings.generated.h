@@ -17,18 +17,19 @@
 PRAGMA_DISABLE_DEPRECATION_WARNINGS
 
 // ********** Begin Class UFFXFSR3Settings *********************************************************
+struct Z_Construct_UClass_UFFXFSR3Settings_Statics;
 FFXFSR3SETTINGS_API UClass* Z_Construct_UClass_UFFXFSR3Settings_NoRegister();
 
 #define FID_UE_Projects_Git_ProtoGameUE5_Plugins_Marketplace_FSR3_Source_FFXFSR3Settings_Public_FFXFSR3Settings_h_177_INCLASS \
 private: \
 	static void StaticRegisterNativesUFFXFSR3Settings(); \
-	friend struct Z_Construct_UClass_UFFXFSR3Settings_Statics; \
+	friend struct ::Z_Construct_UClass_UFFXFSR3Settings_Statics; \
 	static UClass* GetPrivateStaticClass(); \
-	friend FFXFSR3SETTINGS_API UClass* Z_Construct_UClass_UFFXFSR3Settings_NoRegister(); \
+	friend FFXFSR3SETTINGS_API UClass* ::Z_Construct_UClass_UFFXFSR3Settings_NoRegister(); \
 public: \
 	DECLARE_CLASS2(UFFXFSR3Settings, UDeveloperSettings, COMPILED_IN_FLAGS(0 | CLASS_DefaultConfig | CLASS_Config), CASTCLASS_None, TEXT("/Script/FFXFSR3Settings"), Z_Construct_UClass_UFFXFSR3Settings_NoRegister) \
 	DECLARE_SERIALIZER(UFFXFSR3Settings) \
-	static const TCHAR* StaticConfigName() {return TEXT("Engine");} \
+	static constexpr const TCHAR* StaticConfigName() {return TEXT("Engine");} \
 
 
 
@@ -71,7 +72,7 @@ class UFFXFSR3Settings;
 
 enum class EFFXFSR3QualityMode : int32;
 template<> struct TIsUEnumClass<EFFXFSR3QualityMode> { enum { Value = true }; };
-template<> FFXFSR3SETTINGS_API UEnum* StaticEnum<EFFXFSR3QualityMode>();
+template<> FFXFSR3SETTINGS_NON_ATTRIBUTED_API UEnum* StaticEnum<EFFXFSR3QualityMode>();
 // ********** End Enum EFFXFSR3QualityMode *********************************************************
 
 // ********** Begin Enum EFFXFSR3HistoryFormat *****************************************************
@@ -81,7 +82,7 @@ template<> FFXFSR3SETTINGS_API UEnum* StaticEnum<EFFXFSR3QualityMode>();
 
 enum class EFFXFSR3HistoryFormat : int32;
 template<> struct TIsUEnumClass<EFFXFSR3HistoryFormat> { enum { Value = true }; };
-template<> FFXFSR3SETTINGS_API UEnum* StaticEnum<EFFXFSR3HistoryFormat>();
+template<> FFXFSR3SETTINGS_NON_ATTRIBUTED_API UEnum* StaticEnum<EFFXFSR3HistoryFormat>();
 // ********** End Enum EFFXFSR3HistoryFormat *******************************************************
 
 // ********** Begin Enum EFFXFSR3DeDitherMode ******************************************************
@@ -92,7 +93,7 @@ template<> FFXFSR3SETTINGS_API UEnum* StaticEnum<EFFXFSR3HistoryFormat>();
 
 enum class EFFXFSR3DeDitherMode : int32;
 template<> struct TIsUEnumClass<EFFXFSR3DeDitherMode> { enum { Value = true }; };
-template<> FFXFSR3SETTINGS_API UEnum* StaticEnum<EFFXFSR3DeDitherMode>();
+template<> FFXFSR3SETTINGS_NON_ATTRIBUTED_API UEnum* StaticEnum<EFFXFSR3DeDitherMode>();
 // ********** End Enum EFFXFSR3DeDitherMode ********************************************************
 
 // ********** Begin Enum EFFXFSR3LandscapeHISMMode *************************************************
@@ -103,7 +104,7 @@ template<> FFXFSR3SETTINGS_API UEnum* StaticEnum<EFFXFSR3DeDitherMode>();
 
 enum class EFFXFSR3LandscapeHISMMode : int32;
 template<> struct TIsUEnumClass<EFFXFSR3LandscapeHISMMode> { enum { Value = true }; };
-template<> FFXFSR3SETTINGS_API UEnum* StaticEnum<EFFXFSR3LandscapeHISMMode>();
+template<> FFXFSR3SETTINGS_NON_ATTRIBUTED_API UEnum* StaticEnum<EFFXFSR3LandscapeHISMMode>();
 // ********** End Enum EFFXFSR3LandscapeHISMMode ***************************************************
 
 // ********** Begin Enum EFFXFSR3FrameGenUIMode ****************************************************
@@ -113,7 +114,7 @@ template<> FFXFSR3SETTINGS_API UEnum* StaticEnum<EFFXFSR3LandscapeHISMMode>();
 
 enum class EFFXFSR3FrameGenUIMode : int32;
 template<> struct TIsUEnumClass<EFFXFSR3FrameGenUIMode> { enum { Value = true }; };
-template<> FFXFSR3SETTINGS_API UEnum* StaticEnum<EFFXFSR3FrameGenUIMode>();
+template<> FFXFSR3SETTINGS_NON_ATTRIBUTED_API UEnum* StaticEnum<EFFXFSR3FrameGenUIMode>();
 // ********** End Enum EFFXFSR3FrameGenUIMode ******************************************************
 
 // ********** Begin Enum EFFXFSR3PaceRHIFrameMode **************************************************
@@ -123,7 +124,7 @@ template<> FFXFSR3SETTINGS_API UEnum* StaticEnum<EFFXFSR3FrameGenUIMode>();
 
 enum class EFFXFSR3PaceRHIFrameMode : int32;
 template<> struct TIsUEnumClass<EFFXFSR3PaceRHIFrameMode> { enum { Value = true }; };
-template<> FFXFSR3SETTINGS_API UEnum* StaticEnum<EFFXFSR3PaceRHIFrameMode>();
+template<> FFXFSR3SETTINGS_NON_ATTRIBUTED_API UEnum* StaticEnum<EFFXFSR3PaceRHIFrameMode>();
 // ********** End Enum EFFXFSR3PaceRHIFrameMode ****************************************************
 
 PRAGMA_ENABLE_DEPRECATION_WARNINGS

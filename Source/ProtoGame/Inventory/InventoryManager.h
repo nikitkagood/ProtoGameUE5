@@ -84,6 +84,6 @@ private:
 	//TArray<TSubclassOf<UObject>> inventories_test_subclassof_mustimplement;
 
 	//Must implement InventoryInterface
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, meta = (AllowPrivateAccess = "true", MustImplement = "InventoryInterface"), Category = Inventory)
+	//UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, meta = (AllowPrivateAccess = "true", MustImplement = "InventoryInterface"), Category = Inventory)
 	TArray<UObject*> inventories_test_uobject_mustimplement;
 };

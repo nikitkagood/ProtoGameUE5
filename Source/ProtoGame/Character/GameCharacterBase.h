@@ -287,8 +287,8 @@ public:
 	UFUNCTION()
 	virtual void OnRep_IsProne();
 
-	UPROPERTY(Category = "Character Movement (General Settings)", EditAnywhere, BlueprintReadWrite, meta = (Bitmask, BitmaskEnum = EMovementInputToggleFlags))
-	uint8 MovementToggleFlags = 0;
+	//UPROPERTY(Category = "Character Movement (General Settings)", EditAnywhere, BlueprintReadWrite, meta = (Bitmask, BitmaskEnum = EMovementInputToggleFlags))
+	//uint8 MovementToggleFlags = 0;
 
 private:
 
