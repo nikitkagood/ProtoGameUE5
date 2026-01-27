@@ -141,9 +141,12 @@ public:
 private:
 	//Movement events
 
-	void OnJumpStarted(const FInputActionValue& Value);
-	void OnJumpReleased(const FInputActionValue& Value);
-	void OnFlyTriggered(const FInputActionValue& Value);
+	UFUNCTION(BlueprintCallable)
+	void OnJumpStarted(FInputActionValue Value);
+	UFUNCTION(BlueprintCallable)
+	void OnJumpReleased(FInputActionValue Value);
+	UFUNCTION(BlueprintCallable)
+	void OnFlyTriggered(FInputActionValue Value);
 
 private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = Movement)

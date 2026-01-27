@@ -5,6 +5,7 @@
 #include "DefaultMovementSet/NavMoverComponent.h"
 #include "GameFramework/PlayerController.h"
 #include "DefaultMovementSet/Settings/CommonLegacyMovementSettings.h"
+#include "InputActionValue.h"
 
 DEFINE_LOG_CATEGORY(LogMoverPawn)
 
@@ -285,19 +286,19 @@ FMoverDefaultSyncState* AMoverNavPawn::GetMoverDefaultSyncStateMutable() const
 }
 
 
-void AMoverNavPawn::OnJumpStarted(const FInputActionValue& Value)
+void AMoverNavPawn::OnJumpStarted(FInputActionValue Value)
 {
 	bIsJumpJustPressed = !bIsJumpPressed;
 	bIsJumpPressed = true;
 }
 
-void AMoverNavPawn::OnJumpReleased(const FInputActionValue& Value)
+void AMoverNavPawn::OnJumpReleased(FInputActionValue Value)
 {
 	bIsJumpPressed = false;
 	bIsJumpJustPressed = false;
 }
 
-void AMoverNavPawn::OnFlyTriggered(const FInputActionValue& Value)
+void AMoverNavPawn::OnFlyTriggered(FInputActionValue Value)
 {
 	bIsFlying = !bIsFlying;
 }
