@@ -110,12 +110,6 @@ private:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Inventory")
 	UInvSpecialSlotComponent* ActiveSlot;
 
-
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Interaction")
-	TObjectPtr<AActor> interaction_actor;
-
-
 public:
 	AGameCharacterBaseMover(const class FObjectInitializer& ObjectInitializer);
 
@@ -150,32 +144,6 @@ public:
 	//To be implemented by child BP
 	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "UI")
 	void CloseInteractionUI();
-
-
-public:
-	//Movement
-
-	void ToggleSprint();
-	void StartSprint();
-	void EndSprint();
-
-protected:
-
-	//Interaction
-	
-	//Ignores this actor
-	//Currently we check for visibility but in case it won't be enough, use Interaction trace channel - ECC_GameTraceChannel3
-	UFUNCTION(BlueprintCallable, Category = "Interaction")
-	FHitResult SweepInteractionFromView(ECollisionChannel collision_channel = ECollisionChannel::ECC_Visibility);
-
-	//We need to loop sweep (trace) in order for outline and UI to work properly
-	//But since we are looping already, it's also used for Action/interaction itself
-	//Result is stored in interaction_actor
-	UFUNCTION()
-	void SweepInteractionLoop();
-
-	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = "Interaction")
-	EInteractionActions GetInteractionAction();
 
 public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Interaction")

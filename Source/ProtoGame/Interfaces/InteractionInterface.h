@@ -41,6 +41,7 @@ class UInteractionInterface : public UInterface
 	GENERATED_BODY()
 };
 
+//Interface for interactible Actors
 //Both C++ and BP interface, thus may have some redundancy
 class PROTOGAME_API IInteractionInterface
 {
@@ -58,6 +59,8 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent,  Category = "Interaction")
 	EInteractionType GetInteractionType() const;
 
+	//Requirements: Custom Depth,
+	// Post Process volume with Post Process Material added
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction")
 	void DrawInteractionOutline();
 

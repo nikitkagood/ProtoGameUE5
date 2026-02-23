@@ -6,11 +6,13 @@
 #include "GameFramework/PlayerController.h"
 #include "DefaultMovementSet/Settings/CommonLegacyMovementSettings.h"
 #include "InputActionValue.h"
+//#include "ChaosMover/Character/ChaosCharacterMoverComponent.h" UChaosCharacterMoverComponent
 
 DEFINE_LOG_CATEGORY(LogMoverPawn)
 
 struct FMoverInputCmdContext;
 struct FCharacterDefaultInputs;
+class UChaosCharacterMoverComponent;
 
 // Sets default values
 AMoverNavPawn::AMoverNavPawn()
@@ -42,8 +44,17 @@ void AMoverNavPawn::BeginPlay()
 
 	if (APlayerController* PC = Cast<APlayerController>(Controller))
 	{
-		PC->PlayerCameraManager->ViewPitchMax = 89.0f;
-		PC->PlayerCameraManager->ViewPitchMin = -89.0f;
+		PC->PlayerCameraManager->ViewPitchMax = 89.9;
+		PC->PlayerCameraManager->ViewPitchMin = -89.9;
+	}
+
+
+	CommonLegacySettings = GetCharacterMoverComponent()->FindSharedSettings_Mutable<UCommonLegacyMovementSettings>();
+
+	if (!IsValid(CommonLegacySettings))
+	{
+		//UE_LOG(LogMoverPawn, Log, TEXT("Warning: %s: CommonLegacySettings are missing"), *GetName());
+		ensureMsgf(false, TEXT("%s: CommonLegacySettings are missing, dependent functions won't work"), *GetName());
 	}
 }
 
@@ -301,4 +312,47 @@ void AMoverNavPawn::OnJumpReleased(FInputActionValue Value)
 void AMoverNavPawn::OnFlyTriggered(FInputActionValue Value)
 {
 	bIsFlying = !bIsFlying;
+}
+
+void AMoverNavPawn::OnSprintToggled(FInputActionValue Value)
+{
+	if (bIsSprinting)
+	{
+		OnSprintStarted(Value);
+	}
+	else
+	{
+		OnSprintReleased(Value);
+	}
+}
+
+void AMoverNavPawn::OnSprintStarted(FInputActionValue Value)
+{
+	//CommonLegacySettings->
+
+
+
+	//if (GetCharacterMoverComponent())
+	//{
+	//	if (CanSprint())
+	//	{
+	//		EndSlowWalk();
+
+	//		GetCharacterMoverComponent()->StartSprint();
+	//	}
+	//	else if (!GetCharacterMoverComponent()->CanEverSprint())
+	//	{
+	//		UE_LOG(LogCharacter, Log, TEXT("%s is trying to sprint, but sprint is disabled on this character!"), *GetName());
+	//	}
+	//}
+
+
+}
+
+void AMoverNavPawn::OnSprintReleased(FInputActionValue Value)
+{
+	//if (GetCharacterMoverComponent())
+	//{
+	//	GetCharacterMovement()->EndSprint();
+	//}
 }

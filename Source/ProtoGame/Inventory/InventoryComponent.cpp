@@ -388,7 +388,7 @@ void UInventoryComponent::InitializeInventoryGrid(int32 rows, int32 columns)
 
     InventoryGrid.Reserve(rows);
 
-    ParallelFor(rows, [&](int32 idx) 
+    ParallelFor(rows, [this, columns](int32 idx) 
         {
             InventoryGrid[idx].Init(EMPTY_SPACE, columns);
         });

@@ -102,8 +102,8 @@ class PROTOGAME_API AGameCharacterBase : public ACharacter
 	UInventoryManager* InventoryManager;
 
 	//On character inventory
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Inventory)
-	UInventoryComponent* InventoryComponent_Pockets;
+	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Inventory)
+	//UInventoryComponent* InventoryComponent_Pockets;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Inventory)
 	UInvSpecialSlotComponent* InventoryItemSlot_Backpack;

@@ -9,7 +9,7 @@ public class ProtoGame : ModuleRules
 	{
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "ChaosVehicles", "AIModule", "Mover", "NavigationSystem", "EnhancedInput" });
+		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "ChaosVehicles", "AIModule", "Mover", "NetworkPrediction", "NavigationSystem", "EnhancedInput" });
 
 		MinFilesUsingPrecompiledHeaderOverride = 0;
 		CppStandard = CppStandardVersion.Latest;

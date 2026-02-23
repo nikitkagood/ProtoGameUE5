@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Pawn.h"
 #include "MoverSimulationTypes.h"
+#include "InputActionValue.h"
 
 #include "MoverNavPawn.generated.h"
 
@@ -13,6 +14,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogMoverPawn, Log, All);
 class UNavMoverComponent;
 class UCharacterMoverComponent;
 struct FInputActionValue;
+class UCommonLegacyMovementSettings;
 
 //What is necessary to make Mover (+Nav) work:
 //-Firstly make sure a (mover/nav)component is even valid (DefaultSubobject or BP and FindByClass), 
@@ -71,12 +73,15 @@ public:
 
 	// Request the character starts moving with an intended directional magnitude. A length of 1 indicates maximum acceleration.
 	//APawn::ControlInputVector is used, CachedMoveInputIntent is redundant
+
 	UFUNCTION(BlueprintCallable, Category = Movement)
 	virtual void RequestMoveByIntent(const FVector& DesiredIntent) { /*CachedMoveInputIntent = DesiredIntent;*/ ControlInputVector = DesiredIntent; }
 
 	// Request the character starts moving with a desired velocity. This will be used in lieu of any other input.
 	UFUNCTION(BlueprintCallable, Category = Movement)
 	virtual void RequestMoveByVelocity(const FVector& DesiredVelocity) { CachedMoveInputVelocity = DesiredVelocity; }
+
+	UCharacterMoverComponent* GetCharacterMoverComponent() { return CharacterMoverComponent; }
 
 	//Finds Mover's properties - DefaultSyncState, mutable
 	const FMoverDefaultSyncState* GetMoverDefaultSyncState() const;
@@ -87,7 +92,6 @@ public:
 	//If ever needed:
 	//FCharacterDefaultInputs* GetMoverCharacterDefaultInputs() const;
 public:
-
 
 	//UFUNCTION(BlueprintCallable, BlueprintImplementableEvent, Category = MoverNavPawn)
 	//bool GetDesiredRotationRef(FRotator& OutRotation);
@@ -139,20 +143,33 @@ public:
 	bool bIsFlyingAllowed = false;
 
 private:
-	//Movement events
+	//Movement (NavPawn); Also see Mover itself or
 
 	UFUNCTION(BlueprintCallable)
-	void OnJumpStarted(FInputActionValue Value);
+	void OnJumpStarted(FInputActionValue Value = FInputActionValue());
 	UFUNCTION(BlueprintCallable)
-	void OnJumpReleased(FInputActionValue Value);
+	void OnJumpReleased(FInputActionValue Value = FInputActionValue());
 	UFUNCTION(BlueprintCallable)
-	void OnFlyTriggered(FInputActionValue Value);
+	void OnFlyTriggered(FInputActionValue Value = FInputActionValue());
+	UFUNCTION(BlueprintCallable)
+	void OnSprintToggled(FInputActionValue Value = FInputActionValue());
+	UFUNCTION(BlueprintCallable)
+	void OnSprintStarted(FInputActionValue Value = FInputActionValue());
+	UFUNCTION(BlueprintCallable)
+	void OnSprintReleased(FInputActionValue Value = FInputActionValue());
 
 private:
+	//Is a dependency, since we rely on modifying these settings, for example for sprint
+	//We could dinamically search for them but it's too expensive: 2 times per button push 
+	//NOT VALID UNTIL BEGIN PLAY
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Movement)
+	UCommonLegacyMovementSettings* CommonLegacySettings;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = Movement)
 	FVector CachedMoveInputVelocity;
 
 	bool bIsJumpJustPressed = false;
 	bool bIsJumpPressed = false;
 	bool bIsFlying = false;
+	bool bIsSprinting = false;
 };

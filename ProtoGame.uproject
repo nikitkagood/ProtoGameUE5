@@ -200,10 +200,6 @@
 			"Enabled": false
 		},
 		{
-			"Name": "Bridge",
-			"Enabled": false
-		},
-		{
 			"Name": "MetaHumanSDK",
 			"Enabled": false
 		},
@@ -261,6 +257,14 @@
 		},
 		{
 			"Name": "MetaHumanCharacter",
+			"Enabled": true
+		},
+		{
+			"Name": "Bridge",
+			"Enabled": false
+		},
+		{
+			"Name": "AIAssistant",
 			"Enabled": true
 		}
 	],

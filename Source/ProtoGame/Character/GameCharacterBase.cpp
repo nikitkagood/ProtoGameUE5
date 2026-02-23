@@ -61,7 +61,7 @@ AGameCharacterBase::AGameCharacterBase(const class FObjectInitializer& ObjectIni
 	RPGStatsComponent = CreateDefaultSubobject<URPGStatsComponent>(TEXT("RPGStatsComponent"));
 
 	InventoryManager = CreateDefaultSubobject<UInventoryManager>(TEXT("InventoryManager"));
-	InventoryComponent_Pockets = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent_Pockets"));
+	//InventoryComponent_Pockets = CreateDefaultSubobject<UInventoryComponent>(TEXT("InventoryComponent_Pockets"));
 	InventoryItemSlot_Backpack = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("InventoryItemSlot_Backpack"));
 	InventoryItemSlot_ChestRig = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("InventoryItemSlot_ChestRig"));
 
@@ -109,7 +109,7 @@ void AGameCharacterBase::BeginPlay()
 
 	InventoryManager->AddExistingInventory(PrimaryGunSlot);
 	InventoryManager->AddExistingInventory(SecondaryGunSlot);
-	InventoryManager->AddExistingInventory(InventoryComponent_Pockets);
+	//InventoryManager->AddExistingInventory(InventoryComponent_Pockets);
 	InventoryManager->AddExistingInventory(InventoryItemSlot_Backpack);
 	InventoryManager->AddExistingInventory(InventoryItemSlot_ChestRig);
 
@@ -198,7 +198,7 @@ UInventoryComponent* AGameCharacterBase::GetInventoryComponent(ECharacterInvento
 		return nullptr;
 		break;
 	case ECharacterInventoryType::Pockets:
-		return InventoryComponent_Pockets;
+		//return InventoryComponent_Pockets;
 		break;
 	case ECharacterInventoryType::Backpack:
 		temp_inventory_item = Cast<UInventoryItem>(InventoryItemSlot_Backpack->GetItem());
@@ -228,6 +228,8 @@ UInventoryComponent* AGameCharacterBase::GetInventoryComponent(ECharacterInvento
 		return nullptr;
 		break;
 	}
+
+	return nullptr;
 }
 
 UCustomCharacterMovementComponent* AGameCharacterBase::GetCharacterMovement() const
@@ -881,9 +883,6 @@ void AGameCharacterBase::SweepInteractionLoop()
 			{
 				interaction_interface->Execute_DrawInteractionOutline(swept_actor);
 				OpenInteractionUI();
-
-				//ConstructorHelpers::FClassFinder<UUserWidget> widget_class(TEXT("/Game/Blueprints/UI/WBP_InteractionMenu"));
-				//UUserWidget* widget = CreateWidget(this, widget_class.Class);
 			}
 		}
 	}

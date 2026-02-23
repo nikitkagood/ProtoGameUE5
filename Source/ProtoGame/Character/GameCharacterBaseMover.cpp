@@ -119,10 +119,6 @@ void AGameCharacterBaseMover::BeginPlay()
 
 	//Active slot is PrimarySlot by default
 	//ActiveSlot = PrimaryGunSlot;
-
-	//Sweep in a loop for Interaction (outline primarily) to work
-	//TODO: maybe there is a better way
-	GetWorld()->GetTimerManager().SetTimer(InteractionSweepTimerHandle, this, &AGameCharacterBaseMover::SweepInteractionLoop, 1.f / 30.f, true, 0.f);
 }
 
 void AGameCharacterBaseMover::EndPlay(const EEndPlayReason::Type EndPlayReason)
@@ -223,107 +219,5 @@ void AGameCharacterBaseMover::UseItem(UItemBase* item)
 	{
 		//item->Use(this);
 		item->OnUse(this); //BP event
-	}
-}
-
-
-void AGameCharacterBaseMover::ToggleSprint()
-{
-	//if (bIsSprinting)
-	//{
-	//	EndSprint();
-	//}
-	//else
-	//{
-	//	StartSprint();
-	//}
-}
-
-void AGameCharacterBaseMover::StartSprint()
-{
-	//if (GetCharacterMovement())
-	//{
-	//	if (CanSprint())
-	//	{
-	//		EndSlowWalk();
-
-	//		GetCharacterMovement()->StartSprint();
-	//	}
-	//	else if (!GetCharacterMovement()->CanEverSprint())
-	//	{
-	//		UE_LOG(LogCharacter, Log, TEXT("%s is trying to sprint, but sprint is disabled on this character!"), *GetName());
-	//	}
-	//}
-
-
-}
-
-void AGameCharacterBaseMover::EndSprint()
-{
-	//if (GetCharacterMovement())
-	//{
-	//	GetCharacterMovement()->EndSprint();
-	//}
-}
-
-
-
-FHitResult AGameCharacterBaseMover::SweepInteractionFromView(ECollisionChannel collision_channel)
-{
-	//DO NOT trace from FirstPersonCamera - it changes rotation unexpectedly (~90deg) when weapon is equipped
-	//Even though actual view is not affected and mesh head moves very slightly
-
-	const float radius = 2.25f;
-	FVector start;
-	FRotator view_point_rot;
-	Cast<APlayerController>(GetController())->GetPlayerViewPoint(start, view_point_rot);
-
-	const auto shape_rot = view_point_rot.Quaternion().GetUpVector().Rotation().Quaternion();
-	const FVector end = start + view_point_rot.Quaternion().GetForwardVector() * InteractionRange;
-
-	FCollisionQueryParams collision_params;
-	collision_params.AddIgnoredActor(this);
-	//collision_params.AddIgnoredComponent(GetComponentByClass<UMeshComponent>());
-
-	FHitResult hit_result;
-
-	GetWorld()->SweepSingleByChannel(hit_result, start, end, shape_rot, collision_channel, FCollisionShape::MakeSphere(radius), collision_params);
-
-	//DrawDebugLine(GetWorld(), start, end, FColor::Cyan, false, 2, 0, 1.5f);
-	return hit_result;
-}
-
-void AGameCharacterBaseMover::SweepInteractionLoop()
-{
-	AActor* swept_actor = SweepInteractionFromView().GetActor();
-	//auto hit_comp = SweepInteractionFromView().GetComponent();
-	//UE_LOG(LogTemp, Warning, TEXT("Hit comp: %s"), hit_comp ? *hit_comp->GetName() : TEXT("none"));
-	//UE_LOG(LogTemp, Warning, TEXT("Swept actor: %s"), swept_actor ? *swept_actor->GetName() : TEXT("none"));
-
-	if (swept_actor != nullptr)
-	{
-		if (swept_actor != interaction_actor)
-		{
-			interaction_actor = swept_actor;
-			CloseInteractionUI();
-		}
-
-		if (swept_actor->Implements<UInteractionInterface>())
-		{
-			IInteractionInterface* interaction_interface = Cast<IInteractionInterface>(swept_actor);
-
-			if (interaction_interface->Execute_IsInteractible(swept_actor))
-			{
-				interaction_interface->Execute_DrawInteractionOutline(swept_actor);
-				OpenInteractionUI();
-
-				//ConstructorHelpers::FClassFinder<UUserWidget> widget_class(TEXT("/Game/Blueprints/UI/WBP_InteractionMenu"));
-				//UUserWidget* widget = CreateWidget(this, widget_class.Class);
-			}
-		}
-	}
-	else
-	{
-		CloseInteractionUI();
 	}
 }
