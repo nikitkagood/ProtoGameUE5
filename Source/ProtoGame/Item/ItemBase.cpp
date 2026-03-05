@@ -15,6 +15,16 @@ UItemBase::UItemBase()
 	bRotated = false;
 }
 
+void UItemBase::PostInitProperties()
+{
+	Super::PostInitProperties();
+
+	if (!item_guid.guid.IsValid())
+	{
+		item_guid = CreateItemGuid();
+	}
+}
+
 bool UItemBase::Initialize(FDataTableRowHandle handle)
 { 
 	auto* ptr_row = handle.GetRow<DataTableType>("UItemBase::Initialize");
@@ -68,6 +78,21 @@ bool UItemBase::OnUse(AActor* caller)
 {
 	//checkf(false, TEXT("ItemBase::OnUse isn't meant to be called")); 
 	return false;
+}
+
+FItemGuid UItemBase::CreateItemGuid()
+{
+	if (item_guid.guid.IsValid())
+	{
+		return item_guid;
+	}
+
+	if (!HasAnyFlags(RF_ClassDefaultObject))
+	{
+		return FItemGuid(FGuid::NewGuid());
+	}
+
+	return {};
 }
 
 void UItemBase::SetCurrentStackSize(int32 new_size)

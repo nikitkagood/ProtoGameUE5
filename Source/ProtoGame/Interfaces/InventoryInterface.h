@@ -9,15 +9,13 @@
 
 class UItemBase;
 
-//UENUM(BlueprintType)
-//enum class EInventoryOperation : uint8
-//{
-//	MoveTo = 0					UMETA(DisplayName = "MoveTo (another inv)"),
-//	Receive						UMETA(DisplayName = "Receive (from another inv)"),
-//	AddFromWorld				UMETA(DisplayName = "AddFromWorld"),
-//	DropToWorld					UMETA(DisplayName = "AddFromWorld"),
-//	DestroyItem					UMETA(DisplayName = "DestroyItem"),
-//};
+USTRUCT(BlueprintType)
+struct FInventoryGuid {
+	GENERATED_BODY()
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, NoClear)
+	FGuid guid;
+};
 
 
 //to be declared in each class individually with UPROPERTY(BlueprintAssignable) due to interface limitations
@@ -35,6 +33,8 @@ class PROTOGAME_API IInventoryInterface
 	GENERATED_BODY()
 
 public:
+	const FInventoryGuid& GetInventoryGuid() { return inventory_guid; }
+
 	//Inventory operations
 
    // UFUNCTION(BlueprintCallable)
@@ -87,7 +87,7 @@ public:
 	virtual UObject* GetInventoryOwner() = 0;
 
 	UFUNCTION(BlueprintCallable)
-	virtual bool SetInventoryOwner(UObject* new_owner) = 0;
+	virtual bool SetInventoryOwner(UObject* new_owner) { return CanOwnerEverChange(); };
 
 
 	//Whether component always stays where it was created or it can be moved (inventory within another inventory)
@@ -133,6 +133,14 @@ public:
 	//Note: it's better to lock items individually, rather than whole inventory
 	UFUNCTION()
 	virtual bool IsLockGuarded_ItemEdit() { return false; };
+
+protected:
+	//Creates guid
+	//Has to be manually created and assigned in each subclass
+	virtual FInventoryGuid CreateItemGuid();
+
+protected:
+	FInventoryGuid inventory_guid;
 
 };
 

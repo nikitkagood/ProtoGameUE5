@@ -74,6 +74,13 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void AddInventory(const UClass* inventory_class, const FName& name);
 
+	//Utility
+	//Check whether inventory has a valid guid
+	//bool CheckInventoryGuid();
+	
+	//Check whether item has a valid guid
+	//bool CheckItemGuid();
+
 private:
 	//List of managed inventories
 	//Must implement IInventoryInterface and be derived from UObject

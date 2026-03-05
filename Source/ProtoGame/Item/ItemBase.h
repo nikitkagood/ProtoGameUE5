@@ -19,6 +19,15 @@ class AItemActor;
 class IInventoryInterface;
 enum class ItemObjectCreationMethod : uint8;
 
+//Unique ID for each item instance
+USTRUCT(BlueprintType)
+struct FItemGuid {
+	GENERATED_BODY()
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, NoClear)
+	FGuid guid;
+};
+
 //This class represents items without phyisical location, world-independent - ItemObject.
 //ItemActor - is used to represent items in a world.
 // 
@@ -41,6 +50,8 @@ public:
 
 	template<typename T>
 	static T* StaticCreateObject(UObject* outer, TSubclassOf<UItemBase> item_base_class, ItemObjectCreationMethod item_object_creation_method, FDataTableRowHandle dt_item_properties = {});
+
+	virtual void PostInitProperties() override;
 
 	//IMPORTANT: To be overriden in child classes: 
 
@@ -65,7 +76,8 @@ protected:
 	void SetCurrentStackSize(int32 new_size);
 
 public:
-
+	UFUNCTION(BlueprintCallable)
+	const FItemGuid& GetItemGuid() const { return item_guid; };
 	UFUNCTION(BlueprintCallable)
 	const FText& GetItemName() const { return inventory_item_info.Name; }
 	UFUNCTION(BlueprintCallable)
@@ -162,8 +174,11 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual bool OnUse(AActor* caller) override;
+protected:
+	virtual FItemGuid CreateItemGuid();
 
 protected:
+
     UPROPERTY(EditAnywhere, BlueprintReadWrite, NoClear, meta = (AllowPrivateAccess = true))
 	FInventoryItemInfo inventory_item_info;
 
@@ -173,6 +188,10 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, NoClear, meta = (AllowPrivateAccess = true))
 	TSubclassOf<AItemActor> ItemActorClass;
 private:
+	//Unique ID for each item instance
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, NoClear, meta = (AllowPrivateAccess = true))
+	FItemGuid item_guid;
+
 	//position in inventory
     UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	FIntPoint upper_left_cell; 

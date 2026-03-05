@@ -180,6 +180,9 @@ void UInteractionManager::OnSweepCompletedAsync(const FTraceHandle& Handle, FTra
 	{
 		SetInteractionActor(hit_actor);
 
-		IInteractionInterface::Execute_DrawInteractionOutline(hit_actor);
+		if (IInteractionInterface::Execute_DoesDrawOutline(hit_actor))
+		{
+			IInteractionInterface::Execute_DrawInteractionOutline(hit_actor);
+		}
 	}
 }

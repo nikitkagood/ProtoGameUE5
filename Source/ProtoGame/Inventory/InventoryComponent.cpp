@@ -129,6 +129,8 @@ void UInventoryComponent::BeginPlay()
 {
     Super::BeginPlay();
 
+    inventory_guid = CreateItemGuid();
+
     InitializeInventoryGrid(Rows, Columns);
 }
 

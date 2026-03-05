@@ -81,6 +81,10 @@ public:
 
 	void StopDrawingOutline_Implementation();
 
+	bool DoesShowInteractionActions_Implementation() { return false; };
+
+	bool DoesDrawOutline_Implementation() { return true; };
+
 	//UFUNCTION(BlueprintCallable)
 	//UStaticMesh* GetMesh() { return StaticMeshComp->GetStaticMesh(); };
 

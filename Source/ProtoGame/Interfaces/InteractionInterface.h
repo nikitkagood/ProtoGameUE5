@@ -29,8 +29,12 @@ enum class EInteractionActions : uint8
 	Close						UMETA(DisplayName = "Close"),
 	Equip						UMETA(DisplayName = "Equip"), //into inventory but into special slot
 	Take 						UMETA(DisplayName = "Take"), //into inventory
+	Drop 						UMETA(DisplayName = "Drop"), //from inventory
 	Lock 						UMETA(DisplayName = "Lock"), 
 	Unlock 						UMETA(DisplayName = "Unlock"),
+	Push 						UMETA(DisplayName = "Push"),
+	Pull 						UMETA(DisplayName = "Pull"),
+	Move 						UMETA(DisplayName = "Move"),
 };
 //ENUM_CLASS_FLAGS(EInteractionActions);
 
@@ -59,19 +63,26 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintNativeEvent,  Category = "Interaction")
 	EInteractionType GetInteractionType() const;
 
+	//What actions are available	
+	//Note that UI will show array elements in the order, so place actions accordingly
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction")
+	TArray<EInteractionActions> GetInteractionActions();
+
 	//Requirements: Custom Depth,
 	// Post Process volume with Post Process Material added
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction UI")
 	void DrawInteractionOutline();
 
 	//BP objects aren't obliged to implement this function 
 	//They can use Retrigerrable Delay within "DrawInteractionOutline" to stop drawing outline for example
 	//C++ needs it since here Retrigerable Delay can't just continue execution and has to bind to some functon
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction")
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction UI")
 	void StopDrawingOutline();
 
-	//What actions are available	
-	//Note that UI will show array elements in the order, so place actions accordingly
-	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction")
-	TArray<EInteractionActions> GetInteractionActions();
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction UI")
+	bool DoesDrawOutline();
+
+	//Whether interaction actions are actively shown by UI (in a list)
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent, Category = "Interaction UI")
+	bool DoesShowInteractionActions();
 };
