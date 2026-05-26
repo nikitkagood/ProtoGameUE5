@@ -4,10 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "UObject/NoExportTypes.h"
+#include "Engine/DataTable.h"
 
 #include "Interfaces/VBFWeaponInterface.h"
 
 #include "VBFWeapon.generated.h"
+
 
 //A wrapper around TArray
 USTRUCT(BlueprintType)

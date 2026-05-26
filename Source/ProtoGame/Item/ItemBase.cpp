@@ -34,9 +34,36 @@ bool UItemBase::Initialize(FDataTableRowHandle handle)
 		inventory_item_info = ptr_row->inventory_item_info;
 		return true;
 	}
+	else 
+	{
+		//return InitializeFromInstancedStruct(handle);
+	}
 
 	return false;
 }
+
+//bool UItemBase::InitializeFromInstancedStruct(FDataTableRowHandle handle)
+//{
+//	auto* ptr_row_inst = handle.GetRow<FItemInfoInstanced>("UItemBase::Initialize");
+//
+//	if (ptr_row_inst != nullptr)
+//	{
+//		inventory_item_info = ptr_row_inst->inventory_item_info;
+//
+//		//EXAMPLE:
+//		//for (const auto&inst_struct : ptr_row_inst->intstanced_structs)
+//		//{
+//		//	if (inst_struct.GetPtr</*YOUR_TYPE_HERE*/>() != nullptr)
+//		//	{
+//
+//		//	}
+//		//}
+//
+//		return true;
+//	}
+//
+//	return false;
+//}
 
 
 bool UItemBase::Interact(AActor* caller, EInteractionActions action)
@@ -93,6 +120,57 @@ FItemGuid UItemBase::CreateItemGuid()
 	}
 
 	return {};
+}
+
+bool UItemBase::IsEqualForStack(UItemBase* other_item, const FName& tag_filter) const
+{
+	bool result = false;
+	
+	bool is_dimensions_equal = (inventory_item_info.Dimensions.X == other_item->inventory_item_info.Dimensions.X && inventory_item_info.Dimensions.Y == other_item->inventory_item_info.Dimensions.Y)
+		|| (inventory_item_info.Dimensions.X == other_item->inventory_item_info.Dimensions.Y && inventory_item_info.Dimensions.Y == other_item->inventory_item_info.Dimensions.X);
+
+	result = is_dimensions_equal &&
+		GetClass() == other_item->GetClass() &&
+		ItemActorClass == other_item->ItemActorClass &&
+		inventory_item_info.Type == other_item->inventory_item_info.Type;
+
+	if (result == true)
+	{
+		result = CompareTags(other_item, tag_filter);
+	}
+
+	return result;
+}
+
+bool UItemBase::CompareTags(UItemBase* other_item, const FName& tag_filter) const
+{
+	if (tag_filter == FName{} || tag_filter.IsNone())
+	{
+		inventory_item_info.Tags == other_item->inventory_item_info.Tags;
+	}
+
+	FGameplayTag ParentTag = FGameplayTag::RequestGameplayTag(tag_filter);
+
+	FGameplayTagContainer FilteredA;
+	FGameplayTagContainer FilteredB;
+
+	for (const auto& tag : inventory_item_info.Tags)
+	{
+		if (tag.MatchesTag(ParentTag))
+		{
+			FilteredA.AddTag(tag);
+		}
+	}
+
+	for (const auto& tag : other_item->inventory_item_info.Tags)
+	{
+		if (tag.MatchesTag(ParentTag))
+		{
+			FilteredB.AddTag(tag);
+		}
+	}
+
+	return FilteredA == FilteredB;
 }
 
 void UItemBase::SetCurrentStackSize(int32 new_size)
@@ -159,6 +237,25 @@ bool UItemBase::StackAdd(UItemBase* other)
 	}
 }
 
+void UItemBase::SetMass(float new_mass)
+{
+	inventory_item_info.Mass = new_mass;
+
+	//round to MassMaxPrecision
+	const float multiplier = FMath::Pow(10.0f, FInventoryItemInfo::MassMaxPrecision);
+	inventory_item_info.Mass = FMath::RoundHalfFromZero(inventory_item_info.Mass * multiplier) / multiplier;
+}
+
+void UItemBase::ChangeMass(float change_in_mass)
+{
+	inventory_item_info.Mass += change_in_mass;
+
+	//round to MassMaxPrecision
+	const float multiplier = FMath::Pow(10.0f, FInventoryItemInfo::MassMaxPrecision);
+	inventory_item_info.Mass = FMath::RoundHalfFromZero(inventory_item_info.Mass * multiplier) / multiplier;
+	
+}
+
 UStaticMesh* UItemBase::GetStaticMeshFromItemActorCDO() const
 {
 	//Default way to get the mesh. Since it's already used by ItemActor.
@@ -171,13 +268,13 @@ USkeletalMesh* UItemBase::GetSkeletalMeshFromItemActorCDO() const
 	return ItemActorClass.GetDefaultObject()->GetSkeletalMeshComp()->GetSkeletalMeshAsset();
 }
 
-UItemBase* UItemBase::StackGet(int32 amount, UObject* new_outer)
+UItemBase* UItemBase::StackGetSplit(int32 amount, UObject* new_outer)
 {
 	int32 remainder = inventory_item_info.CurrentStackSize - amount;
 
 	if(amount < 1 || remainder < 0)
 	{
-		checkf(false, TEXT("Error: StackGet: Wrong amount"))
+		checkf(false, TEXT("Error: StackGetSplit: Wrong amount"))
 	}
 
 	//if(remainder == 0)
@@ -249,11 +346,11 @@ AActor* UItemBase::GetOwner() const
 }
 
 //TODO: some items may have different dimensions, like weapons
-bool operator==(const UItemBase& lhs, const UItemBase& rhs)
-{
-	return (lhs.inventory_item_info.NameShort.EqualTo(rhs.inventory_item_info.NameShort, ETextComparisonLevel::Quinary) 
-		&& lhs.inventory_item_info.Mass == rhs.inventory_item_info.Mass
-		&& lhs.inventory_item_info.BasePrice == rhs.inventory_item_info.BasePrice
-		&& lhs.inventory_item_info.Dimensions == rhs.inventory_item_info.Dimensions
-		);
-}
+//bool operator==(const UItemBase& lhs, const UItemBase& rhs)
+//{
+//	return (lhs.inventory_item_info.NameShort.EqualTo(rhs.inventory_item_info.NameShort, ETextComparisonLevel::Quinary) 
+//		&& lhs.inventory_item_info.Mass == rhs.inventory_item_info.Mass
+//		&& lhs.inventory_item_info.BasePrice == rhs.inventory_item_info.BasePrice
+//		&& lhs.inventory_item_info.Dimensions == rhs.inventory_item_info.Dimensions
+//		);
+//}

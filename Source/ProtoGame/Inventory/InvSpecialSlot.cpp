@@ -1,6 +1,7 @@
 // Nikita Belov, All rights reserved
 
 #include "Inventory/InvSpecialSlot.h"
+#include "Inventory/InventoryManager.h"
 #include "Item/ItemBase.h"
 
 #include "Kismet/KismetSystemLibrary.h"
@@ -8,8 +9,7 @@
 
 UInvSpecialSlotComponent::UInvSpecialSlotComponent()
 {
-	PrimaryComponentTick.bStartWithTickEnabled = false;
-	bAutoActivate = true;
+
 }
 
 bool UInvSpecialSlotComponent::AddItem(UItemBase* item)
@@ -19,11 +19,11 @@ bool UInvSpecialSlotComponent::AddItem(UItemBase* item)
 		return false;
 	}
 
-	if (!IsItemCompatible(item))
-	{
-		//Incompatible class
-		return false;
-	}
+	//if (!IsItemCompatibleClass(item))
+	//{
+	//	//Incompatible class
+	//	return false;
+	//}
 
 	if (item->SetOuterUpstreamInventory(this) == false)
 	{
@@ -120,14 +120,35 @@ bool UInvSpecialSlotComponent::DropItemToWorld(UItemBase* item)
 	{
 		return false;
 	}
+	
+	AActor* owner_actor = nullptr;
+	UInventoryManager* inv_manager = nullptr;
+	float EndDropDistance = 60; //by default it's 60
 
-	constexpr float DropDistance = 60;
+	if (GetInventoryOwner()->IsA(UInventoryManager::StaticClass()))
+	{
+		inv_manager = Cast<UInventoryManager>(GetInventoryOwner());
+		owner_actor = Cast<AActor>(inv_manager->GetOwner());
 
-	auto* item_actor = item->SpawnItemActor(GetOwner()->GetActorLocation() + GetOwner()->GetActorForwardVector() * DropDistance, GetOwner()->GetActorRotation());
+		EndDropDistance = inv_manager->GetDropDistance();
+	}
+	else
+	{
+		owner_actor = Cast<AActor>(GetInventoryOwner());
+	}
+
+
+	if (owner_actor == nullptr)
+	{
+		return false;
+	}
+
+
+	auto* item_actor = item->SpawnItemActor(owner_actor->GetActorLocation() + owner_actor->GetActorForwardVector() * EndDropDistance, owner_actor->GetActorRotation());
 	if(item_actor == nullptr)
 	{
 		//can't spawn, do not delete from inventory
-		UKismetSystemLibrary::PrintString(GetWorld(), "Drop to world is blocked", true, true, FLinearColor(130, 5, 255), 4);
+		UKismetSystemLibrary::PrintString(owner_actor, "Drop to world is blocked", true, true, FLinearColor(130, 5, 255), 4);
 
 		OnInventoryUpdated.Broadcast(); //Update even if we fail since DragAndDrop operation already destroyed the widget
 		return false;
@@ -168,41 +189,41 @@ bool UInvSpecialSlotComponent::SetInventoryOwner(UObject* new_owner)
 		return false;
 	}
 
-	GetOwner()->RemoveOwnedComponent(this);
+	//GetOwner()->RemoveOwnedComponent(this);
 
-	if (auto new_owner_actor = Cast<AActor>(new_owner))
-	{
-		new_owner_actor->AddOwnedComponent(this);
-	}
+	//if (auto new_owner_actor = Cast<AActor>(new_owner))
+	//{
+	//	new_owner_actor->AddOwnedComponent(this);
+	//}
 
 	return true;
 }
 
-bool UInvSpecialSlotComponent::IsItemCompatible(UItemBase* item)
-{
-	if (CompatibleClasses.IsEmpty())
-	{
-		return true;
-	}
-
-	for (auto& i : CompatibleClasses)
-	{
-		if (i.Key == item->GetClass())
-		{
-			return true;
-		}
-
-		if (i.Value.include_subclasses == true)
-		{
-			if (UKismetMathLibrary::ClassIsChildOf(item->GetClass(), i.Key))
-			{
-				return true;
-			}
-		}
-	}
-
-	return false;
-}
+//bool UInvSpecialSlotComponent::IsItemCompatibleClass(UItemBase* item)
+//{
+//	if (CompatibleClasses.IsEmpty())
+//	{
+//		return true;
+//	}
+//
+//	for (auto& i : CompatibleClasses)
+//	{
+//		if (i.Key == item->GetClass())
+//		{
+//			return true;
+//		}
+//
+//		if (i.Value.include_subclasses == true)
+//		{
+//			if (UKismetMathLibrary::ClassIsChildOf(item->GetClass(), i.Key))
+//			{
+//				return true;
+//			}
+//		}
+//	}
+//
+//	return false;
+//}
 
 bool UInvSpecialSlotComponent::IsOccupied() const
 {

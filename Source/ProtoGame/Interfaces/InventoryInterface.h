@@ -33,8 +33,6 @@ class PROTOGAME_API IInventoryInterface
 	GENERATED_BODY()
 
 public:
-	const FInventoryGuid& GetInventoryGuid() { return inventory_guid; }
-
 	//Inventory operations
 
    // UFUNCTION(BlueprintCallable)
@@ -65,6 +63,12 @@ public:
 
 	//"Service" functions
 
+	const FInventoryGuid& GetInventoryGuid() { return inventory_guid; }
+
+	//Gameplay tags might be useful, but aren't curently strictly necessary
+	UFUNCTION(BlueprintCallable)
+	virtual FGameplayTagContainer GetInventoryTags() const = 0;
+
 	UFUNCTION(BlueprintCallable)
 	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const = 0;
 
@@ -86,11 +90,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual UObject* GetInventoryOwner() = 0;
 
+	//Importat because of lifetime management 
 	UFUNCTION(BlueprintCallable)
 	virtual bool SetInventoryOwner(UObject* new_owner) { return CanOwnerEverChange(); };
 
-
-	//Whether component always stays where it was created or it can be moved (inventory within another inventory)
+	//Whether component always stays where it was created or it can be moved
 	UFUNCTION(BlueprintCallable)
 	virtual bool CanOwnerEverChange() { return true; };
 

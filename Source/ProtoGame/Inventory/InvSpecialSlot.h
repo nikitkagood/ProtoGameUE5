@@ -4,6 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Item/EnumItemTypes.h"
+#include "GameplayTagContainer.h"
+
 #include "Interfaces/InventoryInterface.h"
 
 #include "InvSpecialSlot.generated.h"
@@ -20,7 +22,7 @@ struct PROTOGAME_API FInvSpecialSlotCompatibleClassSettings
 
 //Used when there is a need for one per slot item and whole InventoryComponent with a grid is too much
 UCLASS(Blueprintable, BlueprintType, DefaultToInstanced, EditInlineNew, ClassGroup = (Inventory), meta=(BlueprintSpawnableComponent, DisplayName = "Inventory Special Slot"))
-class PROTOGAME_API UInvSpecialSlotComponent : public UActorComponent, public IInventoryInterface
+class PROTOGAME_API UInvSpecialSlotComponent : public UObject, public IInventoryInterface
 {
 	GENERATED_BODY()
 	
@@ -45,12 +47,13 @@ public:
 	virtual bool ReceiveItem(UItemBase* item, FIntPoint new_upper_left_cell) override;
 	virtual void UpdateInventory() override { OnInventoryUpdated.Broadcast(); };
 	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const override;
-	virtual UObject* GetInventoryOwner() override { return GetOwner(); };
+	virtual UObject* GetInventoryOwner() override { return GetOuter(); };
 	//TODO: Implement
 	virtual bool SetInventoryOwner(UObject* new_owner) override;
+	virtual FGameplayTagContainer GetInventoryTags() const { return Tags; };
 	//IInventoryInterface end
 
-	bool IsItemCompatible(UItemBase* item);
+	//bool IsItemCompatibleClass(UItemBase* item); //Class compatibility removed in favor of Tags
 
 public:
 
@@ -79,6 +82,9 @@ private:
 
 	//Class-based filter
 	//Emtpy means any, has to be subclass of UItemBase
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true, ExposeOnSpawn = true))
-	TMap<TSubclassOf<UItemBase>, FInvSpecialSlotCompatibleClassSettings> CompatibleClasses;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true, ExposeOnSpawn = true))
+	//TMap<TSubclassOf<UItemBase>, FInvSpecialSlotCompatibleClassSettings> CompatibleClasses;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (Categories = "Inventory", AllowPrivateAccess = true))
+	FGameplayTagContainer Tags;
 };

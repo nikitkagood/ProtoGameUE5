@@ -106,6 +106,10 @@ public:
 
 	//End APawn
 
+private:
+#if WITH_EDITOR
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
 
 public:
 	//Using interpolation to smooth change in velocity direction

@@ -37,7 +37,7 @@ AItemActor::AItemActor()
 		SkeletalMeshComp->SetEnableGravity(true);
 		SkeletalMeshComp->SetSimulatePhysics(true);
 		SkeletalMeshComp->CanCharacterStepUpOn = ECanBeCharacterBase::ECB_No;
-		StaticMeshComp->SetGenerateOverlapEvents(true);
+		SkeletalMeshComp->SetGenerateOverlapEvents(true);
 		SkeletalMeshComp->SetCollisionProfileName("Item");
 	}
 

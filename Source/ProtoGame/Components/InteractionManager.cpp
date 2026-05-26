@@ -9,6 +9,7 @@
 #include "Engine/World.h"
 #include "TimerManager.h"
 #include "GameFramework/Pawn.h"
+#include "Components/SphereComponent.h"
 
 #include "DrawDebugHelpers.h"
 
@@ -17,6 +18,11 @@ UInteractionManager::UInteractionManager()
 {
 	//don't tick, timer only
 	PrimaryComponentTick.bCanEverTick = false;
+
+	SphereCollision = CreateDefaultSubobject<USphereComponent>(TEXT("SphereCollisionComp"));
+	SphereCollision->InitSphereRadius(InteractionRange * 1.5f);
+	SphereCollision->SetCollisionProfileName(TEXT("Trigger"));
+	SphereCollision->SetGenerateOverlapEvents(true);
 	
 }
 
@@ -34,6 +40,15 @@ void UInteractionManager::BeginPlay()
 	const float rate = 1.f / 30.f; //30 FPS
 	//GetWorld()->GetTimerManager().SetTimer(interaction_loop_timer_handle, this, &UInteractionManager::SweepInteractionFromView, rate, true, 0.f);
 	GetWorld()->GetTimerManager().SetTimer(interaction_loop_timer_handle, this, &UInteractionManager::SweepInteractionFromViewAsync, rate, true, 0.f);
+
+	GetWorld()->GetTimerManager().SetTimer(sphere_collision_timer_handle, this, &UInteractionManager::SphereCollisionCheck, 1.f / 2.f, true, 0.f);
+
+	SphereCollision->AttachToComponent(GetOwner()->GetRootComponent(), FAttachmentTransformRules::SnapToTargetIncludingScale);
+
+	if (UseCollisionOptimization == false)
+	{
+		GetWorld()->GetTimerManager().PauseTimer(sphere_collision_timer_handle);
+	}
 }
 
 void UInteractionManager::GetInteractionStartPoint_Implementation(FVector& start_point, FRotator& start_rot)
@@ -176,13 +191,71 @@ void UInteractionManager::OnSweepCompletedAsync(const FTraceHandle& Handle, FTra
 		return;
 	}
 
+	if (IInteractionInterface::Execute_DoesDrawOutline(hit_actor))
+	{
+		IInteractionInterface::Execute_DrawInteractionOutline(hit_actor);
+	}
+
 	if (IInteractionInterface::Execute_IsInteractible(hit_actor))
 	{
 		SetInteractionActor(hit_actor);
+	}
 
-		if (IInteractionInterface::Execute_DoesDrawOutline(hit_actor))
+}
+
+void UInteractionManager::SphereCollisionCheck()
+{
+	TArray<AActor*> overlapping_actors;
+	SphereCollision->GetOverlappingActors(overlapping_actors);
+
+	//At some point, it's easier to just always trace, rather than to iterate over too many actors
+	if (overlapping_actors.Num() > ProximityActorIterationLimit)
+	{
+		GetWorld()->GetTimerManager().UnPauseTimer(interaction_loop_timer_handle);
+		return;
+	}
+
+	//If any actor is interactible, then trace
+	for (AActor* actor : overlapping_actors)
+	{
+		if (actor->Implements<UInteractionInterface>())
 		{
-			IInteractionInterface::Execute_DrawInteractionOutline(hit_actor);
+			if (IInteractionInterface::Execute_IsInteractible(actor))
+			{
+				GetWorld()->GetTimerManager().UnPauseTimer(interaction_loop_timer_handle);
+				return;
+			}
+		}
+	}
+
+	GetWorld()->GetTimerManager().PauseTimer(interaction_loop_timer_handle);
+}
+
+#if WITH_EDITOR
+void UInteractionManager::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+
+	FName PropertyName = (PropertyChangedEvent.Property != nullptr)
+		? PropertyChangedEvent.Property->GetFName() : NAME_None;
+
+	if (PropertyName == GET_MEMBER_NAME_CHECKED(UInteractionManager, UseCollisionOptimization))
+	{
+		if (UseCollisionOptimization)
+		{
+			if (GetWorld()->GetTimerManager().TimerExists(sphere_collision_timer_handle))
+			{
+				GetWorld()->GetTimerManager().UnPauseTimer(sphere_collision_timer_handle);
+			}
+			else
+			{
+				GetWorld()->GetTimerManager().SetTimer(sphere_collision_timer_handle, this, &UInteractionManager::SphereCollisionCheck, 1.f / 2.f, true, 0.f);
+			}
+		}
+		else
+		{
+			GetWorld()->GetTimerManager().PauseTimer(sphere_collision_timer_handle);
 		}
 	}
 }
+#endif

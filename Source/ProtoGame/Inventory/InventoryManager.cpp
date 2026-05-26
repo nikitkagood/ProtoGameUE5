@@ -13,6 +13,8 @@
 UInventoryManager::UInventoryManager()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+
+	DropDistance = 60;
 }
 
 void UInventoryManager::BeginPlay()
@@ -56,7 +58,7 @@ bool UInventoryManager::MoveItemToInventory(UItemBase* item, TArray<UClass*> inv
 		}
 		else 
 		{
-			if (inventory_types.Contains(i.GetObject()->GetClass()))
+			if (inventory_types.Contains(i->GetClass()))
 			{
 				result = current_inv->MoveItemToInventory(item, i, {-1, -1});
 			}
@@ -87,12 +89,14 @@ bool UInventoryManager::MoveItemToInventoryDestination(UItemBase* item, TScriptI
 
 bool UInventoryManager::AddItemFromWorld(UItemBase* item, EManagerInventoryType inventory_type)
 {
-	//typedef bool (*Predicate_AddItemFromWorld) (TScriptInterface<IInventoryInterface> inv);
-
-	auto AddItemFromWorld_if = [&](std::function<bool(TScriptInterface<IInventoryInterface>)> predicate)
+	//auto AddItemFromWorld_if = [&](std::function<bool(TScriptInterface<IInventoryInterface>)> predicate)
+	//Call AddItemFrom world if passed predicate is true
+	auto AddItemFromWorld_if = [item, this](std::function<bool(IInventoryInterface*)> predicate)
 	{
-		for (auto& inv : inventories)
+		for (auto& i : inventories)
 		{
+			IInventoryInterface* inv = Cast<IInventoryInterface>(i);
+
 			if (inv == nullptr)
 			{
 				checkf(false, TEXT("Invalid inventory"));
@@ -104,7 +108,7 @@ bool UInventoryManager::AddItemFromWorld(UItemBase* item, EManagerInventoryType 
 				continue;
 			}
 
-			if (inv.GetInterface()->AddItemFromWorld(item))
+			if (inv->AddItemFromWorld(item))
 			{
 				return true;
 			}
@@ -113,13 +117,48 @@ bool UInventoryManager::AddItemFromWorld(UItemBase* item, EManagerInventoryType 
 		return false;
 	};
 
+	auto AddItemFromWorld_Type = [item, this](TSubclassOf<UObject> type)
+		{
+			for (auto& i : inventories)
+			{
+				if (i->IsA(type) == false)
+				{
+					continue;
+				}
+
+				IInventoryInterface* inv = Cast<IInventoryInterface>(i);
+
+				if (inv == nullptr)
+				{
+					checkf(false, TEXT("Invalid inventory"));
+					continue;
+				}
+
+
+				if (inv->AddItemFromWorld(item))
+				{
+					return true;
+				}
+			}
+
+			return false;
+		};
+
 	switch (inventory_type)
 	{
 	case EManagerInventoryType::Any:
 
-		for (auto& inv : inventories)
+		for (auto& i : inventories)
 		{
-			if (inv.GetInterface()->AddItemFromWorld(item))
+			IInventoryInterface* inv = Cast<IInventoryInterface>(i);
+
+			if (inv == nullptr)
+			{
+				checkf(false, TEXT("Invalid inventory"));
+				continue;
+			}
+
+			if (inv->AddItemFromWorld(item))
 			{
 				return true;
 			}
@@ -127,22 +166,31 @@ bool UInventoryManager::AddItemFromWorld(UItemBase* item, EManagerInventoryType 
 
 		break;
 	case EManagerInventoryType::SpecialSlot:
+		//Call lambda, pass as a parameter another lambda (predicate)
+		//if (AddItemFromWorld_if( [](IInventoryInterface* inv)
+		//	{ return inv->_getUObject()->IsA<UInvSpecialSlotComponent>(); }) )
+		//{
+		//	return true;
+		//}
 
-		if (AddItemFromWorld_if( [&](TScriptInterface<IInventoryInterface> inv)
-			{ return inv.GetObject()->IsA<UInvSpecialSlotComponent>(); }) )
+		if (AddItemFromWorld_Type(UInvSpecialSlotComponent::StaticClass()))
 		{
 			return true;
 		}
 
 		break;
 	case EManagerInventoryType::InventoryComponent:
+		//if (AddItemFromWorld_if( [](IInventoryInterface* inv)
+		//	{ return inv->_getUObject()->IsA<UInventoryComponent>(); }) )
+		//{
+		//	return true;
+		//}
 
-		if (
-			AddItemFromWorld_if( [&](TScriptInterface<IInventoryInterface> inv)
-			{ return inv.GetObject()->IsA<UInventoryComponent>(); }) )
+		if (AddItemFromWorld_Type(UInventoryComponent::StaticClass()))
 		{
 			return true;
 		}
+
 		break;
 	default:
 		break;
@@ -221,13 +269,13 @@ void UInventoryManager::AddExistingInventory(TScriptInterface<IInventoryInterfac
 		return;
 	}
 
-	if (inventories.Find(inventory) != INDEX_NONE)
+	if (inventories.Find(inventory.GetObject()) != INDEX_NONE)
 	{
 		checkf(false, TEXT("UInventoryManager::AddExistingInventory: Inventory is added already"));
 		return;
 	}
 
-	inventories.Add(inventory);
+	inventories.Add(inventory.GetObject());
 }
 
 
@@ -239,7 +287,7 @@ void UInventoryManager::RemoveInventory(TScriptInterface<IInventoryInterface> in
 		return;
 	}
 
-	int32 result = inventories.Find(inventory);
+	int32 result = inventories.Find(inventory.GetObject());
 
 	if (result == INDEX_NONE)
 	{

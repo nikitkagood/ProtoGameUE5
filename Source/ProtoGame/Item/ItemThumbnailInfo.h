@@ -7,8 +7,7 @@
 
 #include "ItemThumbnailInfo.generated.h"
 
-//Thumbnail Info isn't to be included into ItemObject or ItemActor since we access this information infrequently
-//Instead it is stored in Data Tables only. See FItemTable.
+//Settings for auto thumbnail creation
 USTRUCT(BlueprintType)
 struct PROTOGAME_API FItemThumbnailInfo : public FTableRowBase
 {

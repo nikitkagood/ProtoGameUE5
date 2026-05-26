@@ -16,6 +16,7 @@
 struct FTraceHandle;
 struct FTraceDatum;
 struct FCollisionQueryParams;
+class USphereComponent;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInteractionActorChanged, AActor*, new_actor);
 
@@ -64,21 +65,30 @@ private:
 	UFUNCTION()
 	void SweepInteractionFromViewAsync();
 
-	//void OnSweepCompletedSync(const FHitResult& hit_result);
-
 	//Callback for AsyncSweep
 	void OnSweepCompletedAsync(const FTraceHandle& Handle, FTraceDatum& Data);
+
+	//Check if any actor within sphere is interactible
+	//Interactible actors must have GenerateOverlapEvents = true
+	UFUNCTION()
+	void SphereCollisionCheck();
+
+#if WITH_EDITOR
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+#endif
+
+	//UFUNCTION()
+	//void OnOverlapBegin(UPrimitiveComponent* OverlappedComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex,
+	//	bool bFromSweep, const FHitResult& SweepResult);
 
 public:
 	UPROPERTY(BlueprintAssignable)
 	FOnInteractionActorChanged OnInteractionActorChanged;
 
-
+	//Trace (sweep) distance
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	float InteractionRange = 130.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	float SweepShapeRadius = 2.25f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	TEnumAsByte<ECollisionChannel> CollisionChannel = ECollisionChannel::ECC_Visibility;
@@ -86,15 +96,28 @@ public:
 	// UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
 	FCollisionQueryParams CollisionParams;
 
-	//TODO
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	USphereComponent* SphereCollision;
+
+
 	//False: trace (sweep) all the time
 	//True: make sure anything interactible is any close before ever starting to trace
-	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	//bool UseCollisionOptimization = true;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	bool UseCollisionOptimization = true;
+
+	//Since "trace" is actually sweep. Acts like line thickness.
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	float SweepShapeRadius = 2.25f;
+
+	//At some point, it's easier to just always trace, rather than to iterate over too many actors
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
+	int ProximityActorIterationLimit = 50;
 
 private:
 	FTimerHandle interaction_loop_timer_handle;
 	FTraceDelegate trace_delegate;
+
+	FTimerHandle sphere_collision_timer_handle;
 
 	//By default we try get GetPlayerViewPoint from it
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))

@@ -64,7 +64,8 @@ public:
 	virtual void UpdateStackDependencies(UItemBase* item, int32 new_stack_size) override;
 	virtual void UpdateInventory() override;
 	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const override;
-	virtual UObject* GetInventoryOwner() { return InventoryComponent->GetOwner(); };
+	virtual UObject* GetInventoryOwner() { return InventoryComponent->GetInventoryOwner(); };
 	bool SetInventoryOwner(UObject* new_owner);
+	virtual FGameplayTagContainer GetInventoryTags() const { return InventoryComponent->GetInventoryTags(); };
 	//IInventoryInterface end
 };

@@ -47,6 +47,7 @@ class UInteractionInterface : public UInterface
 
 //Interface for interactible Actors
 //Both C++ and BP interface, thus may have some redundancy
+//GenerateOverlapEvents is required
 class PROTOGAME_API IInteractionInterface
 {
 	GENERATED_BODY()

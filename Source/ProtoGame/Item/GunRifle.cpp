@@ -107,7 +107,14 @@ void UGunRifle::PrintWeaponStats()
 
 void UGunRifle::OnFire()
 {
-	if(World == nullptr || weapon_info.bFunctional != true)
+	if (GetOuterItemActor() == nullptr)
+	{
+		return;
+	}
+
+	auto sk_comp = GetOuterItemActor()->GetSkeletalMeshComp();
+
+	if (sk_comp == nullptr || weapon_info.bFunctional == false)
 	{
 		return;
 	}
@@ -130,14 +137,14 @@ void UGunRifle::OnFire()
 			ActorSpawnParams.bAllowDuringConstructionScript = false; //We should not be shooting at this point
 
 			//Usually Rotation is simply relative X-forward, but not SocketRotation due to bones may be oriented wrong
-			World->SpawnActor<AProjectile>(weapon_info.Chamber->GetProjectileClass(), SK_WeaponRepresentation->GetSocketLocation("b_gun_muzzleflash"), SK_WeaponRepresentation->GetComponentRotation(), ActorSpawnParams);
+			World->SpawnActor<AProjectile>(weapon_info.Chamber->GetProjectileClass(), sk_comp->GetSocketLocation("b_gun_muzzleflash"), sk_comp->GetComponentRotation(), ActorSpawnParams);
 
-			SpawnMuzzleFlash();
+			SpawnMuzzleFlash(sk_comp);
 
 			if(weapon_info.FireSound != nullptr)
 			{
 				const FVector muzzle_sound_offset = {-5.f, 0.f, 0.f}; //play sound a bit behind the muzzle end
-				UGameplayStatics::PlaySoundAtLocation(this, weapon_info.FireSound, SK_WeaponRepresentation->GetSocketLocation("b_gun_muzzleflash") - muzzle_sound_offset);
+				UGameplayStatics::PlaySoundAtLocation(this, weapon_info.FireSound, sk_comp->GetSocketLocation("b_gun_muzzleflash") - muzzle_sound_offset);
 			}
 		}
 		else if(weapon_info.Chamber != nullptr)
@@ -152,23 +159,23 @@ void UGunRifle::OnFire()
 			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 			ActorSpawnParams.bHideFromSceneOutliner = true;
 
-			World->SpawnActor<AProjectile>(weapon_info.Chamber->GetProjectileClass(), SK_WeaponRepresentation->GetSocketLocation("b_gun_muzzleflash"), SK_WeaponRepresentation->GetSocketRotation("b_gun_muzzleflash"), ActorSpawnParams);
+			World->SpawnActor<AProjectile>(weapon_info.Chamber->GetProjectileClass(), sk_comp->GetSocketLocation("b_gun_muzzleflash"), sk_comp->GetSocketRotation("b_gun_muzzleflash"), ActorSpawnParams);
 			weapon_info.Chamber->MarkAsGarbage();
 			weapon_info.Chamber = nullptr;
 
-			SpawnMuzzleFlash();
+			SpawnMuzzleFlash(sk_comp);
 
 			if(weapon_info.FireSound != nullptr)
 			{
 				const FVector muzzle_sound_offset = {-5.f, 0.f, 0.f}; //play sound a bit behind the muzzle end
-				UGameplayStatics::PlaySoundAtLocation(this, weapon_info.FireSound, SK_WeaponRepresentation->GetSocketLocation("b_gun_muzzleflash") - muzzle_sound_offset);
+				UGameplayStatics::PlaySoundAtLocation(this, weapon_info.FireSound, sk_comp->GetSocketLocation("b_gun_muzzleflash") - muzzle_sound_offset);
 			}
 
 			LoadAmmoIntoChamberFromMag();
 		}
 		else //click sound
 		{
-			UGameplayStatics::SpawnSoundAttached(weapon_info.EmptyClickSound, SK_WeaponRepresentation, "root", {}, EAttachLocation::SnapToTarget);
+			UGameplayStatics::SpawnSoundAttached(weapon_info.EmptyClickSound, sk_comp, "root", {}, EAttachLocation::SnapToTarget);
 		}
 
 	}
@@ -199,13 +206,13 @@ bool UGunRifle::AddAttachment(UWeaponAttachment* attachment)
 	if(idx != INDEX_NONE)
 	{
 		//If we have valid scene capture, then attach to it
-		if(SK_SceneCapture != nullptr)
-		{
-			if(AddAttachmentMesh(SK_WeaponRepresentation, attachment) == false)
-			{
-				UE_LOG(LogTemp, Error, TEXT("AddAttachment: Failed to attach mesh to SceneCapture"));
-			}
-		}
+		//if(SK_SceneCapture != nullptr)
+		//{
+		//	if(AddAttachmentMesh(SK_WeaponRepresentation, attachment) == false)
+		//	{
+		//		UE_LOG(LogTemp, Error, TEXT("AddAttachment: Failed to attach mesh to SceneCapture"));
+		//	}
+		//}
 
 		//if we have ItemActor spawned, then attach to it
 		if(GetOuterItemActor() != nullptr)
@@ -213,17 +220,6 @@ bool UGunRifle::AddAttachment(UWeaponAttachment* attachment)
 			if(AddAttachmentMesh(GetOuterItemActor()->GetSkeletalMeshComp(), attachment) == false)
 			{
 				UE_LOG(LogTemp, Error, TEXT("AddAttachment: Failed to attach mesh to ItemActor"));
-				check(false);
-				return false;
-			}
-		}
-		//Otherwise check referenced skeletal mesh component
-		//Usually this means we have SK in hands of a character and Outer is SpecialSlot (UpstreamInventory)
-		else if(SK_WeaponRepresentation != nullptr)
-		{
-			if(AddAttachmentMesh(SK_WeaponRepresentation, attachment) == false)
-			{
-				UE_LOG(LogTemp, Error, TEXT("AddAttachment: Failed to attach mesh to WeaponRepresentation"));
 				check(false);
 				return false;
 			}

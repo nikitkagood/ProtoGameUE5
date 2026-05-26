@@ -378,13 +378,13 @@ void AGameCharacterBase::UpdateWeaponSlot(UInvSpecialSlotComponent* slot)
 
 	if (slot == ActiveSlot)
 	{
-		InHandsSkeletalMesh = weapon->CreateSKWeaponRepresentation(GetMesh());
-		InHandsSkeletalMesh->AttachToComponent(GetMesh(), { EAttachmentRule::SnapToTarget, true }, "ik_hand_gun");
+		//InHandsSkeletalMesh = weapon->CreateSKWeaponRepresentation(GetMesh());
+		//InHandsSkeletalMesh->AttachToComponent(GetMesh(), { EAttachmentRule::SnapToTarget, true }, "ik_hand_gun");
 	}
 	else
 	{
-		StowedOnBackSkeletalMesh = weapon->CreateSKWeaponRepresentation(GetMesh());
-		StowedOnBackSkeletalMesh->AttachToComponent(GetMesh(), { EAttachmentRule::SnapToTarget, true }, "StowedOnBackSocket");
+		//StowedOnBackSkeletalMesh = weapon->CreateSKWeaponRepresentation(GetMesh());
+		//StowedOnBackSkeletalMesh->AttachToComponent(GetMesh(), { EAttachmentRule::SnapToTarget, true }, "StowedOnBackSocket");
 	}
 }
 

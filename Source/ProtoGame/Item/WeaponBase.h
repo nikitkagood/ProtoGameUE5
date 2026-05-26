@@ -29,15 +29,19 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual TSubclassOf<UAnimInstance> GetAnimClass() const { check(false); return nullptr; };
 
+	UFUNCTION()
+	virtual void OnAttack() { check(false); };
+
+
 	//virtual AItemActor* SpawnItemActor(const FVector& location, const FRotator& rotation) override;
 	//virtual AItemActor* SpawnItemActorVisualOnly(const FVector& location, const FRotator& rotation) override;
 
-	UFUNCTION()
-	virtual USkeletalMeshComponent* GetWeaponRepresentation() { return SK_WeaponRepresentation; };
+	//UFUNCTION()
+	//virtual USkeletalMeshComponent* GetWeaponSK() { return SK_Weapon; };
 
 	//Create functional and animated SK mesh comp which represents Weapon
-	UFUNCTION()
-	virtual USkeletalMeshComponent* CreateSKWeaponRepresentation(USceneComponent* outer) { check(false); return nullptr; };
+	//UFUNCTION()
+	//virtual USkeletalMeshComponent* CreateSKWeaponRepresentation(USceneComponent* outer) { check(false); return nullptr; };
 
 	//virtual USkeletalMeshComponent* CreateSKForSceneCapture() override { check(false); return nullptr; };
 
@@ -57,7 +61,7 @@ public:
 	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const override;
 	virtual AActor* GetInventoryOwner() override { return GetOwner(); };
 	virtual bool SetInventoryOwner(UObject*) { checkf(false, TEXT("Abstract class doesn't have this implementation. Check child classes.")); return false; };
-
+	virtual FGameplayTagContainer GetInventoryTags() const override { return {}; };
 	//IInventoryInterface end
 
 public: 	
@@ -68,14 +72,14 @@ public:
 
 	//class related
 protected:
-	//void OnFire();
+
 
 	//Reference to fully functional SK mesh component which is used to represent this weapon.
 	//Used when Outer != ItemActor. For example when weapon is in a character's hands and Outer == SpecialSlot (UpstreamInventory).
-	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-	USkeletalMeshComponent* SK_WeaponRepresentation;
+	//UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	//USkeletalMeshComponent* SK_Weapon;
 
-	UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-	USkeletalMeshComponent* SK_SceneCapture;
+	//UPROPERTY(BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	//USkeletalMeshComponent* SK_SceneCapture;
 
 };

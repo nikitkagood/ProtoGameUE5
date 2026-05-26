@@ -23,7 +23,7 @@ enum class EManagerInventoryType : uint8
 //we don't want manually go through every possible inventory, we just ask this Manager
 //Not used when we already know all required inventories, Drag and Drop for example
 UCLASS(BlueprintType, DefaultToInstanced, ClassGroup=(Inventory), meta=(BlueprintSpawnableComponent))
-class PROTOGAME_API UInventoryManager : public UActorComponent //, public IInventoryInterface
+class PROTOGAME_API UInventoryManager : public UActorComponent
 {
 	GENERATED_BODY()
 
@@ -53,6 +53,10 @@ public:
 	//void UpdateStackDependencies(UItemBase* item, int32 new_stack_size)  {  };
 	//UFUNCTION(BlueprintCallable)
 	//void UpdateInventory();
+	UFUNCTION(BlueprintCallable)
+	float GetDropDistance() const { return DropDistance; };
+	UFUNCTION(BlueprintCallable)
+	void SetDropDistance(float new_drop_dist) { DropDistance = new_drop_dist; };
 	//end
 
 	//UObject* GetInventories();
@@ -83,14 +87,12 @@ protected:
 
 private:
 	//List of managed inventories
-	//Must implement IInventoryInterface and be derived from UObject
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"), Category = Inventory)
-	TArray<TScriptInterface<IInventoryInterface>> inventories;
-
-	//UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true", MustImplement = "InventoryInterface"), Category = Inventory)
-	//TArray<TSubclassOf<UObject>> inventories_test_subclassof_mustimplement;
-
 	//Must implement InventoryInterface
-	//UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Instanced, meta = (AllowPrivateAccess = "true", MustImplement = "InventoryInterface"), Category = Inventory)
-	TArray<UObject*> inventories_test_uobject_mustimplement;
+	//Must NOT be ActorComponent: Editor will go crazy and crash when changing fields
+	//Instanced + EditInLineNew don't go well with edit in BP's component list
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Instanced, meta = (AllowPrivateAccess = "true", MustImplement = "/Script/ProtoGame.InventoryInterface", AllowedClasses = "/Script/ProtoGame.InventoryInterface", DisallowedClasses = "/Script/Engine.ActorComponent"), Category = Inventory)
+	TArray<UObject*> inventories;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Inventory)
+	float DropDistance;
 };

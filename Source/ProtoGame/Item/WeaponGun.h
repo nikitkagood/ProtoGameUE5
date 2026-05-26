@@ -34,10 +34,10 @@ public:
 
 	//Create functional and animated SK mesh comp which represents Weapon
 
-	virtual USkeletalMeshComponent* CreateSKWeaponRepresentation(USceneComponent* outer) override;
+	//virtual USkeletalMeshComponent* CreateSKWeaponRepresentation(USceneComponent* outer) override;
 
     //TODO: the same code as CreateSKWeaponRepresentation; It's cause SceneCapture (item preview in UI) is still in progress
-	virtual USkeletalMeshComponent* CreateSKForSceneCapture(USceneComponent* outer) override;
+	//virtual USkeletalMeshComponent* CreateSKForSceneCapture(USceneComponent* outer) override;
 
 	//Equips and and de-equips (by calling GameCharacter)
 	virtual bool OnUse(AActor* caller) override;
@@ -48,11 +48,14 @@ public:
 	virtual bool DropItemToWorld(UItemBase* item) override;
 	virtual bool ReceiveItem(UItemBase* item, FIntPoint new_upper_left_cell) override;
 	virtual void UpdateInventory() override { OnInventoryUpdated.Broadcast(); };
+	virtual FGameplayTagContainer GetInventoryTags() const override { return {}; }; //not supported
 
 	UPROPERTY(BlueprintAssignable)
 	FOnInventoryUpdated OnInventoryUpdated;
 
-public: 	
+public:
+	virtual void OnAttack() override { OnFire(); };
+
 	//Weapon controls
 
 	UFUNCTION(BlueprintCallable)
@@ -104,7 +107,7 @@ public:
 	virtual void StartFire();
 	virtual void EndFire();
 
-	bool IsFiring() { return Firing;  };
+	bool IsFiring() const { return Firing;  };
 
 	//class related
 
@@ -112,9 +115,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void PrintWeaponStats();
 protected:
+	//TODO: make it DOD and FireManager or smth
 	virtual void OnFire();
 
-	void SpawnMuzzleFlash() const;
+	void SpawnMuzzleFlash(USkeletalMeshComponent* sk_comp) const;
 
 	bool LoadAmmoIntoChamberFromMag();
 
@@ -135,6 +139,9 @@ protected:
 	FTimerHandle BurstFireTimerHandle;
 
 	//Weapon related
+
+	//UPROPERTY(BlueprintReadOnly, VisibleAnywhere, meta = (AllowPrivateAccess = true))
+	//TWeakObjectPtr<AGunActor> weapon_actor;
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, NoClear, meta = (AllowPrivateAccess = true))
 	FWeaponInfo weapon_info;

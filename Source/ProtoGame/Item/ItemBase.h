@@ -57,6 +57,10 @@ public:
 
 	virtual bool Initialize(FDataTableRowHandle handle);
 
+	//TODO: it's not really used yet
+	//Initialize from FInstancedStruct
+	//virtual bool InitializeFromInstancedStruct(FDataTableRowHandle handle);
+
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	virtual FItemThumbnailInfo GetItemThumbnailInfoFromDT();
 
@@ -79,6 +83,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	const FItemGuid& GetItemGuid() const { return item_guid; };
 	UFUNCTION(BlueprintCallable)
+	FGameplayTag GetType() const { return inventory_item_info.Type; };
+	UFUNCTION(BlueprintCallable)
 	const FText& GetItemName() const { return inventory_item_info.Name; }
 	UFUNCTION(BlueprintCallable)
 	const FText& GetItemNameShort() const { return inventory_item_info.NameShort; }
@@ -86,8 +92,6 @@ public:
 	const FText& GetDescription() const { return inventory_item_info.Description; };
 	UFUNCTION(BlueprintCallable)
 	const FText& GetUseActionText() const { return inventory_item_info.UseActionText; };
-    UFUNCTION(BlueprintCallable)
-	ItemType GetType() const { return inventory_item_info.Type; };
 	UFUNCTION(BlueprintCallable)
 	float GetMassOneUnit() const { return inventory_item_info.Mass; };
 	UFUNCTION(BlueprintCallable)
@@ -95,14 +99,22 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual FIntPoint GetDimensions() const { return inventory_item_info.Dimensions; };
 	UFUNCTION(BlueprintCallable)
-	int32 GetCurrentStackSize() const { return inventory_item_info.CurrentStackSize; };
-	UFUNCTION(BlueprintCallable)
-	int32 GetMaxStackSize() const { return inventory_item_info.MaxStackSize; };
-	UFUNCTION(BlueprintCallable)
 	TSoftObjectPtr<UTexture2DDynamic> GetThumbnail() const { return inventory_item_info.Thumbnail; };
 	UFUNCTION(BlueprintCallable)
 	void SetThumbnail(UTexture2DDynamic* dynamic_texture) { inventory_item_info.Thumbnail = dynamic_texture; };
+	UFUNCTION(BlueprintCallable)
+	int32 GetCurrentStackSize() const { return inventory_item_info.CurrentStackSize; };
+	UFUNCTION(BlueprintCallable)
+	int32 GetMaxStackSize() const { return inventory_item_info.MaxStackSize; };
 
+public:
+
+	UFUNCTION(BlueprintCallable)
+	void SetMass(float new_mass);
+	UFUNCTION(BlueprintCallable)
+	void ChangeMass(float change_in_mass);
+
+	//Default way to get the mesh. Since it's already used by ItemActor.
 	UFUNCTION(BlueprintCallable)
 	UStaticMesh* GetStaticMeshFromItemActorCDO() const;
 	UFUNCTION(BlueprintCallable)
@@ -164,7 +176,20 @@ public:
 
 	//Returns new Item with desired amount in stack
 	UFUNCTION()
-	UItemBase* StackGet(int32 ammount, UObject* new_outer);
+	UItemBase* StackGetSplit(int32 ammount, UObject* new_outer);
+
+	//Probably should not be used
+	//Since it's pretty ambiguous what to consider equal
+	friend bool operator== (const UItemBase& lhs, const UItemBase& rhs) = delete;
+
+	//Checks if items are equal for stacking purposes
+	//Tag filter: only check for this tag and it's descendants
+	//by default tag_filter is Item
+	virtual bool IsEqualForStack(UItemBase* other_item, const FName& tag_filter = "Item") const;
+
+	//tag_filter - only consider this tag and it's decsendants
+	//if tag_filter empty or none, all tags are compared
+	virtual bool CompareTags(UItemBase* other_item, const FName& tag_filter) const;
 
 	//ItemActors ask ItemObject what to do
 	//This behaviour might be reduntant and may change later
@@ -176,34 +201,26 @@ public:
 	virtual bool OnUse(AActor* caller) override;
 protected:
 	virtual FItemGuid CreateItemGuid();
-
 protected:
 
+	//Values shared between instance and DataTable
     UPROPERTY(EditAnywhere, BlueprintReadWrite, NoClear, meta = (AllowPrivateAccess = true))
 	FInventoryItemInfo inventory_item_info;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
-	bool bRotated;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, NoClear, meta = (AllowPrivateAccess = true))
 	TSubclassOf<AItemActor> ItemActorClass;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
+	bool bRotated;
 private:
 	//Unique ID for each item instance
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, NoClear, meta = (AllowPrivateAccess = true))
 	FItemGuid item_guid;
 
-	//position in inventory
+	//position in grid inventory
     UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
 	FIntPoint upper_left_cell; 
-public:
 
-	//ItemBase items are considered to be identical when:
-	//They have the same Name Short (for performance reasons)
-	//Mass
-	//Base price
-	//Dimensions
-	//TODO: some items may have different dimensions, like weapons
-	friend bool operator== (const UItemBase& lhs, const UItemBase& rhs);
 };
 
 template<typename ItemType>

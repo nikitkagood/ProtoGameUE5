@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "Item/WeaponAttachment.h"
 
+#include "GameplayTagContainer.h"
+
 #include "Interfaces/InventoryInterface.h"
 
 #include "WeaponAttachmentMagazine.generated.h"
@@ -46,6 +48,8 @@ public:
 	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const override;
 	virtual AActor* GetInventoryOwner() override { return GetOwner(); };
 	bool SetInventoryOwner(UObject* new_owner);
+	virtual FGameplayTagContainer GetInventoryTags() const { return {}; };
+
 
 	//Mag unload on use
 	virtual bool OnUse(AActor* caller) override;

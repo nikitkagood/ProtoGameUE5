@@ -2,8 +2,9 @@
 
 
 #include "VirtualBattlefield/VBFUnitInfantryInfo.h"
+#include "VirtualBattlefield/VBFUnitInfantry.h"
 
 FVBFUnitInfantryInfoTable::FVBFUnitInfantryInfoTable()
 {
-    unit_land_table.unit_info_table.UnitClass = StaticClass<class UVBFUnitInfantry>();
+    unit_land_table.unit_info_table.UnitClass = StaticClass<UVBFUnitInfantry>();
 }

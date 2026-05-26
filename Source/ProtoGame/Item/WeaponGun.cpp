@@ -111,9 +111,16 @@ void UWeaponGun::PrintWeaponStats()
 
 void UWeaponGun::OnFire()
 {
-	//Default implementation; Isn't meant to be called directly but you can reference it: UChildClass::OnFire -> UWeaponGun::OnFire()
+	//Default implementation; Isn't meant to be called directly but you can reference it: UChildClass::OnFire calls UWeaponGun::OnFire()
 
-	if(World == nullptr || weapon_info.bFunctional != true)
+	if (GetOuterItemActor() == nullptr)
+	{
+		return;
+	}
+
+	auto sk_comp = GetOuterItemActor()->GetSkeletalMeshComp();
+
+	if(sk_comp == nullptr || weapon_info.bFunctional == false)
 	{
 		return;
 	}
@@ -135,23 +142,23 @@ void UWeaponGun::OnFire()
 			ActorSpawnParams.bAllowDuringConstructionScript = false; //We should not be shooting at this point
 
 			//Usually Rotation is simply relative X-forward, but not SocketRotation due to bones may be oriented wrong
-			World->SpawnActor<AProjectile>(weapon_info.Chamber->GetProjectileClass(), SK_WeaponRepresentation->GetSocketLocation("b_gun_muzzleflash"), SK_WeaponRepresentation->GetComponentRotation(), ActorSpawnParams);
+			World->SpawnActor<AProjectile>(weapon_info.Chamber->GetProjectileClass(), sk_comp->GetSocketLocation("b_gun_muzzleflash"), sk_comp->GetComponentRotation(), ActorSpawnParams);
 			weapon_info.Chamber->MarkAsGarbage();
 			weapon_info.Chamber = nullptr;
 
-			SpawnMuzzleFlash();
+			SpawnMuzzleFlash(sk_comp);
 
 			if(weapon_info.FireSound != nullptr)
 			{
 				const FVector muzzle_sound_offset = {-5.f, 0.f, 0.f}; //play sound a bit behind the muzzle end
-				UGameplayStatics::PlaySoundAtLocation(this, weapon_info.FireSound, SK_WeaponRepresentation->GetSocketLocation("b_gun_muzzleflash") - muzzle_sound_offset);
+				UGameplayStatics::PlaySoundAtLocation(this, weapon_info.FireSound, sk_comp->GetSocketLocation("b_gun_muzzleflash") - muzzle_sound_offset);
 			}
 
 			LoadAmmoIntoChamberFromMag();
 		}
 		else //click sound
 		{
-			UGameplayStatics::SpawnSoundAttached(weapon_info.EmptyClickSound, SK_WeaponRepresentation, "root", {}, EAttachLocation::SnapToTarget);
+			UGameplayStatics::SpawnSoundAttached(weapon_info.EmptyClickSound, sk_comp, "root", {}, EAttachLocation::SnapToTarget);
 		}
 
 	}
@@ -253,13 +260,13 @@ bool UWeaponGun::AddAttachment(UWeaponAttachment* attachment)
 	if(idx != INDEX_NONE)
 	{
 		//If we have valid scene capture, then attach to it
-		if(SK_SceneCapture != nullptr)
-		{
-			if(AddAttachmentMesh(SK_WeaponRepresentation, attachment) == false)
-			{
-				UE_LOG(LogTemp, Error, TEXT("AddAttachment: Failed to attach mesh to SceneCapture"));
-			}
-		}
+		//if(SK_SceneCapture != nullptr)
+		//{
+		//	if(AddAttachmentMesh(SK_WeaponRepresentation, attachment) == false)
+		//	{
+		//		UE_LOG(LogTemp, Error, TEXT("AddAttachment: Failed to attach mesh to SceneCapture"));
+		//	}
+		//}
 
 		//if we have ItemActor spawned, then attach to it
 		if(GetOuterItemActor() != nullptr)
@@ -267,17 +274,6 @@ bool UWeaponGun::AddAttachment(UWeaponAttachment* attachment)
 			if(AddAttachmentMesh(GetOuterItemActor()->GetSkeletalMeshComp(), attachment) == false)
 			{
 				UE_LOG(LogTemp, Error, TEXT("AddAttachment: Failed to attach mesh to ItemActor"));
-				check(false);
-				return false;
-			}
-		}
-		//Otherwise check referenced skeletal mesh component
-		//Usually this means we have SK in hands of a character and Outer is SpecialSlot (UpstreamInventory)
-		else if(SK_WeaponRepresentation != nullptr)
-		{
-			if(AddAttachmentMesh(SK_WeaponRepresentation, attachment) == false)
-			{
-				UE_LOG(LogTemp, Error, TEXT("AddAttachment: Failed to attach mesh to WeaponRepresentation"));
 				check(false);
 				return false;
 			}
@@ -367,82 +363,43 @@ void UWeaponGun::SetupAnimInstance(USkeletalMeshComponent* sk_comp)
 	anim_instance->SetFireMode(weapon_info.FireMode);
 }
 
-USkeletalMeshComponent* UWeaponGun::CreateSKWeaponRepresentation(USceneComponent* outer)
-{
-	if(outer == nullptr)
-	{
-		checkf(false, TEXT("ERROR: Outer is invalid. Trying NewObject with invalid outer will cause 'Object not packaged' crash."))
-		return nullptr;
-	}
+//USkeletalMeshComponent* UWeaponGun::CreateSKWeaponRepresentation(USceneComponent* outer)
+//{
+//	if(outer == nullptr)
+//	{
+//		checkf(false, TEXT("ERROR: Outer is invalid. Trying NewObject with invalid outer will cause 'Object not packaged' crash."))
+//		return nullptr;
+//	}
+//
+//	//default way of getting SK mesh, there could be others theoretically
+//	auto temp_SK_mesh = GetSkeletalMeshFromItemActorCDO();
+//
+//	if (!IsValid(temp_SK_mesh))
+//	{
+//		checkf(false, TEXT("ERROR: Skeletal mesh is invalid. Can't create SK component."))
+//		return nullptr;
+//	}
+//
+//	USkeletalMeshComponent* sk_comp = NewObject<USkeletalMeshComponent>(outer);
+//	SK_WeaponRepresentation = sk_comp;
+//
+//	sk_comp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+//	sk_comp->CanCharacterStepUpOn = ECanBeCharacterBase::ECB_No;
+//	sk_comp->SetSimulatePhysics(false);
+//	sk_comp->SetGenerateOverlapEvents(false);
+//
+//	sk_comp->SetSkeletalMesh(temp_SK_mesh, true);
+//	sk_comp->SetAnimInstanceClass(GetAnimClass());
+//
+//	sk_comp->RegisterComponent();
+//
+//	SetupAnimInstance(sk_comp);
+//
+//	AddAllAttachmentMeshes(sk_comp);
+//
+//	return sk_comp;
+//}
 
-	//default way of getting SK mesh, there could be others theoretically
-	auto temp_SK_mesh = GetSkeletalMeshFromItemActorCDO();
-
-	if (!IsValid(temp_SK_mesh))
-	{
-		checkf(false, TEXT("ERROR: Skeletal mesh is invalid. Can't create SK component."))
-		return nullptr;
-	}
-
-	USkeletalMeshComponent* sk_comp = NewObject<USkeletalMeshComponent>(outer);
-	SK_WeaponRepresentation = sk_comp;
-
-	sk_comp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	sk_comp->CanCharacterStepUpOn = ECanBeCharacterBase::ECB_No;
-	sk_comp->SetSimulatePhysics(false);
-	sk_comp->SetGenerateOverlapEvents(false);
-
-	sk_comp->SetSkeletalMesh(temp_SK_mesh, true);
-	sk_comp->SetAnimInstanceClass(GetAnimClass());
-
-	sk_comp->RegisterComponent();
-
-	SetupAnimInstance(sk_comp);
-
-	AddAllAttachmentMeshes(sk_comp);
-
-	return sk_comp;
-}
-
-USkeletalMeshComponent* UWeaponGun::CreateSKForSceneCapture(USceneComponent* outer)
-{
-	//TODO: interface stays, but code is the same (at least for now) so we reuse it
-	return CreateSKWeaponRepresentation(outer);
-
-	//if(outer == nullptr)
-	//{
-	//	checkf(false, TEXT("ERROR: Outer is invalid. Trying NewObject with invalid outer will cause 'Object not packaged' crash."))
-	//	return nullptr;
-	//}
-
-	////default way of getting SK mesh, there could be others theoretically
-	//auto temp_SK_mesh = GetSkeletalMeshFromItemActorCDO();
-
-	//if (!IsValid(temp_SK_mesh))
-	//{
-	//	checkf(false, TEXT("ERROR: Skeletal mesh is invalid. Can't create SK component."))
-	//		return nullptr;
-	//}
-
-	//USkeletalMeshComponent* sk_comp = NewObject<USkeletalMeshComponent>(outer);
-	//SK_SceneCapture = sk_comp;
-
-	//sk_comp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	//sk_comp->CanCharacterStepUpOn = ECanBeCharacterBase::ECB_No;
-	//sk_comp->SetSimulatePhysics(false);
-	//sk_comp->SetGenerateOverlapEvents(false);
-
-	//sk_comp->SetSkeletalMesh(temp_SK_mesh, true);
-	//sk_comp->SetAnimInstanceClass(GetAnimClass());
-
-	//sk_comp->RegisterComponent();
-
-	//SetupAnimInstance(sk_comp);
-
-	//AddAllAttachmentMeshes(sk_comp);
-
-	//return sk_comp;
-}
 
 //void UWeaponGun::SetupWeapon(USkeletalMeshComponent* sk_comp)
 //{
@@ -472,7 +429,7 @@ USkeletalMeshComponent* UWeaponGun::CreateSKForSceneCapture(USceneComponent* out
 //}
 //
 
-void UWeaponGun::SpawnMuzzleFlash() const
+void UWeaponGun::SpawnMuzzleFlash(USkeletalMeshComponent* sk_comp) const
 {
 	if(weapon_info.MuzzleFlash != nullptr)
 	{
@@ -484,14 +441,14 @@ void UWeaponGun::SpawnMuzzleFlash() const
 		const float MOVE_LIGHT_SPAWN_LOCATION = -1.f; 
 
 		//const auto rotation = SK_WeaponRepresentation->GetSocketRotation("b_gun_muzzleflash");
-		const auto rotation = SK_WeaponRepresentation->GetComponentRotation(); //sometimes SocketRotation is wrong, most of the time it's x forward and that's it
-		const auto location = SK_WeaponRepresentation->GetSocketLocation("b_gun_muzzleflash") + rotation.Vector() * MOVE_LIGHT_SPAWN_LOCATION;
+		const auto rotation = sk_comp->GetComponentRotation(); //sometimes SocketRotation is wrong, most of the time it's x forward and that's it
+		const auto location = sk_comp->GetSocketLocation("b_gun_muzzleflash") + rotation.Vector() * MOVE_LIGHT_SPAWN_LOCATION;
 
 		auto light_actor = GetWorld()->SpawnActor(weapon_info.MuzzleLight.Get(), &location, &rotation, actor_spawn_params);
-		light_actor->AttachToComponent(SK_WeaponRepresentation, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "b_gun_muzzleflash");
+		light_actor->AttachToComponent(sk_comp, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "b_gun_muzzleflash");
 
 		//auto* emitter = UGameplayStatics::SpawnEmitterAttached(weapon_info.MuzzleFlash, SK_WeaponRepresentation, "b_gun_muzzleflash", SK_WeaponRepresentation->GetSocketLocation("b_gun_muzzleflash"), rotation, EAttachLocation::SnapToTarget);
-		auto* emitter = UGameplayStatics::SpawnEmitterAttached(weapon_info.MuzzleFlash, SK_WeaponRepresentation, "b_gun_muzzleflash", SK_WeaponRepresentation->GetSocketLocation("b_gun_muzzleflash"), rotation, EAttachLocation::KeepWorldPosition);
+		auto* emitter = UGameplayStatics::SpawnEmitterAttached(weapon_info.MuzzleFlash, sk_comp, "b_gun_muzzleflash", sk_comp->GetSocketLocation("b_gun_muzzleflash"), rotation, EAttachLocation::KeepWorldPosition);
 
 		if (emitter == nullptr)
 		{
@@ -617,7 +574,7 @@ bool UWeaponGun::DropItemToWorld(UItemBase* item)
 	attachment_slots[idx].Value = nullptr;
 
 	item->SetOuterItemActor(item_actor);
-	SK_WeaponRepresentation = nullptr;
+	//SK_WeaponRepresentation = nullptr;
 
 	return false;
 }
@@ -689,7 +646,7 @@ bool UWeaponGun::LoadAmmoStraightIntoChamber(UAmmoBase* ammo)
 		return false;
 	}
 
-	weapon_info.Chamber = Cast<UAmmoBase>(ammo->StackGet(1, this));
+	weapon_info.Chamber = Cast<UAmmoBase>(ammo->StackGetSplit(1, this));
 
 	if(ammo->GetCurrentStackSize() == 0)
 	{
@@ -729,13 +686,13 @@ void UWeaponGun::ChangeFireMode()
 	}
 
 
-	UGunAnimInstance* anim_instance = Cast<UGunAnimInstance>(SK_WeaponRepresentation->GetAnimInstance());
+	//UGunAnimInstance* anim_instance = Cast<UGunAnimInstance>(SK_WeaponRepresentation->GetAnimInstance());
 
-	if(anim_instance == nullptr)
-	{
-		checkf(false, TEXT("Warning: UWeaponGun::ChangeFireMode invalid anim instance"));
-		return;
-	}
+	//if(anim_instance == nullptr)
+	//{
+	//	checkf(false, TEXT("Warning: UWeaponGun::ChangeFireMode invalid anim instance"));
+	//	return;
+	//}
 
-	anim_instance->SetFireMode(weapon_info.FireMode);
+	//anim_instance->SetFireMode(weapon_info.FireMode);
 }

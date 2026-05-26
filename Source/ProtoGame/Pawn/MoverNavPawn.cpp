@@ -286,6 +286,13 @@ void AMoverNavPawn::AddMovementInput(FVector WorldDirection, float ScaleValue, b
 	}
 }
 
+void AMoverNavPawn::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+
+	//It's only to avoid assertion fail
+}
+
 const FMoverDefaultSyncState* AMoverNavPawn::GetMoverDefaultSyncState() const
 {
 	return CharacterMoverComponent ? CharacterMoverComponent->GetSyncState().SyncStateCollection.FindDataByType<FMoverDefaultSyncState>() : nullptr;

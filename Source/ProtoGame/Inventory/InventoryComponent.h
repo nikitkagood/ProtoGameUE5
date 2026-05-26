@@ -3,8 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Components/ActorComponent.h"
+#include "Inventory/InventoryManager.h"
 #include "Item/EnumItemTypes.h"
+#include "GameplayTagContainer.h"
+
 #include "Interfaces/InventoryInterface.h"
 
 #include "InventoryComponent.generated.h"
@@ -13,9 +15,47 @@ class UItemBase;
 class ACharacter;
 class UInvSpecialSlotComponent;
 
+UENUM(BlueprintType)
+enum class EStackResult : uint8
+{
+	NotStacked = 0,
+	StackedPartially, //added item trasfered some amount to any inventory item
+	StackedFully //added item transfered everything and has to be destroyed
+};
+
+//TODO: NOT IMPLEMENTED YET
+//so the idea is to optimize out whole grid thing and only generate it on-demand
+//
+//MassEntity with custom data as TArray<byte> with multiple MassFragments: basic inventory, firearm-specific fragment, health fragment etc
+//UENUM(BlueprintType)
+//enum class EInventoryComponentMode : uint8
+//{
+//	StandardGrid,
+//	LazyOptimized
+//};
+
+//NOTE: only Item pointer is considered for comparison
+USTRUCT(BlueprintType)
+struct FInventoryGridItemWrapper
+{
+	GENERATED_BODY()
+
+	//DO NOT CHANGE ORDER, THIS HAS TO BE FIRST
+	UPROPERTY(BlueprintReadOnly)
+	UItemBase* Item = nullptr;
+
+	UPROPERTY(BlueprintReadOnly)
+	int32 LocalInvID = -1;
+
+	FORCEINLINE bool operator == (const FInventoryGridItemWrapper& other) const
+	{
+		return Item == other.Item;
+	}
+};
+
 //Represents grid inventory
 UCLASS(BlueprintType, Blueprintable, DefaultToInstanced, EditInlineNew, ClassGroup = (Inventory), meta=(BlueprintSpawnableComponent, DisplayName = "Inventory Component"))
-class PROTOGAME_API UInventoryComponent : public UActorComponent, public IInventoryInterface
+class PROTOGAME_API UInventoryComponent : public UObject, public IInventoryInterface
 {
 	GENERATED_BODY()
 
@@ -47,6 +87,11 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool RotateItem(UItemBase* item);
 
+	//local id in the grid
+	//or INDEX_NONE if not found
+	UFUNCTION(BlueprintCallable)
+	int32 FindItemLocalID(UItemBase* item) const;
+
 	UFUNCTION(BlueprintCallable)
 	bool Contains(UItemBase* item) const;
 
@@ -58,7 +103,7 @@ public:
 	void PrintDebugInfo(); 
 
 	UFUNCTION(BlueprintGetter)
-	TMap<UItemBase*, int32> GetItems() const { return Items; };
+	TArray<FInventoryGridItemWrapper> GetItems() const { return Items; };
 
 	//IInventoryInterface
 	//virtual bool MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination) override;
@@ -72,8 +117,9 @@ public:
 	//Since InventoryComponent is ActorComponent, it can only have Actors as Owner/Outer
 	//Thus you can't get hierarchy from InventoryComponent and there is no point it calling this method (at the moment at least)
 	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const override { return nullptr; };
-	virtual UObject* GetInventoryOwner() override { return Cast<UObject>(GetOwner()); };
+	virtual UObject* GetInventoryOwner() override { return GetOuter(); };
 	bool SetInventoryOwner(UObject* new_owner);
+	virtual FGameplayTagContainer GetInventoryTags() const { return Tags; };
 	//IInventoryInterface end
 
 	//Inventories outer can be Item
@@ -83,7 +129,8 @@ public:
 	UPROPERTY(BlueprintAssignable)
 	FOnInventoryUpdated OnInventoryUpdated;
 protected:
-	virtual void BeginPlay() override;
+	//virtual void BeginPlay() override;
+	virtual void PostInitProperties() override;
 
 	//Finds free space then adds
 	//It doesn't destroy ItemActors, does minimal checks
@@ -100,13 +147,18 @@ protected:
 
 	void ChangeMass(float value);
 
+	//Try to find an item to stack with
+	//Successful stacking is not recursive: if anything stacked, then it stops
+	// even if we could find another item to stack with
+	EStackResult TryToStack(UItemBase* item);
+
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Inventory", meta = (AllowPrivateAccess = true, ExposeOnSpawn = true))
 	FName InventoryName;
 
-    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Inventory", meta = (AllowPrivateAccess = true, ClampMin = 1, ExposeOnSpawn = true))
+    UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Inventory", meta = (AllowPrivateAccess = true, ClampMin = 1, ClampMax = 1000000, ExposeOnSpawn = true))
 	int32 Rows;
 
-	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Inventory", meta = (AllowPrivateAccess = true, ClampMin = 1, ExposeOnSpawn = true))
+	UPROPERTY(BlueprintReadOnly, EditAnywhere, Category = "Inventory", meta = (AllowPrivateAccess = true, ClampMin = 1, ClampMax = 1000000, ExposeOnSpawn = true))
 	int32 Columns;
 
     UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly, Category = "Inventory", meta = (AllowPrivateAccess = true))
@@ -115,17 +167,24 @@ protected:
 	UPROPERTY(BlueprintReadOnly, VisibleInstanceOnly, Category = "Inventory", meta = (AllowPrivateAccess = true))
 	float Mass;
 
-	//TODO: may not be useful
-	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, Category = "Inventory", meta = (AllowPrivateAccess = true))
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Inventory", meta = (AllowPrivateAccess = true))
+	bool DropDistanceOverride = false;
+
+	//By default InventoryManager's value is used
+	//But if this comp is not managed or DropDistanceOverride == true
+	// then this value is used
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Inventory", meta = (AllowPrivateAccess = true))
 	float DropDistance;
 
 private:
-	void SetupDefaults();
+	FORCEINLINE void SetupDefaults();
 
-	void InitializeInventoryGrid(int32 rows, int32 columns); 
+	void InitializeInventoryGrid(); 
 
+	//INDEX_NONE if false
 	FIntPoint FindFreeSpaceInGrid(UItemBase* item) const;
 
+	//LeftUpperCell, RightLowerCell
 	TPair<FIntPoint, FIntPoint> FindItemPosition(UItemBase* item) const;
 
 	//Checks for free space only, i.e. -1
@@ -135,24 +194,44 @@ private:
 
 	void UpdateFreeSpaceLeft(int32 space_change);
 
-	int32 GenerateIndex();
+	//If free_indecies not empty then use it,
+	//otherwise create a new one
+	int32 GenerateLocalInvIndex();
 
-	//True means recursion found
-	//This function assumes InventoryComponent Outer = ItemObject with InventoryComponent
-	//Implementation has to be changed if Outer is something else
+	//Check whether we try to place item inside itself
 	UFUNCTION(BlueprintCallable)
 	virtual bool CheckSelfRecursion(UItemBase* item) const;
 
-	UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly, Category = "Inventory", meta = (AllowPrivateAccess = true))
-	TMap<UItemBase*, int32> Items; //item pointer + it's index in the grid
+	int32 GridToArrayIndex(int32 x, int32 y) const;
+	FIntPoint ArrayIndexToGrid(int32 idx) const;
 
+//#if WITH_EDITOR
+//	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+//#endif
+
+	//Item pointer + it's index in the grid
+	//TArray is now used instead of TMap; It's worse at individual operations, 
+	// but should be better when iterating over everything (not tested)
+	UPROPERTY(BlueprintReadOnly, VisibleDefaultsOnly, Category = "Inventory", meta = (AllowPrivateAccess = true))
+	TArray<FInventoryGridItemWrapper> Items;
+
+	UPROPERTY()
 	TArray<int32> free_indices;
 	
-	TArray<TArray<int32>> InventoryGrid; //-1 is free space; 0 and so on - some item
+	//Flattened 2D Array; Use GridToArrayIndex to acces it like 2D
+	//-1 is free space; 0 and so on - some item
+	UPROPERTY()
+	TArray<int32> InventoryGrid;
 
-	UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Inventory", meta = (AllowPrivateAccess = true))
-	TArray<ItemType> SupportedTypes; //TODO: not implemented yet; types this inventory can store, 0 means all
+	static constexpr int GRID_EMPTY_SPACE = -1;
 
+	//TODO: not implemented yet; 
+	//Types this inventory can store, 0 means all
+	//UPROPERTY(BlueprintReadOnly, EditDefaultsOnly, Category = "Inventory", meta = (AllowPrivateAccess = true))
+	//TArray<ItemType> SupportedTypes;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory", meta = (Categories = "Inventory", AllowPrivateAccess = true))
+	FGameplayTagContainer Tags;
 
 	mutable FCriticalSection InventoryMutex;
 };
