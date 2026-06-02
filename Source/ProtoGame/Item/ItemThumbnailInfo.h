@@ -32,6 +32,10 @@ struct PROTOGAME_API FItemThumbnailInfo : public FTableRowBase
     FVector Location;
 
     //Thumbnail which consists of multiple meshes. Example is a gun and attachments 
+    //UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true", ClampMin = 0))
+    //bool bMultipleMeshSKComponent = false;
+
+    //Whether to use generic per class thumbnail, or a unique one
     UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true", ClampMin = 0))
-    bool bMultipleMeshSKComponent = false;
+    bool bPerInstanceThumbnail = false;
 };

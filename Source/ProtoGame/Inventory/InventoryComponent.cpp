@@ -13,8 +13,6 @@
 
 #include "Profiler/Profiler.h"
 
-constexpr int32 EMPTY_SPACE = -1;
-
 // Sets default values for this component's properties
 UInventoryComponent::UInventoryComponent()
 {
@@ -78,7 +76,7 @@ bool UInventoryComponent::MoveItemInGrid(UItemBase* item, FIntPoint new_upper_le
 
     if(result == true)
     {
-        FillSpaceInGrid(item->GetUpperLeftCell(), prev_right_left_cell, EMPTY_SPACE);
+        FillSpaceInGrid(item->GetUpperLeftCell(), prev_right_left_cell, GRID_EMPTY_SPACE);
 
         item->SetUpperLeftCell(new_upper_left_cell);
 
@@ -105,7 +103,7 @@ bool UInventoryComponent::RotateItem(UItemBase* item)
 
     if(result == true)
     {
-        FillSpaceInGrid(item->GetUpperLeftCell(), prev_right_left_cell, EMPTY_SPACE);
+        FillSpaceInGrid(item->GetUpperLeftCell(), prev_right_left_cell, GRID_EMPTY_SPACE);
 
         FillSpaceInGrid(item->GetUpperLeftCell(), item->GetLowerRightCell(), FindItemLocalID(item));
     }
@@ -165,7 +163,7 @@ bool UInventoryComponent::AddItem(UItemBase* item)
 
     auto stack_result = TryToStack(item);
     
-    if (stack_result == EStackResult::StackedFully)
+    if (stack_result == EItemStackResult::StackedFully)
     {
         //Just return, there is nothing else to do
         return true;
@@ -196,6 +194,7 @@ bool UInventoryComponent::AddItem(UItemBase* item)
             ChangeMass(item->GetMassTotal());
 
             item->SetUpperLeftCell(free_space_coords);
+
             FillSpaceInGrid(item->GetUpperLeftCell(), item->GetLowerRightCell(), idx);
 
             item->World = GetWorld();
@@ -235,7 +234,7 @@ bool UInventoryComponent::AddItemAt(UItemBase* item, FIntPoint new_upper_left_ce
 
     auto stack_result = TryToStack(item);
 
-    if (stack_result == EStackResult::StackedFully)
+    if (stack_result == EItemStackResult::StackedFully)
     {
         //Just return, there is nothing else to do
         return true;
@@ -286,7 +285,7 @@ bool UInventoryComponent::RemoveItem(UItemBase* item)
     }
 
     auto item_position = FindItemPosition(item); //we use find because UItemBase->GetUpperLeftCell might be overriden by another inventory
-    FillSpaceInGrid(item_position.Key, item_position.Value, EMPTY_SPACE);
+    FillSpaceInGrid(item_position.Key, item_position.Value, GRID_EMPTY_SPACE);
 
     UpdateFreeSpaceLeft(item->GetDimensions().X * item->GetDimensions().Y);
 
@@ -319,7 +318,7 @@ bool UInventoryComponent::RemoveItemAt(UItemBase* item, FIntPoint upper_left_cel
         return false;
     }
 
-    FillSpaceInGrid(upper_left_cell, lower_right_cell, EMPTY_SPACE);
+    FillSpaceInGrid(upper_left_cell, lower_right_cell, GRID_EMPTY_SPACE);
 
     UpdateFreeSpaceLeft(item->GetDimensions().X * item->GetDimensions().Y);
     free_indices.Push(FindItemLocalID(item));
@@ -348,7 +347,7 @@ void UInventoryComponent::ChangeMass(float value)
     checkf(!(Mass < 0), TEXT("Error: UInventoryComponent: Mass is invalid. Probably this is result of missing/wrong caclulations. Or floating point error."))
 }
 
-EStackResult UInventoryComponent::TryToStack(UItemBase* item)
+EItemStackResult UInventoryComponent::TryToStack(UItemBase* item)
 {
     //If stackable
     if (item->GetMaxStackSize() > 1)
@@ -360,7 +359,7 @@ EStackResult UInventoryComponent::TryToStack(UItemBase* item)
             {
                 if (i.Item->StackAdd(item) == false)
                 {
-                    return EStackResult::NotStacked;
+                    return EItemStackResult::NotStacked;
                 }
 
                 if (item->GetCurrentStackSize() == 0)
@@ -368,17 +367,17 @@ EStackResult UInventoryComponent::TryToStack(UItemBase* item)
                     item->ConditionalBeginDestroy();
 
                     //Item was fully added to an existing stack
-                    return EStackResult::StackedFully;
+                    return EItemStackResult::StackedFully;
                 }
                 else //there is remainder of stack size
                 {
-                    return EStackResult::StackedPartially;
+                    return EItemStackResult::StackedPartially;
                 }
             }
         }
     }
 
-    return EStackResult::NotStacked;
+    return EItemStackResult::NotStacked;
 }
 
 void UInventoryComponent::SetupDefaults()
@@ -405,7 +404,7 @@ void UInventoryComponent::InitializeInventoryGrid()
         //checkf(false, TEXT("%s object: InventoryGrid has been initialized already!"), *InventoryName.ToString() );
     }
 
-    InventoryGrid.Init(EMPTY_SPACE, Rows * Columns);
+    InventoryGrid.Init(GRID_EMPTY_SPACE, Rows * Columns);
 
     FreeSpaceLeft = Rows * Columns;
 }
@@ -414,34 +413,32 @@ FIntPoint UInventoryComponent::FindFreeSpaceInGrid(UItemBase* item) const
 {
     //LOG_DURATION(LogDurationChronoUnit::nanoseconds, __FUNCTION__);
 
-    //constexpr int32 NONE = -999;
-    //auto find = [NONE](int32 first, int32 last, const TArray<int32>& container, int32 value)
-    //{
-    //    for(; first <= last; ++first)
-    //    {
-    //        if(container[first] == value)
-    //        {
-    //            return first;
-    //        }
-    //    }
-    //    return NONE;
-    //};
+    auto find = [](int32 first, int32 last, const TArray<int32>& container, int32 value)
+    {
+        for(; first <= last; ++first)
+        {
+            if(container[first] == value)
+            {
+                return first;
+            }
+        }
+        return (int32)INDEX_NONE;
+    };
 
-    //TEST AFTER FLATTED ARRAY !!!
-
-    for(int32 row_idx = 0; row_idx < Columns; row_idx++)
+    for(int32 row_idx = 0; row_idx < Rows; row_idx++)
     {
         int32 first_col_idx = 0;
-        int32 last_col_idx = Columns - 1;
+        const int32 last_col_idx = Columns - 1;
 
-        while(first_col_idx != INDEX_NONE)
+        while (first_col_idx != INDEX_NONE && first_col_idx < Columns)
         {
-            //first_col_idx = find(first_col_idx, last_col_idx, InventoryGrid[row_idx], -1);
-            first_col_idx = ArrayIndexToGrid(InventoryGrid.Find(-1)).Y;
-            
-            if(first_col_idx != INDEX_NONE)
+            auto arr_idx = find(GridToArrayIndex(row_idx, first_col_idx), GridToArrayIndex(row_idx, last_col_idx), InventoryGrid, GRID_EMPTY_SPACE);
+
+            first_col_idx = ArrayIndexToGrid(arr_idx).Y;
+
+            if (first_col_idx != INDEX_NONE)
             {
-                if(CheckSpace({ row_idx, first_col_idx }, item))
+                if (CheckSpace({ row_idx, first_col_idx }, item))
                 {
                     return { row_idx, first_col_idx };
                 }
@@ -451,6 +448,7 @@ FIntPoint UInventoryComponent::FindFreeSpaceInGrid(UItemBase* item) const
                 }
             }
         }
+
     }
 
     return { INDEX_NONE, INDEX_NONE };
@@ -503,7 +501,7 @@ bool UInventoryComponent::CheckSpace(FIntPoint upper_left_cell, UItemBase* item)
     {
         for(int32 j = upper_left_cell.Y; j <= new_lower_right_cell.Y; j++)
         {
-            if(InventoryGrid[GridToArrayIndex(i, j)] != EMPTY_SPACE)
+            if(InventoryGrid[GridToArrayIndex(i, j)] != GRID_EMPTY_SPACE)
             {
                 return false;
             }
@@ -555,7 +553,7 @@ bool UInventoryComponent::CheckSpaceMove(const FIntPoint upper_left_cell, UItemB
         {
             for(int32 j = upper_left_cell.Y; j <= new_lower_right_cell.Y; j++)
             {
-                if(InventoryGrid[GridToArrayIndex(i, j)] != local_idx && InventoryGrid[GridToArrayIndex(i, j)] != EMPTY_SPACE)
+                if(InventoryGrid[GridToArrayIndex(i, j)] != local_idx && InventoryGrid[GridToArrayIndex(i, j)] != GRID_EMPTY_SPACE)
                 {
                     return false;
                 }
@@ -569,7 +567,7 @@ bool UInventoryComponent::CheckSpaceMove(const FIntPoint upper_left_cell, UItemB
         {
             for(int32 j = upper_left_cell.Y; j <= new_lower_right_cell.Y; j++)
             {
-                if(InventoryGrid[GridToArrayIndex(i, j)] != EMPTY_SPACE)
+                if(InventoryGrid[GridToArrayIndex(i, j)] != GRID_EMPTY_SPACE)
                 {
                     return false;
                 }
@@ -585,19 +583,14 @@ void UInventoryComponent::FillSpaceInGrid(FIntPoint upper_left_cell, FIntPoint l
 {
     FScopeLock Lock(&InventoryMutex);
 
-    for (int32 i = GridToArrayIndex(upper_left_cell.X, upper_left_cell.Y); i < GridToArrayIndex(lower_right_cell.X, lower_right_cell.Y); i++)
+    for(int32 row_idx = upper_left_cell.X; row_idx <= lower_right_cell.X; row_idx++)
     {
-        InventoryGrid[i] = item_idx;
+        //TODO: Multithread maybe
+        for(int32 col_idx = upper_left_cell.Y; col_idx <= lower_right_cell.Y; col_idx++)
+        {
+            InventoryGrid[GridToArrayIndex(row_idx, col_idx)] = item_idx;
+        }
     }
-
-    //for(int32 row = upper_left_cell.X; row <= lower_right_cell.X; row++)
-    //{
-    //    //TODO: Multithread maybe
-    //    for(int32 column = upper_left_cell.Y; column <= lower_right_cell.Y; column++)
-    //    {
-    //        InventoryGrid[GridToArrayIndex(row, column)] = item_idx;
-    //    }
-    //}
 }
 
 void UInventoryComponent::UpdateFreeSpaceLeft(int32 space_change)
@@ -642,15 +635,23 @@ bool UInventoryComponent::CheckSelfRecursion(UItemBase* item) const
     return result;
 }
 
-int32 UInventoryComponent::GridToArrayIndex(int32 x, int32 y) const
+
+int32 UInventoryComponent::GridToArrayIndex(int32 row_idx, int32 col_idx) const
 {
-    //Row * Cols + Col
-    return x * Columns + y;
+    if (row_idx < 0 || col_idx < 0)
+    {
+        return INDEX_NONE;
+    }
+    return row_idx * Columns + col_idx;
 }
 
 FIntPoint UInventoryComponent::ArrayIndexToGrid(int32 idx) const
 {
     //Rows, columns
+    if (idx < 0)
+    {
+        return { INDEX_NONE, INDEX_NONE };
+    }
     return { idx / Columns, idx % Columns };
 }
 
@@ -834,7 +835,12 @@ bool UInventoryComponent::DropItemToWorld(UItemBase* item)
         return false;
     }
 
-    auto* item_actor = item->SpawnItemActor(owner_actor->GetActorLocation() + owner_actor->GetActorForwardVector() * EndDropDistance, owner_actor->GetActorRotation());
+    FItemActorSpawnParameters spawn_params;
+    spawn_params.MoveOwnershipItemObject = true;
+    spawn_params.EnablePhysics = true;
+    spawn_params.Interactible = true;
+
+    auto* item_actor = item->SpawnItemActor(owner_actor->GetActorLocation() + owner_actor->GetActorForwardVector() * EndDropDistance, owner_actor->GetActorRotation(), spawn_params);
     if(IsValid(item_actor) == false)
     {
         //can't spawn, do not delete from inventory

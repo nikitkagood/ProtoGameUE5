@@ -57,9 +57,21 @@ public:
 	float GetDropDistance() const { return DropDistance; };
 	UFUNCTION(BlueprintCallable)
 	void SetDropDistance(float new_drop_dist) { DropDistance = new_drop_dist; };
-	//end
 
-	//UObject* GetInventories();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	TArray<UObject*> GetInventories() { return inventories; };
+
+	//Find first inventory that FGameplayTagContainer::HasTag/HasTagExact
+	//exact - whether tag includes children
+	UFUNCTION(BlueprintCallable)
+	TScriptInterface<IInventoryInterface> FindInventoryHasTag(FGameplayTag tag, bool exact = true);
+
+	UFUNCTION(BlueprintCallable)
+	TArray<TScriptInterface<IInventoryInterface>> FindAllInventoriesHasTag(FGameplayTag tag, bool exact = true);
+
+	UFUNCTION(BlueprintCallable)
+	TScriptInterface<IInventoryInterface> FindInventoryHasAllTags(FGameplayTagContainer tags, bool exact = true);
 
 	//C++: do not call it in Character constructor, better call in BeginPlay
 	//Add reference to an inventory, that has been already created

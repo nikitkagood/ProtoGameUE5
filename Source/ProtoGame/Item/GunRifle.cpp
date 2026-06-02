@@ -21,7 +21,7 @@ bool UGunRifle::Initialize(FDataTableRowHandle handle)
 	if(ptr_row != nullptr)
 	{
 		inventory_item_info = ptr_row->inventory_item_info;
-		weapon_info = ptr_row->weapon_info;
+		weapon_gun_info = ptr_row->weapon_gun_info;
 
 		for(auto& i : ptr_row->attachment_slots)
 		{
@@ -42,11 +42,11 @@ FItemThumbnailInfo UGunRifle::GetItemThumbnailInfoFromDT()
 
 void UGunRifle::StartFire()
 {
-	if(weapon_info.bFunctional)
+	if(weapon_gun_info.bFunctional)
 	{
-		const float rate = 1 / (weapon_info.FireRate / 60);
+		const float rate = 1 / (weapon_gun_info.FireRate / 60);
 
-		switch(weapon_info.FireMode)
+		switch(weapon_gun_info.FireMode)
 		{
 		case EWeaponFireMode::Single:
 			OnFire();
@@ -99,142 +99,23 @@ void UGunRifle::EndFire()
 
 void UGunRifle::PrintWeaponStats()
 {
-	auto* mag = Cast<UWeaponAttachmentMagazine>(attachment_slots[MagazineAttachmentIdx].Value);
+	//auto* mag = Cast<UWeaponAttachmentMagazine>(attachment_slots[MagazineAttachmentIdx].Value);
 
-	FString msg { "Ammo in mag: " + FString::FromInt(mag->GetAmmoLeft())};
-	UKismetSystemLibrary::PrintString(GetWorld(), msg, true, true, FLinearColor(206, 245, 66), 2);
+	//FString msg { "Ammo in mag: " + FString::FromInt(mag->GetAmmoLeft())};
+	//UKismetSystemLibrary::PrintString(GetWorld(), msg, true, true, FLinearColor(206, 245, 66), 2);
 }
 
 void UGunRifle::OnFire()
 {
-	if (GetOuterItemActor() == nullptr)
-	{
-		return;
-	}
-
-	auto sk_comp = GetOuterItemActor()->GetSkeletalMeshComp();
-
-	if (sk_comp == nullptr || weapon_info.bFunctional == false)
-	{
-		return;
-	}
-
-	if(weapon_info.bHasChamber)
-	{
-		//Unlimited ammo, for testing purposes only
-		if(bTestFire && weapon_info.Chamber != nullptr)
-		{
-			if(weapon_info.Chamber->GetProjectileClass() == nullptr)
-			{
-				checkf(false, TEXT("Projectile isn't assigned, can't fire."));
-				return;
-			}
-
-			FActorSpawnParameters ActorSpawnParams;
-			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-			ActorSpawnParams.bHideFromSceneOutliner = true;
-			ActorSpawnParams.Instigator = Cast<APawn>(GetInventoryOwner()); //Simple attempt to get the Pawn as Instigator, may fail
-			ActorSpawnParams.bAllowDuringConstructionScript = false; //We should not be shooting at this point
-
-			//Usually Rotation is simply relative X-forward, but not SocketRotation due to bones may be oriented wrong
-			World->SpawnActor<AProjectile>(weapon_info.Chamber->GetProjectileClass(), sk_comp->GetSocketLocation("b_gun_muzzleflash"), sk_comp->GetComponentRotation(), ActorSpawnParams);
-
-			SpawnMuzzleFlash(sk_comp);
-
-			if(weapon_info.FireSound != nullptr)
-			{
-				const FVector muzzle_sound_offset = {-5.f, 0.f, 0.f}; //play sound a bit behind the muzzle end
-				UGameplayStatics::PlaySoundAtLocation(this, weapon_info.FireSound, sk_comp->GetSocketLocation("b_gun_muzzleflash") - muzzle_sound_offset);
-			}
-		}
-		else if(weapon_info.Chamber != nullptr)
-		{
-			if(weapon_info.Chamber->GetProjectileClass() == nullptr)
-			{
-				checkf(false, TEXT("Projectile isn't assigned, can't fire."));
-				return;
-			}
-
-			FActorSpawnParameters ActorSpawnParams;
-			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-			ActorSpawnParams.bHideFromSceneOutliner = true;
-
-			World->SpawnActor<AProjectile>(weapon_info.Chamber->GetProjectileClass(), sk_comp->GetSocketLocation("b_gun_muzzleflash"), sk_comp->GetSocketRotation("b_gun_muzzleflash"), ActorSpawnParams);
-			weapon_info.Chamber->MarkAsGarbage();
-			weapon_info.Chamber = nullptr;
-
-			SpawnMuzzleFlash(sk_comp);
-
-			if(weapon_info.FireSound != nullptr)
-			{
-				const FVector muzzle_sound_offset = {-5.f, 0.f, 0.f}; //play sound a bit behind the muzzle end
-				UGameplayStatics::PlaySoundAtLocation(this, weapon_info.FireSound, sk_comp->GetSocketLocation("b_gun_muzzleflash") - muzzle_sound_offset);
-			}
-
-			LoadAmmoIntoChamberFromMag();
-		}
-		else //click sound
-		{
-			UGameplayStatics::SpawnSoundAttached(weapon_info.EmptyClickSound, sk_comp, "root", {}, EAttachLocation::SnapToTarget);
-		}
-
-	}
-	//TODO
-	else //if no chamber 
-	{
-		//FActorSpawnParameters ActorSpawnParams;
-		//ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-
-		////TODO: Temporary
-		//World->SpawnActor<AProjectile>(weapon_info.AmmoType, WeaponSkeletalMeshComp->GetSocketLocation("b_gun_muzzleflash"), WeaponSkeletalMeshComp->GetSocketRotation("b_gun_muzzleflash"), ActorSpawnParams);
-
-		//SpawnMuzzleFlash();
-
-		//if(weapon_info.FireSound != nullptr)
-		//{
-		//	const FVector muzzle_sound_offset = {-5.f, 0.f, 0.f}; //play sound a bit behind the muzzle end
-		//	UGameplayStatics::PlaySoundAtLocation(this, weapon_info.FireSound, WeaponSkeletalMeshComp->GetSocketLocation("b_gun_muzzleflash") - muzzle_sound_offset);
-		//}
-	}
+	Super::OnFire();
 }
 
 bool UGunRifle::AddAttachment(UWeaponAttachment* attachment)
 {
-	//Find free attachment slot
-	int32 idx = attachment_slots.Find(TPair<FAttachmentSlot, UWeaponAttachment*>{ attachment->GetAttachmentSlot(), nullptr });
-
-	if(idx != INDEX_NONE)
-	{
-		//If we have valid scene capture, then attach to it
-		//if(SK_SceneCapture != nullptr)
-		//{
-		//	if(AddAttachmentMesh(SK_WeaponRepresentation, attachment) == false)
-		//	{
-		//		UE_LOG(LogTemp, Error, TEXT("AddAttachment: Failed to attach mesh to SceneCapture"));
-		//	}
-		//}
-
-		//if we have ItemActor spawned, then attach to it
-		if(GetOuterItemActor() != nullptr)
-		{
-			if(AddAttachmentMesh(GetOuterItemActor()->GetSkeletalMeshComp(), attachment) == false)
-			{
-				UE_LOG(LogTemp, Error, TEXT("AddAttachment: Failed to attach mesh to ItemActor"));
-				check(false);
-				return false;
-			}
-		}
-
-		attachment_slots[idx].Value = attachment;
-		attachment->SetOuterWeapon(this);
-
-		return true;
-	}
-
-	return false;
+	return Super::AddAttachment(attachment);
 }
 
-bool UGunRifle::AddAttachmentTo(UWeaponAttachment* attachment, TPair<FAttachmentSlot, UWeaponAttachment*>* slot_pair)
+bool UGunRifle::AddAttachmentTo(UWeaponAttachment* attachment, FAttachmentSlot* slot)
 {
 	return false;
 
@@ -257,7 +138,7 @@ bool UGunRifle::OnUse(AActor* caller)
 
 bool UGunRifle::CycleChargingHandle()
 {
-	if(weapon_info.bHasChamber)
+	if(weapon_gun_info.bHasChamber)
 	{
 		return LoadAmmoIntoChamberFromMag();
 	}
@@ -267,7 +148,7 @@ bool UGunRifle::CycleChargingHandle()
 
 const UAmmoBase* UGunRifle::CheckChamber() const
 {
-	return weapon_info.Chamber;
+	return weapon_gun_info.Chamber;
 }
 
 bool UGunRifle::Reload()
@@ -294,14 +175,14 @@ void UGunRifle::ChangeFireMode()
 {
 	EndFire();
 
-	size_t i = weapon_info.FireModesAvailable.Find(weapon_info.FireMode);
+	size_t i = weapon_gun_info.FireModesAvailable.Find(weapon_gun_info.FireMode);
 
-	if(weapon_info.FireModesAvailable.IsValidIndex(i+1))
+	if(weapon_gun_info.FireModesAvailable.IsValidIndex(i+1))
 	{
-		weapon_info.FireMode = weapon_info.FireModesAvailable[i+1];
+		weapon_gun_info.FireMode = weapon_gun_info.FireModesAvailable[i+1];
 	}
 	else
 	{
-		weapon_info.FireMode = weapon_info.FireModesAvailable[0];
+		weapon_gun_info.FireMode = weapon_gun_info.FireModesAvailable[0];
 	}
 }

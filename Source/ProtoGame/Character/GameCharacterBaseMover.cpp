@@ -6,7 +6,6 @@
 //custom
 #include "Item/Projectile.h"
 #include "Item/ItemBase.h"
-#include "Item/InventoryItem.h"
 #include "Item/ItemActor.h"
 #include "Item/WeaponGun.h"
 #include "Inventory/InventoryComponent.h"
@@ -58,13 +57,13 @@ AGameCharacterBaseMover::AGameCharacterBaseMover(const class FObjectInitializer&
 	//SetupMovementDefaults();
 
 	FirstPersonCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("FirstPersonCamera"));
-	FirstPersonCameraComponent->SetupAttachment(GetCharacterMesh());
+	FirstPersonCameraComponent->SetupAttachment(GetMesh());
 	//FirstPersonCameraComponent->SetRelativeLocation(FVector(0.f, 0.f, 0.f));
 	FirstPersonCameraComponent->bUsePawnControlRotation = true;
 	//FirstPersonCameraComponent->AttachToComponent(GetCharacterMesh(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, false));
 
 	SpringArm_FPCam = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm_FPCam"));
-	SpringArm_FPCam->SetupAttachment(GetCharacterMesh());
+	SpringArm_FPCam->SetupAttachment(GetMesh());
 
 
 	VitalityComponent = CreateDefaultSubobject<UVitalityComponent>(TEXT("Vitality Component"));
@@ -87,11 +86,11 @@ AGameCharacterBaseMover::AGameCharacterBaseMover(const class FObjectInitializer&
 	//GetCharacterMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel3, ECollisionResponse::ECR_Ignore);
 
 	InHandsSkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("InHands SkeletalMesh"));
-	InHandsSkeletalMesh->SetupAttachment(GetCharacterMesh(), TEXT("ik_hand_gun"));
+	InHandsSkeletalMesh->SetupAttachment(GetMesh(), TEXT("ik_hand_gun"));
 	InHandsSkeletalMesh->SetOnlyOwnerSee(false);
 
 	OnBackSkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("OnBack SkeletalMesh"));
-	OnBackSkeletalMesh->SetupAttachment(GetCharacterMesh(), TEXT("OnBack SkeletalMesh"));
+	OnBackSkeletalMesh->SetupAttachment(GetMesh(), TEXT("OnBack SkeletalMesh"));
 	OnBackSkeletalMesh->SetOnlyOwnerSee(false);
 
 	//BackpackMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Backpack Mesh"));
@@ -179,7 +178,7 @@ void AGameCharacterBaseMover::Tick(float DeltaTime)
 
 bool AGameCharacterBaseMover::EquipGun(UItemBase* item)
 {
-	if (!IsValid(GetCharacterMesh()))
+	if (!IsValid(GetMesh()))
 	{
 		checkf(false, TEXT("AGameCharacterBaseMover::EquipGun: Main Mesh not valid"));
 		return false;
@@ -217,7 +216,6 @@ void AGameCharacterBaseMover::UseItem(UItemBase* item)
 {
 	if (item != nullptr)
 	{
-		//item->Use(this);
 		item->OnUse(this); //BP event
 	}
 }

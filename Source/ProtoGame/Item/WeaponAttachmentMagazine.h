@@ -30,7 +30,7 @@ public:
 	bool Push(UAmmoBase* ammo);
 	UAmmoBase* Pop();
 
-	int32 GetCapacity() const { return attachment_magazine_info.capacity; }
+	int32 GetCapacity() const { return attachment_magazine_info.Capacity; }
 	int32 GetAmmoLeft() const { return attachment_magazine_info.storage.Num(); }
 	const UAmmoBase* GetTopAmmo() const { return attachment_magazine_info.storage.Last(); }
 	const FText& GetTopAmmoName() const { return attachment_magazine_info.storage.Last()->GetItemName(); }

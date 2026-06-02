@@ -152,7 +152,7 @@ bool UWeaponAttachmentMagazine::OnUse(AActor* caller)
 
 bool UWeaponAttachmentMagazine::Push(UAmmoBase* ammo)
 {
-	if(ammo != nullptr && attachment_magazine_info.storage.Num() < attachment_magazine_info.capacity)
+	if(ammo != nullptr && attachment_magazine_info.storage.Num() < attachment_magazine_info.Capacity)
 	{
 		attachment_magazine_info.storage.Push(ammo);
 		return true;

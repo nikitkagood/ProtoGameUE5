@@ -44,9 +44,9 @@ public:
 	virtual bool MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) = 0;
 
 	//Add item from world, laying on the ground for example
-	//ANYTHING world-related is expected to be handled by Item itself
+	//Currently anything world-related is expected to be handled by ItemActor or ItemObject
 	//Inventory is not to predict Item behavior when moved into inventory, 
-	// not even just to just delete its world representation - since this easily could be done wrong
+	// not even just to just delete its world representation with built-in Destroy - since this easily could be done wrong
 	UFUNCTION(BlueprintCallable)
 	virtual bool AddItemFromWorld(UItemBase* item) = 0; 
 

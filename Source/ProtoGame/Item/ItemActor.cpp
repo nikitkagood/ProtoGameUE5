@@ -3,7 +3,9 @@
 #include "ItemActor.h"
 #include "ItemBase.h"
 
-#include "InventoryItem.h"
+#include "Components/PrimitiveComponent.h"
+#include "Components/SkeletalMeshComponent.h"
+#include "Components/StaticMeshComponent.h"
 
 #include "Kismet/GameplayStatics.h"
 
@@ -16,7 +18,7 @@ AItemActor::AItemActor()
 
 	SceneComponent = CreateOptionalDefaultSubobject<USceneComponent>(TEXT("SceneComponent"));
 
-	if(item_actor_mesh_type == ItemActorMeshType::StaticMesh || GetDefault<AItemActor>() == this)
+	if(item_actor_mesh_type == ItemActorMeshType::StaticMesh || HasAnyFlags(RF_ClassDefaultObject))
 	{
 		StaticMeshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("StaticMeshComp"));
 		StaticMeshComp->SetupAttachment(SceneComponent, {});
@@ -27,7 +29,7 @@ AItemActor::AItemActor()
 		StaticMeshComp->SetGenerateOverlapEvents(true);
 		StaticMeshComp->SetCollisionProfileName("Item");
 	}
-	if(item_actor_mesh_type == ItemActorMeshType::SkeletalMesh || GetDefault<AItemActor>() == this)
+	if(item_actor_mesh_type == ItemActorMeshType::SkeletalMesh || HasAnyFlags(RF_ClassDefaultObject))
 	{
 		SkeletalMeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMeshComp"));
 		SkeletalMeshComp->SetupAttachment(SceneComponent, {});
@@ -46,61 +48,28 @@ AItemActor::AItemActor()
 	ItemObject = nullptr;
 	ItemBaseClass = UItemBase::StaticClass();
 
-	item_object_creation_method = ItemObjectCreationMethod::CreateItemObjectFromDataTable;
-
 	bInteractable = true;
 }
 
-AItemActor* AItemActor::StaticCreateObject(UWorld* world, TSubclassOf<AItemActor> item_actor_class, UItemBase* item_object, const FVector& location, const FRotator& rotation)
+
+//AItemActor* AItemActor::StaticCreateObjectVisualOnly(UWorld* world, TSubclassOf<AItemActor> item_actor_class, UItemBase* item_object, const FVector& location, const FRotator& rotation)
+//{
+//	AItemActor* spawned_actor = world->SpawnActorDeferred<AItemActor>(item_actor_class, { rotation, location }, nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding);
+//
+//	if(IsValid(spawned_actor))
+//	{
+//		spawned_actor->bInteractable = false;
+//		spawned_actor->SetItemObject(item_object);
+//	}
+//
+//	UGameplayStatics::FinishSpawningActor(spawned_actor, { rotation, location });
+//
+//	return spawned_actor;
+//}
+
+TArray<EInteractionActions> AItemActor::GetInteractionActions_Implementation()
 {
-	//Deffered spawn is used to set ItemObject
-	AItemActor* spawned_actor = world->SpawnActorDeferred<AItemActor>(item_actor_class, { rotation, location }, nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding);
-
-	if(spawned_actor == nullptr)
-	{
-		checkf(false, TEXT("Error: AItemActor::StaticCreateObject: SpawnActorDeferred failed"));
-		return nullptr;
-	}
-
-	if (IsValid(item_object) == false)
-	{
-		//Although ItemActors can spawn their own ItemObjects, 
-		//StaticCreateObject is meant to be used primarily with inventory and has to avoid "duping", 
-		//i.e. creating new items out of thin air
-		//This behaviour may change
-		checkf(false, TEXT("Error: AItemActor::StaticCreateObject: Invalid ItemObject"));
-		spawned_actor->Destroy();
-		return nullptr;
-	}
-
-	spawned_actor->SetItemObject(item_object);
-
-	UGameplayStatics::FinishSpawningActor(spawned_actor, { rotation, location });
-
-	if (IsValid(spawned_actor) == false)
-	{
-		return nullptr;
-	}
-
-	item_object->SetOuterItemActor(spawned_actor);
-
-	return spawned_actor;
-}
-
-AItemActor* AItemActor::StaticCreateObjectVisualOnly(UWorld* world, TSubclassOf<AItemActor> item_actor_class, UItemBase* item_object, const FVector& location, const FRotator& rotation)
-{
-	AItemActor* spawned_actor = world->SpawnActorDeferred<AItemActor>(item_actor_class, { rotation, location }, nullptr, nullptr, ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding);
-
-	if(spawned_actor != nullptr)
-	{
-		spawned_actor->bInteractable = false;
-		spawned_actor->SetItemObject(item_object);
-
-		UGameplayStatics::FinishSpawningActor(spawned_actor, { rotation, location });
-		return spawned_actor;
-	}
-
-	return nullptr;
+	return ItemObject->GetInteractionActions();
 }
 
 void AItemActor::DrawInteractionOutline_Implementation()
@@ -237,12 +206,97 @@ void AItemActor::BeginPlay()
 	//They are both created in the first place only for CDO and Editor
 	if(item_actor_mesh_type == ItemActorMeshType::StaticMesh)
 	{
-		SkeletalMeshComp->DestroyComponent();
+		if (SkeletalMeshComp != nullptr)
+		{
+			SkeletalMeshComp->DestroyComponent();
+		}
+
 	}
 	else if(item_actor_mesh_type == ItemActorMeshType::SkeletalMesh)
 	{
-		StaticMeshComp->DestroyComponent();
+		if (StaticMeshComp != nullptr)
+		{
+			StaticMeshComp->DestroyComponent();
+		}
 	}
+}
+
+AItemActor* AItemActor::StaticCreateObject(UWorld* world, TSubclassOf<AItemActor> item_actor_class, UItemBase* item_object, const FItemActorSpawnParameters& spawn_parameters, const FVector& location, const FRotator& rotation)
+{
+	//Deffered spawn is used to set things within the spawned actor
+
+	auto collision_handling_method = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButDontSpawnIfColliding;
+
+	if (spawn_parameters.DisableCollision)
+	{
+		collision_handling_method = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	}
+
+	AItemActor* spawned_actor = world->SpawnActorDeferred<AItemActor>(item_actor_class, { rotation, location }, nullptr, nullptr, collision_handling_method);
+
+	if (spawned_actor == nullptr)
+	{
+		checkf(false, TEXT("Error: AItemActor::StaticCreateObject: SpawnActorDeferred failed"));
+		return nullptr;
+	}
+
+	if (IsValid(item_object) == false)
+	{
+		//Although ItemActors can spawn their own ItemObjects, 
+		//StaticCreateObject is meant to be used primarily with inventory and has to avoid "duping", 
+		//i.e. creating new items out of thin air
+		//This behaviour may change
+		checkf(false, TEXT("Error: AItemActor::StaticCreateObject: Invalid ItemObject"));
+		spawned_actor->Destroy();
+		return nullptr;
+	}
+
+	spawned_actor->SetItemObject(item_object);
+
+	if (spawn_parameters.MoveOwnershipItemObject)
+	{
+		item_object->SetOuterItemActor(spawned_actor);
+	}
+
+	spawned_actor->bInteractable = spawn_parameters.Interactible;
+
+	if (spawn_parameters.EnablePhysics == false)
+	{
+		if (spawned_actor->SkeletalMeshComp)
+		{
+			spawned_actor->SkeletalMeshComp->SetSimulatePhysics(false);
+		}
+		if (spawned_actor->StaticMeshComp)
+		{
+			spawned_actor->StaticMeshComp->SetSimulatePhysics(false);
+		}
+	}
+	else
+	{
+		if (spawned_actor->SkeletalMeshComp)
+		{
+			spawned_actor->SkeletalMeshComp->SetSimulatePhysics(true);
+		}
+		if (spawned_actor->StaticMeshComp)
+		{
+			spawned_actor->StaticMeshComp->SetSimulatePhysics(true);
+		}
+	}
+
+	if (spawn_parameters.DisableCollision)
+	{
+		spawned_actor->SetActorEnableCollision(false);
+	}
+
+	UGameplayStatics::FinishSpawningActor(spawned_actor, { rotation, location });
+
+	if (IsValid(spawned_actor) == false)
+	{
+		return nullptr;
+	}
+
+
+	return spawned_actor;
 }
 
 void AItemActor::Tick(float DeltaTime)
@@ -265,59 +319,12 @@ bool AItemActor::OnInteract_Implementation(AActor* caller, EInteractionActions a
 		return false;
 	}
 
-	if(bInteractable == true && ItemObject->Interact(caller, action) == true)
+	if(bInteractable == true)
 	{
-		//auto comps_copy = GetComponents();
-
-		//for (auto* comp : comps_copy)
-		//{
-		//	auto comp_owner = comp->GetOwner();
-
-		//	if (IsValid(comp) && comp->IsA<USceneComponent>() == false)
-		//	{
-		//		RemoveOwnedComponent(comp);
-		//		comp->Rename(nullptr, caller);
-		//		caller->AddOwnedComponent(comp);
-		//	}
-		//}
-
-		//auto item_obj_outer_before_destr = ItemObject->GetOuter();
-		//auto item_obj_owner_before_destr = ItemObject->GetOwner();
-
-		//UE_LOG(LogTemp, Warning, TEXT("Obj (before destroy): Outer: %s, Owner: %s"), *item_obj_outer_before_destr->GetName(), item_obj_owner_before_destr == nullptr ? TEXT("NONE") : *item_obj_owner_before_destr->GetName())
-
-		//bool destroy_res = Destroy();
-
-		//auto item_obj_outer = ItemObject->GetOuter();
-		//auto item_obj_owner = ItemObject->GetOwner();
-		//bool is_unreachable_obj = ItemObject->IsUnreachable();
-		//bool is_valid_obj = IsValid(ItemObject);
-
-		//UE_LOG(LogTemp, Warning, TEXT("Obj (after destroy): IsUnreachable: %i, IsValid: %i, Outer: %s, Owner: %s"), is_unreachable_obj, is_valid_obj, *item_obj_outer->GetName(), item_obj_owner == nullptr ? TEXT("NONE") : *item_obj_owner->GetName())
-		//
-		//auto inv_item = Cast<UInventoryItem>(ItemObject);
-		//if (inv_item)
-		//{
-		//	auto inv_comp = inv_item->GetInventoryComponent();
-		//	
-		//	if (inv_comp)
-		//	{
-		//		bool is_unreachable = inv_comp->IsUnreachable();
-		//		bool is_pend_kill = IsValid(inv_comp);
-
-		//		UE_LOG(LogTemp, Warning, TEXT("InvComp: IsUnreachable: %i, IsValid: %i, Outer: %s, Owner: %s"), is_unreachable, is_pend_kill, *inv_comp->GetOuter()->GetName(), inv_comp->GetOwner() == nullptr ? TEXT("NONE") : *inv_comp->GetOwner()->GetName())
-		//	}
-		//}
-
-		//return DestroyAndMoveComps();
-
-		return Destroy(); //currently ItemActors are obliged to destroy themselves
-	}
-	else
-	{
-		return false;
+		return ItemObject->OnInteracted(caller, action);
 	}
 
+	return false;
 }
 
 

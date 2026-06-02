@@ -121,8 +121,11 @@ public:
 
 public:
 	auto GetCollisionComponent() const { return CollisionComponent; }
-	auto GetCharacterMesh() const {	return CharacterMesh; };
+
+	virtual USkeletalMeshComponent* GetMesh() const override {	return CharacterMesh; };
+
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
+
 	UInventoryManager* GetInventoryManger() const { return InventoryManager; }
 	//UInventoryComponent* GetInventoryComponent(ECharacterInventoryType type) const;
 

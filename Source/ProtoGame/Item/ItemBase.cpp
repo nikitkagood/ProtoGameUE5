@@ -66,44 +66,69 @@ bool UItemBase::Initialize(FDataTableRowHandle handle)
 //}
 
 
-bool UItemBase::Interact(AActor* caller, EInteractionActions action)
+bool UItemBase::OnInteracted(AActor* caller, EInteractionActions action)
 {
-	auto ptr = Cast<AGameCharacterBase>(caller);
+	auto inv_manager = caller->FindComponentByClass<UInventoryManager>();
 
-	if(ptr != nullptr)
+	//Inventory manager dependent actions
+	if(IsValid(inv_manager))
 	{
+		auto cached_item_actor = GetOuterItemActor();
+
 		switch (action)
 		{
-		case EInteractionActions::Unspecified:
-			if (ptr->GetInventoryManger()->AddItemFromWorld(this))
+		case EInteractionActions::Default:
+			if (inv_manager->AddItemFromWorld(this))
 			{
+				cached_item_actor->Destroy();
 				return true;
 			}
 			break;
 		case EInteractionActions::Equip:
-			if (ptr->GetInventoryManger()->AddItemFromWorld(this, EManagerInventoryType::SpecialSlot))
+			if (inv_manager->AddItemFromWorld(this, EManagerInventoryType::SpecialSlot))
 			{
+				cached_item_actor->Destroy();
 				return true;
 			}
 			break;
 		case EInteractionActions::Take:
-			if (ptr->GetInventoryManger()->AddItemFromWorld(this, EManagerInventoryType::InventoryComponent))
+			if (inv_manager->AddItemFromWorld(this, EManagerInventoryType::InventoryComponent))
 			{
+				cached_item_actor->Destroy();
 				return true;
 			}
 			break;
 		default:
-			checkf(false, TEXT("This action is not meaningful for ItemBase"));
+			ensureMsgf(false, TEXT("UItemBase::OnInteracted: no match for action"));
 			break;
 		}
+	}
+
+	//Other actions
+	switch (action)
+	{
+	case EInteractionActions::Use:
+		OnUse(caller);
+		break;
+	case EInteractionActions::Consume:
+		OnUse(caller);
+		break;
+	default:
+		ensureMsgf(false, TEXT("UItemBase::OnInteracted: no match for action"));
+		break;
 	}
 
 	return false;
 }
 
+TArray<EInteractionActions> UItemBase::GetInteractionActions() const
+{
+	return TArray<EInteractionActions>{ EInteractionActions::Default };
+}
+
 bool UItemBase::OnUse(AActor* caller)
 {
-	//checkf(false, TEXT("ItemBase::OnUse isn't meant to be called")); 
+	ensureMsgf(false, TEXT("UItemBase::OnUse is meant to be overriden")); 
 	return false;
 }
 
@@ -185,15 +210,15 @@ void UItemBase::SetCurrentStackSize(int32 new_size)
 	inventory_item_info.CurrentStackSize = new_size;
 }
 
-AItemActor* UItemBase::SpawnItemActor(const FVector& location, const FRotator& rotation)
+AItemActor* UItemBase::SpawnItemActor(const FVector& location, const FRotator& rotation, const FItemActorSpawnParameters& spawn_parameters)
 {
-	return AItemActor::StaticCreateObject(GetWorld(), ItemActorClass, this, location, rotation);
+	return AItemActor::StaticCreateObject(GetWorld(), ItemActorClass, this, spawn_parameters, location, rotation);
 }
 
-AItemActor* UItemBase::SpawnItemActorVisualOnly(const FVector& location, const FRotator& rotation)
-{
-	return AItemActor::StaticCreateObjectVisualOnly(GetWorld(), ItemActorClass, this, location, rotation);
-}
+//AItemActor* UItemBase::SpawnItemActorVisualOnly(const FVector& location, const FRotator& rotation)
+//{
+//	return AItemActor::StaticCreateObjectVisualOnly(GetWorld(), ItemActorClass, this, location, rotation);
+//}
 
 void UItemBase::Rotate()
 {
@@ -331,6 +356,17 @@ UWorld* UItemBase::GetWorldFromOuter() const
 	{
 		return nullptr; 
 	}
+}
+
+void UItemBase::OnDestroy()
+{
+	auto owning_item_actor = GetOuterItemActor();
+	if (owning_item_actor)
+	{
+		owning_item_actor->Destroy();
+	}
+
+	MarkAsGarbage();
 }
 
 AActor* UItemBase::GetOwner() const

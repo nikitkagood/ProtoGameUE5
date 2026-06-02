@@ -50,6 +50,9 @@ public:
 	// Sets default values for this pawn's properties
 	AMoverNavPawn();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	virtual USkeletalMeshComponent* GetMesh() const { return nullptr; };
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

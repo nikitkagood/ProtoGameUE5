@@ -38,7 +38,7 @@ enum class ItemActorMeshType : uint8
 //This class represents items with physical location, located in a world.
 //Actual properties of an item are represented by world-independent, UObject-derived class (UItemBase).
 //Note that items attached to a character ARE NOT considered ItemActors. They are ItemBase + SkeletalMesh (although this might change).
-UCLASS(Blueprintable, BlueprintType, DefaultToInstanced, meta=(BlueprintSpawnableComponent), ClassGroup=(Item))
+UCLASS(Blueprintable, BlueprintType, DefaultToInstanced, meta=(BlueprintSpawnableComponent), ClassGroup=(Item), PrioritizeCategories = "ItemActor ItemObject")
 class PROTOGAME_API AItemActor : public AActor, public IInteractionInterface
 {
 	GENERATED_BODY()
@@ -48,10 +48,10 @@ class PROTOGAME_API AItemActor : public AActor, public IInteractionInterface
 
 	//Only 1 mesh component is allowed to be active at the time
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category=Mesh, meta = (AllowPrivateAccess = "true", EditCondition = "item_actor_mesh_type == ItemActorMeshType::SkeletalMesh", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category=Mesh, meta = (AllowPrivateAccess = "true"))
 	USkeletalMeshComponent* SkeletalMeshComp;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category=Mesh, meta = (AllowPrivateAccess = "true", EditCondition = "item_actor_mesh_type == ItemActorMeshType::StaticMesh", EditConditionHides))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category=Mesh, meta = (AllowPrivateAccess = "true"))
 	UStaticMeshComponent* StaticMeshComp;
 	
 public:	
@@ -60,10 +60,12 @@ public:
 	FDataTableRowHandle GetItemProperites() { return DT_ItemProperties; };
 
 	//Deffered spawn is used to set ItemBase
-	//Spawns ItemActor from ItemBase. Sets new ItemActor to be Outer for the ItemBase.
-	static AItemActor* StaticCreateObject(UWorld* world, TSubclassOf<AItemActor> item_actor_class, UItemBase* item_object, const FVector& location, const FRotator& rotation);
+	//Spawns ItemActor from ItemBase. 
+	//Sets new ItemActor to be Outer for the ItemBase.
+	static AItemActor* StaticCreateObject(UWorld* world, TSubclassOf<AItemActor> item_actor_class, UItemBase* item_object, const FItemActorSpawnParameters& spawn_parameters, const FVector& location, const FRotator& rotation);
+
 	//Only visual: doesn't set ItemBase Outer and non-interactable.
-	static AItemActor* StaticCreateObjectVisualOnly(UWorld* world, TSubclassOf<AItemActor> item_actor_class, UItemBase* item_object, const FVector& location, const FRotator& rotation);
+	//static AItemActor* StaticCreateObjectVisualOnly(UWorld* world, TSubclassOf<AItemActor> item_actor_class, UItemBase* item_object, const FVector& location, const FRotator& rotation);
 
 	virtual void Tick(float DeltaTime) override;
 
@@ -76,6 +78,8 @@ public:
 
 	//UFUNCTION(BlueprintCallable, Category = "Interaction")
 	EInteractionType GetEInteractionType_Implementation() const { return EInteractionType::Item; };
+
+	TArray<EInteractionActions> GetInteractionActions_Implementation();
 
 	void DrawInteractionOutline_Implementation();
 
@@ -110,25 +114,28 @@ protected:
 	//Deffered spawn is used to set ItemObject
 	virtual void BeginPlay() override;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Actor", meta = (AllowPrivateAccess = true))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "ItemActor", meta = (AllowPrivateAccess = true))
 	bool bInteractable;
-private:
+
 	void CreateItemObject();
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Actor", meta = (AllowPrivateAccess = "true"))
+	//By default: in CDO both mesh components will be created for BP reasons
+	//but in non-CDO only selected component will be ever created
+	//the other pointer will be invalid
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "ItemActor", meta = (AllowPrivateAccess = "true"))
 	ItemActorMeshType item_actor_mesh_type = ItemActorMeshType::StaticMesh;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Item Object", meta = (AllowPrivateAccess = "true"))
-	ItemObjectCreationMethod item_object_creation_method;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "ItemObject", meta = (AllowPrivateAccess = "true"))
+	ItemObjectCreationMethod item_object_creation_method = ItemObjectCreationMethod::CreateItemObjectFromDataTable;
 
 	//associated item object
-	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Instanced, Category = "Item Object", NoClear, meta = (AllowPrivateAccess = "true"))
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly, Instanced, Category = "ItemObject", NoClear, meta = (AllowPrivateAccess = "true"))
 	UItemBase* ItemObject;
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, NoClear, Category = "Item Object", meta = (AllowPrivateAccess = true))
+    UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, NoClear, Category = "ItemObject", meta = (AllowPrivateAccess = true))
 	TSubclassOf<UItemBase> ItemBaseClass;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, NoClear, Category = "Item Object", meta = (AllowPrivateAccess = "true", 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, NoClear, Category = "ItemObject", meta = (AllowPrivateAccess = "true", 
 	EditCondition = "item_object_creation_method == ItemObjectCreationMethod::CreateItemObjectFromDataTable", EditConditionHides))
 	FDataTableRowHandle DT_ItemProperties;
 };

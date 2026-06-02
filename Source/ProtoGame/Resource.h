@@ -15,12 +15,12 @@ enum class EResourceType : uint8
 	Manpower = 2			UMETA(DisplayName = "Manpower"),
 };
 
-
-USTRUCT(BlueprintType)
-struct PROTOGAME_API FResource : public FTableRowBase
-{
-	GENERATED_BODY()
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true, ClampMin = -1))
-	EResourceType type;
-};
+//
+//USTRUCT(BlueprintType)
+//struct PROTOGAME_API FResource : public FTableRowBase
+//{
+//	GENERATED_BODY()
+//
+//	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true, ClampMin = -1))
+//	EResourceType type;
+//};

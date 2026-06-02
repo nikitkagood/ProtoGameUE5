@@ -13,6 +13,25 @@
 
 #include "InventoryItemInfo.generated.h"
 
+USTRUCT(BlueprintType)
+struct FItemActorSpawnParameters
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	bool MoveOwnershipItemObject = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	bool Interactible = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	bool EnablePhysics = false;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	bool DisableCollision = false;
+
+};
+
 //Contains basic information about items
 //Stored in ItemObject
 //Do NOT place DataTable only values here
@@ -51,6 +70,7 @@ struct PROTOGAME_API FInventoryItemInfo : public FTableRowBase
 	//how many decimal places
 	constexpr static double MassMaxPrecision = 4;
 
+	//SINGULAR, has to be multiplied by stack
 	//in kg, only MassMaxPrecision decimal places are relevant, everything else is rounded
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true", ClampMin = 0))
 	float Mass = 0.001;
@@ -85,12 +105,6 @@ struct PROTOGAME_API FItemTable : public FTableRowBase
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	FItemThumbnailInfo item_thumbnail_info;
-
-	//Might be useful
-	//As far as I can tell (item)Fragment is a dynamically added value + logic (class)
-	//List of fragments added to Item by default from DT
-	//UPROPERTY(EditAnywhere, BlueprintReadOnly, meta = (AllowAbstract = "false", AllowPrivateAccess = "true"))
-	//TArray<TSubclassOf<UItemFragment>> ItemDefalutFragments;
 };
 
 USTRUCT(BlueprintType)

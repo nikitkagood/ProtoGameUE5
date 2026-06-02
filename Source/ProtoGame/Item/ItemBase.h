@@ -155,17 +155,21 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual class UWorld* GetWorldFromOuter() const;
 
+	//Override if something else needs to be cleaned up
+	UFUNCTION(BlueprintCallable)
+	virtual void OnDestroy();
+
 	UFUNCTION(BlueprintPure)
 	virtual AActor* GetOwner() const;
 
 	//Spawn ItemActor and set it as ItemBase Outer
 	//TODO: Currently this system isn't reliable enough. Though collision is handled, it's probably still possible to spawn small objects inside walls.
-	UFUNCTION()
-	virtual AItemActor* SpawnItemActor(const FVector& location, const FRotator& rotation);
+	UFUNCTION(BlueprintCallable)
+	virtual AItemActor* SpawnItemActor(const FVector& location, const FRotator& rotation, const FItemActorSpawnParameters& spawn_parameters);
 
 	//Spawn ItemActor which is purely visual
-	UFUNCTION(BlueprintCallable)
-	virtual AItemActor* SpawnItemActorVisualOnly(const FVector& location, const FRotator& rotation);
+	//UFUNCTION(BlueprintCallable)
+	//virtual AItemActor* SpawnItemActorVisualOnly(const FVector& location, const FRotator& rotation);
 
     UFUNCTION(BlueprintCallable)
 	void Rotate();
@@ -192,8 +196,14 @@ public:
 	virtual bool CompareTags(UItemBase* other_item, const FName& tag_filter) const;
 
 	//ItemActors ask ItemObject what to do
-	//This behaviour might be reduntant and may change later
-	virtual bool Interact(AActor* caller, EInteractionActions action);
+	virtual bool OnInteracted(AActor* caller, EInteractionActions action);
+
+	//Each class overrides this
+	UFUNCTION(BlueprintCallable)
+	virtual TArray<EInteractionActions> GetInteractionActions() const;
+
+	UFUNCTION(BlueprintCallable)
+	virtual bool OnEquipped(AActor* caller, USceneComponent* attach_mesh, const FName& socket_name) { return false; };
 
 	//Interfaces
 

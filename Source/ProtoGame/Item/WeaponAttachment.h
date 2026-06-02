@@ -30,14 +30,13 @@ public:
 
 	const FAttachmentSlot& GetAttachmentSlot() { return attachment_info.slot; };
 	TSoftObjectPtr<UStaticMesh> GetStaticMesh() { return attachment_info.static_mesh; };
-	//Format: socketname_*socket_number > 0*. Example: b_gun_mag_1
-	//If socket_number is 0, then it's not added. I.e. b_gun_mag
+
 	FName GetSocketName();
 
 	//static bool isAttachmentCompatible(FAttachmentSlot slot, FAttachmentSlot other_slot);
 
 	//TODO: simple implementation now
-	bool isAttachmentCompatible(FAttachmentSlot slot) const;
+	bool IsAttachmentCompatible(FAttachmentSlot slot) const;
 
 protected:
 	//virtual void BeginPlay() override;

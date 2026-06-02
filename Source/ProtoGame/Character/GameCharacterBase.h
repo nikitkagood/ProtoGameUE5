@@ -133,7 +133,6 @@ public:
 
 	UCameraComponent* GetFirstPersonCameraComponent() const { return FirstPersonCameraComponent; }
 	UInventoryManager* GetInventoryManger() const { return InventoryManager; }
-	UInventoryComponent* GetInventoryComponent(ECharacterInventoryType type) const;
 
 	UFUNCTION(BlueprintCallable)
 	UCustomCharacterMovementComponent* GetCharacterMovement() const;

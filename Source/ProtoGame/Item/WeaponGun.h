@@ -18,14 +18,16 @@ public:
 
 	virtual bool Initialize(FDataTableRowHandle handle) override { check(false); return false; };
 
+	const auto& GetWeaponInfoConst() const { return weapon_gun_info; };
+
 	virtual FItemThumbnailInfo GetItemThumbnailInfoFromDT() override { check(false); return {}; };
 
-	virtual TSubclassOf<UAnimInstance> GetAnimClass() const { return weapon_info.AnimClass; };
+	//virtual TSubclassOf<UAnimInstance> GetAnimClass() const { return weapon_gun_info.AnimClass; };
 
     UFUNCTION(BlueprintCallable, BlueprintPure)
-	EWeaponFireMode GetFireMode() const { return weapon_info.FireMode; }
+	EWeaponFireMode GetFireMode() const { return weapon_gun_info.FireMode; }
 
-	virtual AItemActor* SpawnItemActor(const FVector& location, const FRotator& rotation) override;
+	virtual AItemActor* SpawnItemActor(const FVector& location, const FRotator& rotation, const FItemActorSpawnParameters& spawn_parameters) override;
 
 	UFUNCTION(BlueprintCallable)
 	bool AddAttachmentSlot(const FAttachmentSlot& slot);
@@ -40,9 +42,12 @@ public:
 	//virtual USkeletalMeshComponent* CreateSKForSceneCapture(USceneComponent* outer) override;
 
 	//Equips and and de-equips (by calling GameCharacter)
-	virtual bool OnUse(AActor* caller) override;
+	//virtual bool OnUse(AActor* caller) override;
+
+	virtual bool OnEquipped(AActor* caller, USceneComponent* attach_mesh, const FName& socket_name) override;
 
 	//Inventory interface; This class supports only WeaponAttachment and AmmoBase items
+
 	virtual bool MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell) override;
 	virtual bool AddItemFromWorld(UItemBase* item) override;
 	virtual bool DropItemToWorld(UItemBase* item) override;
@@ -54,7 +59,7 @@ public:
 	FOnInventoryUpdated OnInventoryUpdated;
 
 public:
-	virtual void OnAttack() override { OnFire(); };
+	virtual void OnAttack() override { StartFire(); };
 
 	//Weapon controls
 
@@ -104,21 +109,41 @@ public:
 	//UFUNCTION(BlueprintCallable)
 	//bool ChangeFunctionalAttachmentMode();
 
+	//Weapon function
+	
+	UFUNCTION(BlueprintCallable)
+	virtual bool IsFunctional() { return weapon_gun_info.bFunctional; }
+
 	virtual void StartFire();
 	virtual void EndFire();
 
-	bool IsFiring() const { return Firing;  };
+	UFUNCTION(BlueprintCallable)
+	bool IsFiring() const { return Firing; };
+
+	UFUNCTION(BlueprintCallable)
+	float GetDispersionMOA() { return weapon_gun_info.Dispersion; }
+
+	UFUNCTION(BlueprintCallable)
+	float GetFireRate() { return weapon_gun_info.FireRate; }
 
 	//class related
 
 	//Debug
 	UFUNCTION(BlueprintCallable)
 	void PrintWeaponStats();
+
+	virtual void OnDestroy() override;
 protected:
+	//Firstly will try to get from Outer
+	//Secondly will get cached ptr
+	UFUNCTION(BlueprintCallable)
+	AWeaponGunActor* GetWeaponGunActor();
+
 	//TODO: make it DOD and FireManager or smth
+	//Should not be called directly, call StartFire
 	virtual void OnFire();
 
-	void SpawnMuzzleFlash(USkeletalMeshComponent* sk_comp) const;
+	//void SpawnMuzzleFlash(USkeletalMeshComponent* sk_comp) const;
 
 	bool LoadAmmoIntoChamberFromMag();
 
@@ -130,7 +155,9 @@ protected:
 	bool AddAttachment(UWeaponAttachment* attachment);
 
 	//TODO: implement
-	bool AddAttachmentTo(UWeaponAttachment* attachment, TPair<FAttachmentSlot, UWeaponAttachment*>* slot_pair);
+	//bool AddAttachmentTo(UWeaponAttachment* attachment, FAttachmentSlot* slot);
+
+	FAttachmentSlot* FindSlot(const FAttachmentSlot& slot) { return nullptr; };
 
 	//TODO: implement
 	static constexpr int32 GUN_MAX_SINGLE_FIRE_FIRERATE = 500;
@@ -140,18 +167,19 @@ protected:
 
 	//Weapon related
 
-	//UPROPERTY(BlueprintReadOnly, VisibleAnywhere, meta = (AllowPrivateAccess = true))
-	//TWeakObjectPtr<AGunActor> weapon_actor;
+	//Cached weak pointer to weapon gun actor
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+	TWeakObjectPtr<class AWeaponGunActor> WeaponGunActorCached;
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, NoClear, meta = (AllowPrivateAccess = true))
-	FWeaponInfo weapon_info;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, NoClear, meta = (AllowPrivateAccess = true))
+	FWeaponGunInfo weapon_gun_info;
 
 	//Class related
 
-	TArray<TPair<FAttachmentSlot, UWeaponAttachment*>> attachment_slots;
+	TMultiMap<FAttachmentSlot, UWeaponAttachment*> attachment_slots;
 
-	//Saved for quick access
-	int32 MagazineAttachmentIdx;
+	bool Firing = false;
 
-	bool Firing;
+	//Cached mag
+	UWeaponAttachmentMagazine* MagazineAttachment;
 };

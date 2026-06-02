@@ -69,7 +69,7 @@ struct FVBFWeaponInfoTable : public FTableRowBase
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	int64 AmmoMax;
 
-	FVBFWeaponInfo vbf_weapon_info;
+	FVBFWeaponInfo vbf_weapon_gun_info;
 
 };
 
@@ -89,21 +89,21 @@ public:
 
 	//IVBFWeaponInterface
 
-	FName GetWeaponName_Implementation() const { return vbf_weapon_info.Name; };
+	FName GetWeaponName_Implementation() const { return vbf_weapon_gun_info.Name; };
 
 	UObject* GetWeaponOwner_Implementation() const;
 
-	EVBFWeaponTypes GetWeaponType_Implementation(uint8& WeaponType) const { WeaponType = vbf_weapon_info.WeaponType; return vbf_weapon_info.WeaponTypeEnum; };
+	EVBFWeaponTypes GetWeaponType_Implementation(uint8& WeaponType) const { WeaponType = vbf_weapon_gun_info.WeaponType; return vbf_weapon_gun_info.WeaponTypeEnum; };
 
 	bool SetWeaponActive_Implementation(bool new_active) const;
 
-	bool IsWeaponActive_Implementation() const { return vbf_weapon_info.IsActive; };
+	bool IsWeaponActive_Implementation() const { return vbf_weapon_gun_info.IsActive; };
 
 	bool CanWeaponAttack_Implementation() const;
 
-	TArray<FVBFDamageInfo> GetWeaponDamageInfo_Implementation() const { return vbf_weapon_info.DamageInfo;	};
+	TArray<FVBFDamageInfo> GetWeaponDamageInfo_Implementation() const { return vbf_weapon_gun_info.DamageInfo;	};
 
-	const UObject* GetTarget_Implementation() const { return vbf_weapon_info.Target; };
+	const UObject* GetTarget_Implementation() const { return vbf_weapon_gun_info.Target; };
 
 	//2000 meters is arbitrary default value
 	double GetWeaponMaxRangeLimit_Implementation() const { return 2000 * 100; };
@@ -117,16 +117,16 @@ public:
 
 	//EWeaponAccuracyType GetWeaponAccuracyType() const
 
-	double GetWeaponAbsoluteAccuracyMils_Implementation() const { return vbf_weapon_info.AccuracyMilliradians; };
+	double GetWeaponAbsoluteAccuracyMils_Implementation() const { return vbf_weapon_gun_info.AccuracyMilliradians; };
 
 	//TODO
 	double GetWeaponHitChance_Implementation(double target_distance, const FVector& target_location, const FVector& target_size, double target_speed) const;
 
-	double GetWeaponInitialVelocity_Implementation() const { return vbf_weapon_info.InitialVelocity; };
+	double GetWeaponInitialVelocity_Implementation() const { return vbf_weapon_gun_info.InitialVelocity; };
 
-	int64 GetWeaponAmmoMax_Implementation() const { return vbf_weapon_info.AmmoMax; };
+	int64 GetWeaponAmmoMax_Implementation() const { return vbf_weapon_gun_info.AmmoMax; };
 
-	int64 GetWeaponAmmoLeftOverall_Implementation() const { return vbf_weapon_info.AmmoLeft; };
+	int64 GetWeaponAmmoLeftOverall_Implementation() const { return vbf_weapon_gun_info.AmmoLeft; };
 
 	int64 GetWeaponAmmoCurrentMagazineCapacity_Implementation() const { return 0; };
 
@@ -152,5 +152,5 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static double MOAToMils(double MOA) { return MOA / 3, 4377; };
 private:
-	FVBFWeaponInfo vbf_weapon_info;
+	FVBFWeaponInfo vbf_weapon_gun_info;
 };

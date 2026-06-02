@@ -22,7 +22,7 @@ public:
     //int32 GetFactionId() const { return FactionId; };
 
     //UFUNCTION(BlueprintCallable)
-    const TMap<EResourceType, int64> GetResources() const { return Resources; };
+    //const TMap<EResourceType, int64> GetResources() const { return Resources; };
 
 protected:
     //Do not reuse, they have to be always unique
@@ -32,8 +32,8 @@ protected:
     UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, NoClear, meta = (AllowPrivateAccess = true))
     FText Name { FText::FromString("DefaultFactionName") };
 
-    UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
-    TMap<EResourceType, int64> Resources;
+    //UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true))
+    //TMap<EResourceType, int64> Resources;
 
     //TODO: maybe it will be needed
     //UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))

@@ -32,6 +32,7 @@ public:
 	UFUNCTION()
 	virtual void OnAttack() { check(false); };
 
+	virtual TArray<EInteractionActions> GetInteractionActions() const override;
 
 	//virtual AItemActor* SpawnItemActor(const FVector& location, const FRotator& rotation) override;
 	//virtual AItemActor* SpawnItemActorVisualOnly(const FVector& location, const FRotator& rotation) override;

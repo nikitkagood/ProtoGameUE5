@@ -143,8 +143,12 @@ bool UInvSpecialSlotComponent::DropItemToWorld(UItemBase* item)
 		return false;
 	}
 
+	FItemActorSpawnParameters spawn_params;
+	spawn_params.MoveOwnershipItemObject = true;
+	spawn_params.EnablePhysics = true;
+	spawn_params.Interactible = true;
 
-	auto* item_actor = item->SpawnItemActor(owner_actor->GetActorLocation() + owner_actor->GetActorForwardVector() * EndDropDistance, owner_actor->GetActorRotation());
+	auto* item_actor = item->SpawnItemActor(owner_actor->GetActorLocation() + owner_actor->GetActorForwardVector() * EndDropDistance, owner_actor->GetActorRotation(), spawn_params);
 	if(item_actor == nullptr)
 	{
 		//can't spawn, do not delete from inventory

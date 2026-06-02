@@ -9,14 +9,15 @@
 #include "Animation/GunAnimInstance.h"
 #include "Engine/World.h"
 #include "TimerManager.h"
+#include "Item/WeaponGunActor.h"
 
 #include "Kismet/GameplayStatics.h"
 
 UWeaponGun::UWeaponGun()
 {
-	if(weapon_info.FireModesAvailable.Num() != 0)
+	if(weapon_gun_info.FireModesAvailable.Num() != 0)
 	{
-		weapon_info.FireMode = weapon_info.FireModesAvailable[0];
+		weapon_gun_info.FireMode = weapon_gun_info.FireModesAvailable[0];
 	}
 }
 
@@ -27,7 +28,7 @@ UWeaponGun::UWeaponGun()
 	//if(ptr_row != nullptr)
 	//{
 	//	inventory_item_info = ptr_row->inventory_item_info;
-	//	weapon_info = ptr_row->weapon_info;
+	//	weapon_gun_info = ptr_row->weapon_gun_info;
 
 	//	for(auto& i : ptr_row->attachment_slots)
 	//	{
@@ -42,13 +43,13 @@ UWeaponGun::UWeaponGun()
 
 void UWeaponGun::StartFire()
 {
-	if(weapon_info.bFunctional)
+	if(weapon_gun_info.bFunctional)
 	{
 		Firing = true;
 
-		const float rate = 1 / (weapon_info.FireRate / 60);
+		const float rate = 1 / (weapon_gun_info.FireRate / 60);
 
-		switch(weapon_info.FireMode)
+		switch(weapon_gun_info.FireMode)
 		{
 		case EWeaponFireMode::Single:
 			OnFire();
@@ -103,62 +104,62 @@ void UWeaponGun::EndFire()
 
 void UWeaponGun::PrintWeaponStats()
 {
-	auto* mag = Cast<UWeaponAttachmentMagazine>(attachment_slots[MagazineAttachmentIdx].Value);
+	//auto* mag = Cast<UWeaponAttachmentMagazine>(attachment_slots[MagazineAttachmentIdx].Value);
 
-	FString msg { "Ammo in mag: " + FString::FromInt(mag->GetAmmoLeft())};
-	UKismetSystemLibrary::PrintString(GetWorld(), msg, true, true, FLinearColor(206, 245, 66), 2);
+	//FString msg { "Ammo in mag: " + FString::FromInt(mag->GetAmmoLeft())};
+	//UKismetSystemLibrary::PrintString(GetWorld(), msg, true, true, FLinearColor(206, 245, 66), 2);
+}
+
+void UWeaponGun::OnDestroy()
+{
+	if (WeaponGunActorCached.IsValid())
+	{
+		WeaponGunActorCached->Destroy();
+	}
+
+	Super::OnDestroy();
+}
+
+AWeaponGunActor* UWeaponGun::GetWeaponGunActor()
+{
+	AWeaponGunActor* from_outer = Cast<AWeaponGunActor>(GetOuterItemActor());
+
+	if (IsValid(from_outer))
+	{
+		return from_outer;
+	}
+
+	return WeaponGunActorCached.Get();
 }
 
 void UWeaponGun::OnFire()
 {
-	//Default implementation; Isn't meant to be called directly but you can reference it: UChildClass::OnFire calls UWeaponGun::OnFire()
+	USkeletalMeshComponent* sk_comp = nullptr;
+	auto gun_actor = GetWeaponGunActor();
 
-	if (GetOuterItemActor() == nullptr)
+	if (IsValid(gun_actor))
+	{
+		sk_comp = gun_actor->GetSkeletalMeshComp();
+	}
+
+	if(sk_comp == nullptr || weapon_gun_info.bFunctional == false)
 	{
 		return;
 	}
 
-	auto sk_comp = GetOuterItemActor()->GetSkeletalMeshComp();
-
-	if(sk_comp == nullptr || weapon_info.bFunctional == false)
+	if(weapon_gun_info.bHasChamber)
 	{
-		return;
-	}
-
-	if(weapon_info.bHasChamber)
-	{
-		if(weapon_info.Chamber != nullptr)
+		if(weapon_gun_info.Chamber != nullptr)
 		{
-			if(weapon_info.Chamber->GetProjectileClass() == nullptr)
+			if(weapon_gun_info.Chamber->GetProjectileClass() == nullptr)
 			{
 				checkf(false, TEXT("Projectile isn't assigned, can't fire."));
 				return;
 			}
 
-			FActorSpawnParameters ActorSpawnParams;
-			ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-			ActorSpawnParams.bHideFromSceneOutliner = true;
-			ActorSpawnParams.Instigator = Cast<APawn>(GetInventoryOwner()); //Simple attempt to get the Pawn as Instigator, may fail
-			ActorSpawnParams.bAllowDuringConstructionScript = false; //We should not be shooting at this point
-
-			//Usually Rotation is simply relative X-forward, but not SocketRotation due to bones may be oriented wrong
-			World->SpawnActor<AProjectile>(weapon_info.Chamber->GetProjectileClass(), sk_comp->GetSocketLocation("b_gun_muzzleflash"), sk_comp->GetComponentRotation(), ActorSpawnParams);
-			weapon_info.Chamber->MarkAsGarbage();
-			weapon_info.Chamber = nullptr;
-
-			SpawnMuzzleFlash(sk_comp);
-
-			if(weapon_info.FireSound != nullptr)
-			{
-				const FVector muzzle_sound_offset = {-5.f, 0.f, 0.f}; //play sound a bit behind the muzzle end
-				UGameplayStatics::PlaySoundAtLocation(this, weapon_info.FireSound, sk_comp->GetSocketLocation("b_gun_muzzleflash") - muzzle_sound_offset);
-			}
+			gun_actor->OnFire();
 
 			LoadAmmoIntoChamberFromMag();
-		}
-		else //click sound
-		{
-			UGameplayStatics::SpawnSoundAttached(weapon_info.EmptyClickSound, sk_comp, "root", {}, EAttachLocation::SnapToTarget);
 		}
 
 	}
@@ -169,14 +170,14 @@ void UWeaponGun::OnFire()
 		//ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 		////TODO: Temporary
-		//World->SpawnActor<AProjectile>(weapon_info.AmmoType, WeaponSkeletalMeshComp->GetSocketLocation("b_gun_muzzleflash"), WeaponSkeletalMeshComp->GetSocketRotation("b_gun_muzzleflash"), ActorSpawnParams);
+		//World->SpawnActor<AProjectile>(weapon_gun_info.AmmoType, WeaponSkeletalMeshComp->GetSocketLocation("b_gun_muzzleflash"), WeaponSkeletalMeshComp->GetSocketRotation("b_gun_muzzleflash"), ActorSpawnParams);
 
 		//SpawnMuzzleFlash();
 
-		//if(weapon_info.FireSound != nullptr)
+		//if(weapon_gun_info.FireSound != nullptr)
 		//{
 		//	const FVector muzzle_sound_offset = {-5.f, 0.f, 0.f}; //play sound a bit behind the muzzle end
-		//	UGameplayStatics::PlaySoundAtLocation(this, weapon_info.FireSound, WeaponSkeletalMeshComp->GetSocketLocation("b_gun_muzzleflash") - muzzle_sound_offset);
+		//	UGameplayStatics::PlaySoundAtLocation(this, weapon_gun_info.FireSound, WeaponSkeletalMeshComp->GetSocketLocation("b_gun_muzzleflash") - muzzle_sound_offset);
 		//}
 	}
 }
@@ -255,61 +256,59 @@ void UWeaponGun::RemoveAllAttachmentMeshes(USkeletalMeshComponent* sk_comp)
 bool UWeaponGun::AddAttachment(UWeaponAttachment* attachment)
 {
 	//Find free attachment slot
-	int32 idx = attachment_slots.Find(TPair<FAttachmentSlot, UWeaponAttachment*>{ attachment->GetAttachmentSlot(), nullptr });
+	TArray<UWeaponAttachment*> res;
+	attachment_slots.MultiFind(attachment->GetAttachmentSlot(), res, true);
 
-	if(idx != INDEX_NONE)
+	for (auto i : res)
 	{
-		//If we have valid scene capture, then attach to it
-		//if(SK_SceneCapture != nullptr)
-		//{
-		//	if(AddAttachmentMesh(SK_WeaponRepresentation, attachment) == false)
-		//	{
-		//		UE_LOG(LogTemp, Error, TEXT("AddAttachment: Failed to attach mesh to SceneCapture"));
-		//	}
-		//}
-
-		//if we have ItemActor spawned, then attach to it
-		if(GetOuterItemActor() != nullptr)
+		//if a slot is empty:
+		if (i == nullptr)
 		{
-			if(AddAttachmentMesh(GetOuterItemActor()->GetSkeletalMeshComp(), attachment) == false)
-			{
-				UE_LOG(LogTemp, Error, TEXT("AddAttachment: Failed to attach mesh to ItemActor"));
-				check(false);
-				return false;
-			}
+			i = attachment;
 		}
-
-		attachment_slots[idx].Value = attachment;
-		attachment->SetOuterWeapon(this);
-
-		return true;
 	}
 
-	return false;
+	//if we have ItemActor spawned, then attach to it
+	if (GetOuterItemActor() != nullptr)
+	{
+		if (AddAttachmentMesh(GetOuterItemActor()->GetSkeletalMeshComp(), attachment) == false)
+		{
+			UE_LOG(LogTemp, Error, TEXT("AddAttachment: Failed to attach mesh to ItemActor"));
+			check(false);
+			return false;
+		}
+	}
+
+	attachment->SetOuterWeapon(this);
+
+
+	return true;
 }
 
-bool UWeaponGun::AddAttachmentTo(UWeaponAttachment* attachment, TPair<FAttachmentSlot, UWeaponAttachment*>* slot_pair)
+//bool UWeaponGun::AddAttachmentTo(UWeaponAttachment* attachment, FAttachmentSlot* slot)
+//{
+//	FindPair?
+// 
+//	TArray<UWeaponAttachment*> res;
+//	attachment_slots.MultiFind(*slot, res, true);
+//
+//	return false;
+//
+//}
+
+AItemActor* UWeaponGun::SpawnItemActor(const FVector& location, const FRotator& rotation, const FItemActorSpawnParameters& spawn_parameters)
 {
-	return false;
+	if (spawn_parameters.MoveOwnershipItemObject && WeaponGunActorCached.IsValid())
+	{
+		checkf(true, TEXT("Trying to spawn ItemActor and change ownership while WeaponGunActorCached still valid"));
+	}
 
-	//if(!attachment->isAttachmentCompatible(slot_pair->Key))
-	//{
-	//	return false;
-	//}
-
-	//slot_pair->Value = attachment;
-	//
-	//attachment->SetOuterWeapon(this);
-
-	//return true;
-}
-
-AItemActor* UWeaponGun::SpawnItemActor(const FVector& location, const FRotator& rotation)
-{
-	AItemActor* weapon_item_actor = AItemActor::StaticCreateObject(GetWorld(), ItemActorClass, this, location, rotation);
+	AItemActor* weapon_item_actor = AItemActor::StaticCreateObject(GetWorld(), ItemActorClass, this, spawn_parameters, location, rotation);
 
 	if(weapon_item_actor != nullptr)
 	{
+		WeaponGunActorCached = Cast<AWeaponGunActor>(weapon_item_actor);
+
 		AddAllAttachmentMeshes(weapon_item_actor->GetSkeletalMeshComp());
 	}
 
@@ -330,21 +329,7 @@ AItemActor* UWeaponGun::SpawnItemActor(const FVector& location, const FRotator& 
 
 bool UWeaponGun::AddAttachmentSlot(const FAttachmentSlot& slot)
 {
-	if(slot.slot_class == AttachmentSlotClass::None || slot.slot_type == AttachmentSlotType::None)
-	{
-		return false;
-	}
-
-	int32 idx = attachment_slots.Emplace(slot, nullptr);
-
-	//Reference magazine for fast access
-	if(slot.slot_type == AttachmentSlotType::Magazine || 
-		slot.slot_type == AttachmentSlotType::MagazineSpecial || 
-		slot.slot_type == AttachmentSlotType::Belt)
-	{
-		//*MagazineRef = TPair<FAttachmentSlot, UWeaponAttachmentMagazine*>{ attachment_slots[idx].Key, Cast<UWeaponAttachmentMagazine>(attachment_slots[idx].Value) };
-		MagazineAttachmentIdx = idx;
-	}
+	auto current_attachment = attachment_slots.Emplace(slot, nullptr);
 
 	return true;
 }
@@ -360,7 +345,7 @@ void UWeaponGun::SetupAnimInstance(USkeletalMeshComponent* sk_comp)
 	}
 
 	anim_instance->SetWeaponGun(this);
-	anim_instance->SetFireMode(weapon_info.FireMode);
+	anim_instance->SetFireMode(weapon_gun_info.FireMode);
 }
 
 //USkeletalMeshComponent* UWeaponGun::CreateSKWeaponRepresentation(USceneComponent* outer)
@@ -429,46 +414,19 @@ void UWeaponGun::SetupAnimInstance(USkeletalMeshComponent* sk_comp)
 //}
 //
 
-void UWeaponGun::SpawnMuzzleFlash(USkeletalMeshComponent* sk_comp) const
-{
-	if(weapon_info.MuzzleFlash != nullptr)
-	{
-		//Order: light first, emitter second. Otherwise a weird bug will occur: emitter location will be slightly off (UE 4.27)
-		const FActorSpawnParameters actor_spawn_params;
-
-		//Adjust location to account for muzzle device
-		//hardcoded for now
-		const float MOVE_LIGHT_SPAWN_LOCATION = -1.f; 
-
-		//const auto rotation = SK_WeaponRepresentation->GetSocketRotation("b_gun_muzzleflash");
-		const auto rotation = sk_comp->GetComponentRotation(); //sometimes SocketRotation is wrong, most of the time it's x forward and that's it
-		const auto location = sk_comp->GetSocketLocation("b_gun_muzzleflash") + rotation.Vector() * MOVE_LIGHT_SPAWN_LOCATION;
-
-		auto light_actor = GetWorld()->SpawnActor(weapon_info.MuzzleLight.Get(), &location, &rotation, actor_spawn_params);
-		light_actor->AttachToComponent(sk_comp, FAttachmentTransformRules::SnapToTargetNotIncludingScale, "b_gun_muzzleflash");
-
-		//auto* emitter = UGameplayStatics::SpawnEmitterAttached(weapon_info.MuzzleFlash, SK_WeaponRepresentation, "b_gun_muzzleflash", SK_WeaponRepresentation->GetSocketLocation("b_gun_muzzleflash"), rotation, EAttachLocation::SnapToTarget);
-		auto* emitter = UGameplayStatics::SpawnEmitterAttached(weapon_info.MuzzleFlash, sk_comp, "b_gun_muzzleflash", sk_comp->GetSocketLocation("b_gun_muzzleflash"), rotation, EAttachLocation::KeepWorldPosition);
-
-		if (emitter == nullptr)
-		{
-			UE_LOG(LogTemp, Warning, TEXT("UWeaponGun::SpawnMuzzleFlash: failed to spawn emitter"));
-		}
-	}
-}
 
 bool UWeaponGun::LoadAmmoIntoChamberFromMag()
 {
-	auto* mag = Cast<UWeaponAttachmentMagazine>(attachment_slots[MagazineAttachmentIdx].Value);
+	auto* mag = Cast<UWeaponAttachmentMagazine>(MagazineAttachment);
 
 	if(mag == nullptr)
 	{
 		return false;
 	}
 
-	weapon_info.Chamber = mag->Pop();
+	weapon_gun_info.Chamber = mag->Pop();
 
-	if(weapon_info.Chamber == nullptr)
+	if(weapon_gun_info.Chamber == nullptr)
 	{
 		return false;
 	}
@@ -476,17 +434,17 @@ bool UWeaponGun::LoadAmmoIntoChamberFromMag()
 	return true;
 }
 
-bool UWeaponGun::OnUse(AActor* caller)
-{
-	AGameCharacterBase* game_character = Cast<AGameCharacterBase>(caller);
-
-	if(game_character != nullptr)
-	{
-		return game_character->EquipGun(this);
-	}
-
-	return false;
-}
+//bool UWeaponGun::OnUse(AActor* caller)
+//{
+//	AGameCharacterBase* game_character = Cast<AGameCharacterBase>(caller);
+//
+//	if(game_character != nullptr)
+//	{
+//		return game_character->EquipGun(this);
+//	}
+//
+//	return false;
+//}
 
 //bool UWeaponGun::MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination)
 //{
@@ -509,24 +467,52 @@ bool UWeaponGun::OnUse(AActor* caller)
 //	return false;
 //}
 
-bool UWeaponGun::MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell)
+bool UWeaponGun::OnEquipped(AActor* caller, USceneComponent* attach_mesh, const FName& socket_name)
 {
-	auto* attachment = Cast<UWeaponAttachment>(item);
-
-	//TODO: test
-	if(destination.GetObject() == this || attachment == nullptr)
+	if (!IsValid(attach_mesh))
 	{
 		return false;
 	}
 
-	int32 idx = attachment_slots.Find(TPair<FAttachmentSlot, UWeaponAttachment*>{ attachment->GetAttachmentSlot(), attachment });
+	FItemActorSpawnParameters spawn_params;
+	spawn_params.Interactible = false;
+	spawn_params.MoveOwnershipItemObject = false;
+	spawn_params.EnablePhysics = false;
+	spawn_params.DisableCollision = true;
 
-	if(idx != INDEX_NONE && destination->ReceiveItem(item, new_upper_left_cell))
+	//spawn location and rotation is rather irrelevant, but anyway
+	auto spawned_actor = SpawnItemActor(caller->GetActorLocation(), caller->GetActorRotation(), spawn_params);
+
+	if (spawned_actor)
 	{
-		attachment_slots[idx].Value = attachment;
+		auto attach_result = spawned_actor->AttachToComponent(attach_mesh, { EAttachmentRule::SnapToTarget, true }, socket_name);
+
+		WeaponGunActorCached = Cast<AWeaponGunActor>(spawned_actor);
 
 		return true;
 	}
+
+	return false;
+}
+
+bool UWeaponGun::MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell)
+{
+	//auto* attachment = Cast<UWeaponAttachment>(item);
+
+	////TODO: test
+	//if(destination.GetObject() == this || attachment == nullptr)
+	//{
+	//	return false;
+	//}
+
+	//int32 idx = attachment_slots.Find(TPair<FAttachmentSlot, UWeaponAttachment*>{ attachment->GetAttachmentSlot(), attachment });
+
+	//if(idx != INDEX_NONE && destination->ReceiveItem(item, new_upper_left_cell))
+	//{
+	//	attachment_slots[idx].Value = attachment;
+
+	//	return true;
+	//}
 
 	return false;
 }
@@ -554,26 +540,30 @@ bool UWeaponGun::DropItemToWorld(UItemBase* item)
 		return false;
 	}
 
-	int32 idx = attachment_slots.Find(TPair<FAttachmentSlot, UWeaponAttachment*>{ attachment->GetAttachmentSlot(), attachment });
+	//int32 idx = attachment_slots.Find(TPair<FAttachmentSlot, UWeaponAttachment*>{ attachment->GetAttachmentSlot(), attachment });
 
-	if(idx != INDEX_NONE)
-	{
-		return false;
-	}
+	//if(idx != INDEX_NONE)
+	//{
+	//	return false;
+	//}
 
-	constexpr float DropDistance = 60;
+	//constexpr float DropDistance = 60;
+	//FItemActorSpawnParameters spawn_params;
+	//spawn_params.ChangeOuter = true;
+	//spawn_params.EnablePhysics = true;
+	//spawn_params.Interactible = true;
 
-	auto* item_actor = item->SpawnItemActor(GetOwner()->GetActorLocation() + GetOwner()->GetActorForwardVector() * DropDistance, GetOwner()->GetActorRotation());
-	if(item_actor == nullptr)
-	{
-		//can't spawn, do not delete from inventory
-		UKismetSystemLibrary::PrintString(GetWorld(), "Drop to world is blocked", true, true, FLinearColor(130, 5, 255), 4);
-		return false;
-	}
+	//auto* item_actor = item->SpawnItemActor(GetOwner()->GetActorLocation() + GetOwner()->GetActorForwardVector() * DropDistance, GetOwner()->GetActorRotation());
+	//if(item_actor == nullptr)
+	//{
+	//	//can't spawn, do not delete from inventory
+	//	UKismetSystemLibrary::PrintString(GetWorld(), "Drop to world is blocked", true, true, FLinearColor(130, 5, 255), 4);
+	//	return false;
+	//}
 
-	attachment_slots[idx].Value = nullptr;
+	//attachment_slots[idx].Value = nullptr;
 
-	item->SetOuterItemActor(item_actor);
+	//item->SetOuterItemActor(item_actor);
 	//SK_WeaponRepresentation = nullptr;
 
 	return false;
@@ -600,23 +590,23 @@ bool UWeaponGun::ReceiveItem(UItemBase* item, FIntPoint new_upper_left_cell)
 void UWeaponGun::AddAllAttachmentMeshes(USkeletalMeshComponent* sk_comp)
 {
 	//Attach all attachments
-	for(int32 i = 0; i < attachment_slots.Num(); i++)
-	{
-		if(attachment_slots[i].Value != nullptr)
-		{
-			AddAttachmentMesh(sk_comp, attachment_slots[i].Value);
-		}
-	}
+	//for(int32 i = 0; i < attachment_slots.Num(); i++)
+	//{
+	//	if(attachment_slots[i].Value != nullptr)
+	//	{
+	//		AddAttachmentMesh(sk_comp, attachment_slots[i].Value);
+	//	}
+	//}
 }
 
 //void UWeaponGun::SetWeaponInfo(FWeaponInfo&& value)
 //{
-//	weapon_info = value;
+//	weapon_gun_info = value;
 //}
 
 bool UWeaponGun::CycleChargingHandle()
 {
-	if(weapon_info.bHasChamber)
+	if(weapon_gun_info.bHasChamber)
 	{
 		return LoadAmmoIntoChamberFromMag();
 	}
@@ -626,7 +616,7 @@ bool UWeaponGun::CycleChargingHandle()
 
 const UAmmoBase* UWeaponGun::CheckChamber() const
 {
-	return weapon_info.Chamber;
+	return weapon_gun_info.Chamber;
 }
 
 bool UWeaponGun::Reload()
@@ -641,12 +631,12 @@ bool UWeaponGun::ReloadFast()
 
 bool UWeaponGun::LoadAmmoStraightIntoChamber(UAmmoBase* ammo)
 {
-	if(ammo == nullptr || weapon_info.Chamber != nullptr)
+	if(ammo == nullptr || weapon_gun_info.Chamber != nullptr)
 	{
 		return false;
 	}
 
-	weapon_info.Chamber = Cast<UAmmoBase>(ammo->StackGetSplit(1, this));
+	weapon_gun_info.Chamber = Cast<UAmmoBase>(ammo->StackGetSplit(1, this));
 
 	if(ammo->GetCurrentStackSize() == 0)
 	{
@@ -674,15 +664,15 @@ void UWeaponGun::ChangeFireMode()
 {
 	EndFire();
 
-	size_t i = weapon_info.FireModesAvailable.Find(weapon_info.FireMode);
+	size_t i = weapon_gun_info.FireModesAvailable.Find(weapon_gun_info.FireMode);
 
-	if(weapon_info.FireModesAvailable.IsValidIndex(i+1))
+	if(weapon_gun_info.FireModesAvailable.IsValidIndex(i+1))
 	{
-		weapon_info.FireMode = weapon_info.FireModesAvailable[i+1];
+		weapon_gun_info.FireMode = weapon_gun_info.FireModesAvailable[i+1];
 	}
 	else
 	{
-		weapon_info.FireMode = weapon_info.FireModesAvailable[0];
+		weapon_gun_info.FireMode = weapon_gun_info.FireModesAvailable[0];
 	}
 
 
@@ -694,5 +684,5 @@ void UWeaponGun::ChangeFireMode()
 	//	return;
 	//}
 
-	//anim_instance->SetFireMode(weapon_info.FireMode);
+	//anim_instance->SetFireMode(weapon_gun_info.FireMode);
 }

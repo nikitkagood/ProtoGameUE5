@@ -12,12 +12,12 @@ UObject* UVBFWeapon::GetWeaponOwner_Implementation() const
 
 bool UVBFWeapon::SetWeaponActive_Implementation(bool new_active) const
 {
-    return vbf_weapon_info.IsActive;
+    return vbf_weapon_gun_info.IsActive;
 }
 
 bool UVBFWeapon::CanWeaponAttack_Implementation() const
 {
-    return IsWeaponActive() && vbf_weapon_info.AmmoLeft > 1;
+    return IsWeaponActive() && vbf_weapon_gun_info.AmmoLeft > 1;
 }
 
 double UVBFWeapon::GetWeaponHitChance_Implementation(double target_distance, const FVector& target_location, const FVector& target_size, double target_speed) const
@@ -40,7 +40,7 @@ bool UVBFWeapon::WeaponTarget_Implementation(const UObject* target)
 
     //auto unit = Cast<IVBFUnitInterface>(target);
 
-    vbf_weapon_info.Target = target;
+    vbf_weapon_gun_info.Target = target;
 
     return true;
 }
@@ -71,7 +71,7 @@ int64 UVBFWeapon::WeaponUseAmmo_Implementation(int64 count, bool strict_check)
         return 0;
     }
 
-    if (vbf_weapon_info.AmmoLeft < count)
+    if (vbf_weapon_gun_info.AmmoLeft < count)
     {
         if (strict_check == true)
         {
@@ -79,14 +79,14 @@ int64 UVBFWeapon::WeaponUseAmmo_Implementation(int64 count, bool strict_check)
         }
         else
         {
-            int64 remaining_ammo_used = vbf_weapon_info.AmmoLeft;
-            vbf_weapon_info.AmmoLeft = 0;
+            int64 remaining_ammo_used = vbf_weapon_gun_info.AmmoLeft;
+            vbf_weapon_gun_info.AmmoLeft = 0;
 
             return remaining_ammo_used;
         }
     }
 
-    vbf_weapon_info.AmmoLeft -= count;
+    vbf_weapon_gun_info.AmmoLeft -= count;
     return count;
 }
 
@@ -97,7 +97,7 @@ int64 UVBFWeapon::WeaponAddAmmo_Implementation(int64 count, bool strict_check)
         return 0;
     }
 
-    if ((vbf_weapon_info.AmmoLeft + count) > GetWeaponAmmoMax())
+    if ((vbf_weapon_gun_info.AmmoLeft + count) > GetWeaponAmmoMax())
     {
         if (strict_check == true)
         {
@@ -105,13 +105,13 @@ int64 UVBFWeapon::WeaponAddAmmo_Implementation(int64 count, bool strict_check)
         }
         else
         {
-            int64 ammo_added_until_max = GetWeaponAmmoMax() - vbf_weapon_info.AmmoLeft;
-            vbf_weapon_info.AmmoLeft = GetWeaponAmmoMax();
+            int64 ammo_added_until_max = GetWeaponAmmoMax() - vbf_weapon_gun_info.AmmoLeft;
+            vbf_weapon_gun_info.AmmoLeft = GetWeaponAmmoMax();
 
             return ammo_added_until_max;
         }
     }
 
-    vbf_weapon_info.AmmoLeft += count;
+    vbf_weapon_gun_info.AmmoLeft += count;
     return count;
 }

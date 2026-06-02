@@ -16,7 +16,7 @@ class ACharacter;
 class UInvSpecialSlotComponent;
 
 UENUM(BlueprintType)
-enum class EStackResult : uint8
+enum class EItemStackResult : uint8
 {
 	NotStacked = 0,
 	StackedPartially, //added item trasfered some amount to any inventory item
@@ -150,7 +150,7 @@ protected:
 	//Try to find an item to stack with
 	//Successful stacking is not recursive: if anything stacked, then it stops
 	// even if we could find another item to stack with
-	EStackResult TryToStack(UItemBase* item);
+	EItemStackResult TryToStack(UItemBase* item);
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Inventory", meta = (AllowPrivateAccess = true, ExposeOnSpawn = true))
 	FName InventoryName;
@@ -202,7 +202,7 @@ private:
 	UFUNCTION(BlueprintCallable)
 	virtual bool CheckSelfRecursion(UItemBase* item) const;
 
-	int32 GridToArrayIndex(int32 x, int32 y) const;
+	int32 GridToArrayIndex(int32 row, int32 col) const;
 	FIntPoint ArrayIndexToGrid(int32 idx) const;
 
 //#if WITH_EDITOR
@@ -220,10 +220,8 @@ private:
 	
 	//Flattened 2D Array; Use GridToArrayIndex to acces it like 2D
 	//-1 is free space; 0 and so on - some item
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, Category = "Inventory", meta = (AllowPrivateAccess = true))
 	TArray<int32> InventoryGrid;
-
-	static constexpr int GRID_EMPTY_SPACE = -1;
 
 	//TODO: not implemented yet; 
 	//Types this inventory can store, 0 means all
@@ -234,4 +232,6 @@ private:
 	FGameplayTagContainer Tags;
 
 	mutable FCriticalSection InventoryMutex;
+
+	static constexpr int GRID_EMPTY_SPACE = -1;
 };

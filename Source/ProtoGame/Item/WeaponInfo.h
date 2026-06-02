@@ -7,12 +7,17 @@
 #include "ItemThumbnailInfo.h"
 #include "Effects/EffectBase.h"
 
+
+#include "Engine/DataAsset.h"
+
 #include "WeaponInfo.generated.h"
 
 class UAnimInstance;
+class UAnimMontage;
 class AProjectile;
 class UWeaponAttachment;
-class UAnimMontage;
+struct FWeaponGunActorInfo;
+struct FWeaponGunInfo;
 
 UENUM(BlueprintType)
 enum class EWeaponFireMode : uint8
@@ -32,56 +37,61 @@ enum class EWeaponFireMode : uint8
 	SpecialMode3        UMETA(DisplayName = "Special mode 3"),
 };
 
+//Since different skeletal meshes have different bone names
+//We explicitly tell AnimInsance what is what
 USTRUCT(BlueprintType)
-struct PROTOGAME_API FWeaponInfo : public FTableRowBase
+struct PROTOGAME_API FGunBoneNames : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Bones")
+	FName MuzzleEnd = "muzzle_end";
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Bones")
+	FName MuzzleDevice = "muzzle_device";
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Bones")
+	FName GunBarrel = "muzzle_end";
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Bones")
+	FName Magazine = "magazine";
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Bones")
+	FName MagRelease = "mag_release";
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Bones")
+	FName ChargingHandle = "charging_handle";
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Bones")
+	FName Bolt = "bolt";
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Bones")
+	FName BoltCover = "bolt_cover";
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Bones")
+	FName BoltRelease = "bolt_release";
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Bones")
+	FName FireModeSwitch = "fire_mode_switch";
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Bones")
+	FName Stock = "stock";
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Bones")
+	FName SafetySwitch = "safety_switch";
+
+};
+
+//It should contain only weapon logic values
+USTRUCT(BlueprintType)
+struct PROTOGAME_API FWeaponGunInfo : public FTableRowBase
 {
 	GENERATED_USTRUCT_BODY()
 
 	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	//TSoftObjectPtr<USkeletalMesh> weapon_mesh;
 
-	//Animations
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Animation, meta = (AllowPrivateAccess = true))
-	TSubclassOf<UAnimInstance> AnimClass;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Animation, meta = (AllowPrivateAccess = true))
-	UAnimMontage* HoldAnim;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Animation, meta = (AllowPrivateAccess = true))
-	UAnimMontage* AimDownSights;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Animation, meta = (AllowPrivateAccess = true))
-	UAnimMontage* ReloadCharacter;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Animation, meta = (AllowPrivateAccess = true))
-	UAnimMontage* ReloadGun;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Animation, meta = (AllowPrivateAccess = true))
-	UAnimMontage* ChargingHandle;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Animation, meta = (AllowPrivateAccess = true))
-	UAnimMontage* ChargingHandleGun;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Animation, meta = (AllowPrivateAccess = true))
-	UParticleSystem* MuzzleFlash;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Animation, meta = (AllowPrivateAccess = true))
-	TSubclassOf<AEffectBase> MuzzleLight;
-	//
-
-	//Sounds, effects
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Audio, meta = (AllowPrivateAccess = true))
-	USoundBase* FireSound;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Audio, meta = (AllowPrivateAccess = true))
-	USoundBase* EmptyClickSound;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Audio, meta = (AllowPrivateAccess = true))
-	USoundBase* CasingSound;
-	//
-
+	//Ideally guns will be made out of parts, so by default they aren't functional
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	bool bFunctional = false;
 
@@ -94,11 +104,13 @@ struct PROTOGAME_API FWeaponInfo : public FTableRowBase
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true), Category = WeaponSpecifications)
 	TArray<EWeaponFireMode> FireModesAvailable { EWeaponFireMode::Single };
 
+	//Fire mode of a gun
+	//By default single fire, but it's not always available
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = true), Category = WeaponSpecifications)
 	EWeaponFireMode FireMode = FireModesAvailable[0];
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = true), Category = WeaponSpecifications)
-	EAmmoCaliber Caliber;
+	FGameplayTag Caliber;
 
 	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true), Category = WeaponSpecifications)
 	//TSubclassOf<AProjectile> AmmoType;
@@ -162,43 +174,117 @@ struct PROTOGAME_API FWeaponInfo : public FTableRowBase
 	//Reload
 
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true), Category = Reload)
-	bool bReloading;
+	bool bReloading = false;
 
 	//Combined. Mag in and mag out. Pulling charging handle or other additional manipulations aren't included.
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true, ClampMin = 0, ClampMax = 300), Category = Reload)
-	float ReloadTime;
+	float ReloadTime = 3;
+
+	//I.e. if a gun is fully empty, ReloadTime and ChargingHandleTime are combined
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true, ClampMin = 0, ClampMax = 300), Category = Reload)
+	float ChargingHandleTime = 1;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true, ClampMin = 0, ClampMax = 300), Category = Reload)
-	float ChargingHandleTime;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true, ClampMin = 0, ClampMax = 300), Category = Reload)
-	float LoadAmmoStraightIntoChamberTime;
+	float LoadAmmoStraightIntoChamberTime = 3;
 	//
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true, ClampMin = 0, ClampMax = 1200), Category = Handling)
-	float DrawSpeed;
+	float DrawSpeed = 1;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true, ClampMin = 0, ClampMax = 1200), Category = Handling)
-	float HolsterSpeed;
+	float HolsterSpeed = 1;
+
+
+	//Absolute nubmer. So players can easily understand which weapon is more durable
+	//Default value is 500
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true, ClampMin = 0, ClampMax = 10000), Category = Durability)
+	float Durability = 500;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true, ClampMin = 0), Category = Durability)
+	float Heat = 0;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true, ClampMin = 0), Category = Durability)
+	float HeatingSpeed = 1;
 
 	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true, ClampMin = 0), Category = Handling)
 	//float Length;
-
-	//It's not percentage. Each gun must have absolute nubmer, so players can easily understand which weapon is more durable
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true, ClampMin = 0, ClampMax = 10000), Category = Durability)
-	float Durability;
-
-	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true, ClampMin = 0), Category = Durability)
-	float Heat;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true, ClampMin = 0), Category = Durability)
-	float HeatingSpeed;
 };
+
+USTRUCT(BlueprintType)
+struct PROTOGAME_API FWeaponGunActorInfo : public FTableRowBase
+{
+	GENERATED_BODY()
+
+	//Animations
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Animation, meta = (AllowPrivateAccess = true))
+	TSubclassOf<UAnimInstance> AnimClass;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Animation, meta = (AllowPrivateAccess = true))
+	FGunBoneNames gun_bone_names;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Animation, meta = (AllowPrivateAccess = true))
+	UAnimMontage* HoldAnimChar;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Animation, meta = (AllowPrivateAccess = true))
+	UAnimMontage* AimDownSightsChar;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Animation, meta = (AllowPrivateAccess = true))
+	UAnimMontage* ReloadChar;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Animation, meta = (AllowPrivateAccess = true))
+	UAnimMontage* ReloadGun;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Animation, meta = (AllowPrivateAccess = true))
+	UAnimMontage* ChargingHandleChar;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Animation, meta = (AllowPrivateAccess = true))
+	UAnimMontage* ChargingHandleGun;
+
+	//Sounds
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Audio, meta = (AllowPrivateAccess = true))
+	USoundBase* FireSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Audio, meta = (AllowPrivateAccess = true))
+	USoundBase* DryFireSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Audio, meta = (AllowPrivateAccess = true))
+	USoundBase* CasingDropSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Audio, meta = (AllowPrivateAccess = true))
+	USoundBase* FireSelectorSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Audio, meta = (AllowPrivateAccess = true))
+	USoundBase* MagInSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Audio, meta = (AllowPrivateAccess = true))
+	USoundBase* MagOutSound;
+
+	//Effects
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Effects, meta = (AllowPrivateAccess = true))
+	UParticleSystem* MuzzleFlash;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Effects, meta = (AllowPrivateAccess = true))
+	TSubclassOf<AEffectBase> MuzzleLight;
+};
+
+UCLASS(BlueprintType)
+class PROTOGAME_API UFWeaponGunActorData : public UDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FWeaponGunActorInfo gun_actor_info;
+};
+
 
 //Data tables only
 //Represents only base weapon
 USTRUCT(BlueprintType)
-struct PROTOGAME_API FWeaponTable : public FTableRowBase
+struct PROTOGAME_API FWeaponGunTable : public FTableRowBase
 {
 	GENERATED_USTRUCT_BODY()
 
@@ -206,7 +292,7 @@ struct PROTOGAME_API FWeaponTable : public FTableRowBase
 	FInventoryItemInfo inventory_item_info;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
-	FWeaponInfo weapon_info;
+	FWeaponGunInfo weapon_gun_info;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	TArray<FAttachmentSlot> attachment_slots;

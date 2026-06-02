@@ -13,7 +13,7 @@ class PROTOGAME_API UGunRifle : public UWeaponGun
 	GENERATED_BODY()
 
 private:
-	using DataTableType = FWeaponTable;
+	using DataTableType = FWeaponGunTable;
 public:
 	//UGunRifle();
 
@@ -76,7 +76,7 @@ private:
 	bool AddAttachment(UWeaponAttachment* attachment);
 
 	//TODO: implement
-	bool AddAttachmentTo(UWeaponAttachment* attachment, TPair<FAttachmentSlot, UWeaponAttachment*>* slot_pair);
+	bool AddAttachmentTo(UWeaponAttachment* attachment, FAttachmentSlot* slot);
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = true))
 	bool bTestFire = true;

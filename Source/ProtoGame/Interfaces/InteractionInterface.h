@@ -22,7 +22,7 @@ enum class EInteractionType : uint8
 UENUM(BlueprintType)
 enum class EInteractionActions : uint8
 {
-	Unspecified	= 0				UMETA(DisplayName = "Unspecified"),
+	Default	= 0					UMETA(DisplayName = "Default"),
 	Use							UMETA(DisplayName = "Use"),
 	Consume						UMETA(DisplayName = "Consume"),
 	Open						UMETA(DisplayName = "Open"), //both open something like door and something like crate

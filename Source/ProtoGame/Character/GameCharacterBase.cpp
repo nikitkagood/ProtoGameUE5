@@ -4,7 +4,6 @@
 #include "Character/GameCharacterBase.h"
 #include "Item/Projectile.h"
 #include "Item/ItemBase.h"
-#include "Item/InventoryItem.h"
 #include "Item/ItemActor.h"
 #include "Item/WeaponGun.h"
 #include "Inventory/InventoryComponent.h"
@@ -188,49 +187,51 @@ void AGameCharacterBase::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-UInventoryComponent* AGameCharacterBase::GetInventoryComponent(ECharacterInventoryType type) const
-{
-	UInventoryItem* temp_inventory_item;
-
-	switch (type)
-	{
-	case ECharacterInventoryType::None:
-		return nullptr;
-		break;
-	case ECharacterInventoryType::Pockets:
-		//return InventoryComponent_Pockets;
-		break;
-	case ECharacterInventoryType::Backpack:
-		temp_inventory_item = Cast<UInventoryItem>(InventoryItemSlot_Backpack->GetItem());
-
-		if (temp_inventory_item == nullptr)
-		{
-			return nullptr;
-		}
-		else
-		{
-			return temp_inventory_item->GetInventoryComponent();
-		}
-		break;
-	case ECharacterInventoryType::ChestRig:
-		temp_inventory_item = Cast<UInventoryItem>(InventoryItemSlot_Backpack->GetItem());
-
-		if (temp_inventory_item == nullptr)
-		{
-			return nullptr;
-		}
-		else
-		{
-			return temp_inventory_item->GetInventoryComponent();
-		}
-		break;
-	default:
-		return nullptr;
-		break;
-	}
-
-	return nullptr;
-}
+//UInventoryComponent* AGameCharacterBase::GetInventoryComponent(ECharacterInventoryType type) const
+//{
+//	UInventoryItem* temp_inventory_item;
+//
+//	switch (type)
+//	{
+//	case ECharacterInventoryType::None:
+//		return nullptr;
+//		break;
+//	case ECharacterInventoryType::Pockets:
+//		//return InventoryComponent_Pockets;
+//		break;
+//	case ECharacterInventoryType::Backpack:
+//
+//
+//		temp_inventory_item = Cast<UInventoryItem>(InventoryItemSlot_Backpack->GetItem());
+//
+//		if (temp_inventory_item == nullptr)
+//		{
+//			return nullptr;
+//		}
+//		else
+//		{
+//			return temp_inventory_item->GetInventoryComponent();
+//		}
+//		break;
+//	case ECharacterInventoryType::ChestRig:
+//		temp_inventory_item = Cast<UInventoryItem>(InventoryItemSlot_Backpack->GetItem());
+//
+//		if (temp_inventory_item == nullptr)
+//		{
+//			return nullptr;
+//		}
+//		else
+//		{
+//			return temp_inventory_item->GetInventoryComponent();
+//		}
+//		break;
+//	default:
+//		return nullptr;
+//		break;
+//	}
+//
+//	return nullptr;
+//}
 
 UCustomCharacterMovementComponent* AGameCharacterBase::GetCharacterMovement() const
 {

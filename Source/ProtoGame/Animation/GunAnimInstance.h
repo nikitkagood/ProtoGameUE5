@@ -4,12 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
+#include "Effects/EffectBase.h"
+#include "Item/WeaponInfo.h"
 
 #include "GunAnimInstance.generated.h"
 
 //DECLARE_DYNAMIC_MULTICAST_DELEGATE(FUpdateAnimInstance);
 
 class UWeaponGun;
+class UAnimMontage;
+class UParticleSystem;
+class USoundBase;
 enum class EWeaponFireMode : uint8;
 
 UCLASS()

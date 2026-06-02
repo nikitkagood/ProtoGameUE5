@@ -11,6 +11,11 @@
 #include "Kismet/GameplayStatics.h"
 
 
+TArray<EInteractionActions> UWeaponBase::GetInteractionActions() const
+{
+	return TArray<EInteractionActions>{ EInteractionActions::Equip, EInteractionActions::Take };
+}
+
 void UWeaponBase::DestroySKStatic(USkeletalMeshComponent* sk_comp)
 {
 	if(sk_comp == nullptr)

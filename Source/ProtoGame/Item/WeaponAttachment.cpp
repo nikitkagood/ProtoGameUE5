@@ -36,22 +36,21 @@ UWeaponBase* UWeaponAttachment::GetOuterWeapon() const
 
 FName UWeaponAttachment::GetSocketName()
 {
-	if(attachment_info.slot.slot_number > 0)
-	{
-		return FName(attachment_info.socket_name.ToString() + '_' + FString::FromInt(attachment_info.slot.slot_number));
-	}
-	else
-	{
-		return attachment_info.socket_name;
-	}
+	//if(attachment_info.slot.slot_number > 0)
+	//{
+	//	return FName(attachment_info.socket_name.ToString() + '_' + FString::FromInt(attachment_info.slot.slot_number));
+	//}
+	//else
+	//{
+
+	//}
+
+	return attachment_info.socket_name;
 }
 
-bool UWeaponAttachment::isAttachmentCompatible(FAttachmentSlot slot) const
+bool UWeaponAttachment::IsAttachmentCompatible(FAttachmentSlot slot) const
 {
-	//TODO: Temporary version
-	bool result = slot.slot_class == attachment_info.slot.slot_class && slot.slot_type == attachment_info.slot.slot_type;
-
-	return result;
+	return attachment_info.slot == slot;
 }
 
 //void UWeaponAttachment::BeginPlay()

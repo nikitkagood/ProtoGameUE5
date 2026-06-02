@@ -91,31 +91,31 @@ bool UInventoryManager::AddItemFromWorld(UItemBase* item, EManagerInventoryType 
 {
 	//auto AddItemFromWorld_if = [&](std::function<bool(TScriptInterface<IInventoryInterface>)> predicate)
 	//Call AddItemFrom world if passed predicate is true
-	auto AddItemFromWorld_if = [item, this](std::function<bool(IInventoryInterface*)> predicate)
-	{
-		for (auto& i : inventories)
-		{
-			IInventoryInterface* inv = Cast<IInventoryInterface>(i);
+	//auto AddItemFromWorld_if = [item, this](std::function<bool(IInventoryInterface*)> predicate)
+	//{
+	//	for (auto& i : inventories)
+	//	{
+	//		IInventoryInterface* inv = Cast<IInventoryInterface>(i);
 
-			if (inv == nullptr)
-			{
-				checkf(false, TEXT("Invalid inventory"));
-				continue;
-			}
+	//		if (inv == nullptr)
+	//		{
+	//			checkf(false, TEXT("Invalid inventory"));
+	//			continue;
+	//		}
 
-			if (predicate(inv) == false)
-			{
-				continue;
-			}
+	//		if (predicate(inv) == false)
+	//		{
+	//			continue;
+	//		}
 
-			if (inv->AddItemFromWorld(item))
-			{
-				return true;
-			}
-		}
+	//		if (inv->AddItemFromWorld(item))
+	//		{
+	//			return true;
+	//		}
+	//	}
 
-		return false;
-	};
+	//	return false;
+	//};
 
 	auto AddItemFromWorld_Type = [item, this](TSubclassOf<UObject> type)
 		{
@@ -133,7 +133,6 @@ bool UInventoryManager::AddItemFromWorld(UItemBase* item, EManagerInventoryType 
 					checkf(false, TEXT("Invalid inventory"));
 					continue;
 				}
-
 
 				if (inv->AddItemFromWorld(item))
 				{
@@ -260,6 +259,78 @@ bool UInventoryManager::DropItemToWorld(UItemBase* item)
 //		inv->UpdateInventory();
 //	}
 //}
+
+TScriptInterface<IInventoryInterface> UInventoryManager::FindInventoryHasTag(FGameplayTag tag, bool exact)
+{
+	for (auto* inv : inventories)
+	{
+		if (exact)
+		{
+			if (Cast<IInventoryInterface>(inv)->GetInventoryTags().HasTagExact(tag))
+			{
+				return inv;
+			}
+		}
+		else
+		{
+			if (Cast<IInventoryInterface>(inv)->GetInventoryTags().HasTag(tag))
+			{
+				return inv;
+			}
+		}
+	}
+
+	return {};
+}
+
+TArray<TScriptInterface<IInventoryInterface>> UInventoryManager::FindAllInventoriesHasTag(FGameplayTag tag, bool exact)
+{
+	TArray<TScriptInterface<IInventoryInterface>> arr;
+
+	for (auto* inv : inventories)
+	{
+		if (exact)
+		{
+			if (Cast<IInventoryInterface>(inv)->GetInventoryTags().HasTagExact(tag))
+			{
+				arr.Push(inv);
+			}
+		}
+		else
+		{
+			if (Cast<IInventoryInterface>(inv)->GetInventoryTags().HasTag(tag))
+			{
+				arr.Push(inv);
+			}
+		}
+	}
+
+	return arr;
+}
+
+TScriptInterface<IInventoryInterface> UInventoryManager::FindInventoryHasAllTags(FGameplayTagContainer tags, bool exact)
+{
+	for (auto* inv : inventories)
+	{
+		if (exact)
+		{
+			if (Cast<IInventoryInterface>(inv)->GetInventoryTags().HasAllExact(tags))
+			{
+				return inv;
+			}
+		}
+		else
+		{
+			if (Cast<IInventoryInterface>(inv)->GetInventoryTags().HasAll(tags))
+			{
+				return inv;
+			}
+		}
+	}
+
+	return {};
+}
+
 
 void UInventoryManager::AddExistingInventory(TScriptInterface<IInventoryInterface> inventory)
 {
