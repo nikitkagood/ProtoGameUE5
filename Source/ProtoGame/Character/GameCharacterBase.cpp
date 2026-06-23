@@ -67,7 +67,7 @@ AGameCharacterBase::AGameCharacterBase(const class FObjectInitializer& ObjectIni
 	PrimaryGunSlot = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("Primary gun slot component"));
 	SecondaryGunSlot = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("Secondary gun slot component"));
 	//It is created so it is visibile in Blueprints, otherwise it's redundant
-	ActiveSlot = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("Active slot component"));
+	//ActiveSlot = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("Active slot component"));
 
 	//ECC_GameTraceChannel3 is Interaction
 	//See DefaultEngine.ini
@@ -113,7 +113,7 @@ void AGameCharacterBase::BeginPlay()
 	InventoryManager->AddExistingInventory(InventoryItemSlot_ChestRig);
 
 	//Active slot is PrimarySlot by default
-	ActiveSlot = PrimaryGunSlot;
+	//ActiveSlot = PrimaryGunSlot;
 
 	GetWorld()->GetTimerManager().SetTimer(InteractionSweepTimerHandle, this, &AGameCharacterBase::SweepInteractionLoop, 1.f / 30.f, true, 0.f);
 }
@@ -280,25 +280,25 @@ void AGameCharacterBase::StartFireActive()
 {
 	bFireButtonDown = true;
 
-	if(ActiveSlot->IsOccupied())
-	{
-		Cast<UWeaponGun>(ActiveSlot->GetItem())->StartFire();
-	}
+	//if(ActiveSlot->IsOccupied())
+	//{
+	//	Cast<UWeaponGun>(ActiveSlot->GetItem())->StartFire();
+	//}
 }
 
 void AGameCharacterBase::EndFireActive()
 {
-	if(bFireButtonDown == true)
-	{
-		UWeaponGun* gun = Cast<UWeaponGun>(ActiveSlot->GetItem());
+	//if(bFireButtonDown == true)
+	//{
+	//	UWeaponGun* gun = Cast<UWeaponGun>(ActiveSlot->GetItem());
 
-		if(gun != nullptr)
-		{
-			gun->EndFire();
-		}
-	}
+	//	if(gun != nullptr)
+	//	{
+	//		gun->EndFire();
+	//	}
+	//}
 
-	bFireButtonDown = false;
+	//bFireButtonDown = false;
 }
 
 bool AGameCharacterBase::EquipGun(UItemBase* item)
@@ -359,14 +359,14 @@ void AGameCharacterBase::UpdateWeaponSlot(UInvSpecialSlotComponent* slot)
 		return;
 	}
 
-	if (slot == ActiveSlot)
-	{
-		UWeaponBase::DestroySKStatic(InHandsSkeletalMesh);
-	}
-	else
-	{
-		UWeaponBase::DestroySKStatic(StowedOnBackSkeletalMesh);
-	}
+	//if (slot == ActiveSlot)
+	//{
+	//	UWeaponBase::DestroySKStatic(InHandsSkeletalMesh);
+	//}
+	//else
+	//{
+	//	UWeaponBase::DestroySKStatic(StowedOnBackSkeletalMesh);
+	//}
 
 	auto* weapon = Cast<UWeaponGun>(slot->GetItem());
 
@@ -377,16 +377,16 @@ void AGameCharacterBase::UpdateWeaponSlot(UInvSpecialSlotComponent* slot)
 
 	weapon->EndFire();
 
-	if (slot == ActiveSlot)
-	{
-		//InHandsSkeletalMesh = weapon->CreateSKWeaponRepresentation(GetMesh());
-		//InHandsSkeletalMesh->AttachToComponent(GetMesh(), { EAttachmentRule::SnapToTarget, true }, "ik_hand_gun");
-	}
-	else
-	{
-		//StowedOnBackSkeletalMesh = weapon->CreateSKWeaponRepresentation(GetMesh());
-		//StowedOnBackSkeletalMesh->AttachToComponent(GetMesh(), { EAttachmentRule::SnapToTarget, true }, "StowedOnBackSocket");
-	}
+	//if (slot == ActiveSlot)
+	//{
+	//	//InHandsSkeletalMesh = weapon->CreateSKWeaponRepresentation(GetMesh());
+	//	//InHandsSkeletalMesh->AttachToComponent(GetMesh(), { EAttachmentRule::SnapToTarget, true }, "ik_hand_gun");
+	//}
+	//else
+	//{
+	//	//StowedOnBackSkeletalMesh = weapon->CreateSKWeaponRepresentation(GetMesh());
+	//	//StowedOnBackSkeletalMesh->AttachToComponent(GetMesh(), { EAttachmentRule::SnapToTarget, true }, "StowedOnBackSocket");
+	//}
 }
 
 void AGameCharacterBase::MoveForward(float Value)

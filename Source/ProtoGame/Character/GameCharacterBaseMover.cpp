@@ -21,6 +21,9 @@
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
+#include "Components/ShapeComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "GameFramework/InputSettings.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -29,6 +32,7 @@
 #include "DefaultMovementSet/CharacterMoverComponent.h"
 #include "Engine/SkeletalMesh.h"
 #include "Engine/World.h"
+#include "TimerManager.h"
 
 
 //debug
@@ -78,7 +82,7 @@ AGameCharacterBaseMover::AGameCharacterBaseMover(const class FObjectInitializer&
 	//PrimaryGunSlot = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("Primary gun slot component"));
 	//SecondaryGunSlot = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("Secondary gun slot component"));
 	//It is created so it is visibile in Blueprints, otherwise it's redundant
-	ActiveSlot = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("Active slot component"));
+	//ActiveSlot = CreateDefaultSubobject<UInvSpecialSlotComponent>(TEXT("Active slot component"));
 
 	//ECC_GameTraceChannel3 is Interaction
 	//See DefaultEngine.ini

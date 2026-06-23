@@ -45,6 +45,7 @@ public:
 	//virtual bool OnUse(AActor* caller) override;
 
 	virtual bool OnEquipped(AActor* caller, USceneComponent* attach_mesh, const FName& socket_name) override;
+	virtual bool OnUnEquipped() override;
 
 	//Inventory interface; This class supports only WeaponAttachment and AmmoBase items
 
@@ -52,7 +53,7 @@ public:
 	virtual bool AddItemFromWorld(UItemBase* item) override;
 	virtual bool DropItemToWorld(UItemBase* item) override;
 	virtual bool ReceiveItem(UItemBase* item, FIntPoint new_upper_left_cell) override;
-	virtual void UpdateInventory() override { OnInventoryUpdated.Broadcast(); };
+	virtual void UpdateInventory() override { OnInventoryUpdated.Broadcast(this); };
 	virtual FGameplayTagContainer GetInventoryTags() const override { return {}; }; //not supported
 
 	UPROPERTY(BlueprintAssignable)

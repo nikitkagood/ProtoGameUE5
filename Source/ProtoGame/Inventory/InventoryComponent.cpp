@@ -199,7 +199,7 @@ bool UInventoryComponent::AddItem(UItemBase* item)
 
             item->World = GetWorld();
 
-            OnInventoryUpdated.Broadcast();
+            OnInventoryUpdated.Broadcast(this);
             return true;
         }
         else if(was_rotated == true)
@@ -257,7 +257,7 @@ bool UInventoryComponent::AddItemAt(UItemBase* item, FIntPoint new_upper_left_ce
 
             item->World = GetWorld();
 
-            OnInventoryUpdated.Broadcast();
+            OnInventoryUpdated.Broadcast(this);
             return true;
         }
     }
@@ -295,7 +295,7 @@ bool UInventoryComponent::RemoveItem(UItemBase* item)
 
     Items.RemoveSingleSwap({ item }, EAllowShrinking::Yes);
 
-    OnInventoryUpdated.Broadcast();
+    OnInventoryUpdated.Broadcast(this);
     return true;
 }
 
@@ -327,7 +327,7 @@ bool UInventoryComponent::RemoveItemAt(UItemBase* item, FIntPoint upper_left_cel
 
     Items.RemoveSingleSwap({ item }, EAllowShrinking::Yes);
 
-    OnInventoryUpdated.Broadcast();
+    OnInventoryUpdated.Broadcast(this);
     return true;
 }
 
@@ -725,7 +725,7 @@ void UInventoryComponent::PrintDebugInfo()
     str.AppendInt(DropDistance);
     str.Append("\n");
 
-    UKismetSystemLibrary::PrintString(GetOuter()->GetWorld(), str, true, false, FColor::White, 5);
+    //UKismetSystemLibrary::PrintString(GetOuter()->GetWorld(), str, true, false, FColor::White, 5);
 }
 
 //bool UInventoryComponent::MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination)

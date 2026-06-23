@@ -5,6 +5,8 @@
 
 #include "Character/GameCharacterBase.h"
 #include "Inventory/InventoryManager.h"
+#include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "ItemActor.h"
 
 #include "Engine/StaticMesh.h"

@@ -118,8 +118,8 @@ class PROTOGAME_API AGameCharacterBase : public ACharacter
 	UInvSpecialSlotComponent* SecondaryGunSlot;
 
 	//what is currently in hands
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Inventory)
-	UInvSpecialSlotComponent* ActiveSlot;
+	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Inventory)
+	//UInvSpecialSlotComponent* ActiveSlot;
 
 public:
 	AGameCharacterBase(const class FObjectInitializer& ObjectInitializer);

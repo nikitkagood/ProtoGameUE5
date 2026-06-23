@@ -40,15 +40,20 @@ bool UInvSpecialSlotComponent::AddItem(UItemBase* item)
 		item->Rotate();
 	}
 
-	OnInventoryUpdated.Broadcast();
+	OnInventoryUpdated.Broadcast(this);
 
 	return true;
 }
 
 void UInvSpecialSlotComponent::Clear()
 {
+	if (IsValid(Item))
+	{
+		Item->OnUnEquipped();
+	}
+
 	Item = nullptr;
-	OnInventoryUpdated.Broadcast();
+	OnInventoryUpdated.Broadcast(this);
 }
 
 UItemBase* UInvSpecialSlotComponent::GetItem() const
@@ -83,7 +88,7 @@ bool UInvSpecialSlotComponent::MoveItemToInventory(UItemBase* item, TScriptInter
 {
 	if(destination.GetObject() == this || item != GetItem())
 	{
-		OnInventoryUpdated.Broadcast(); //Update even if we fail
+		OnInventoryUpdated.Broadcast(this); //Update even if we fail
 		return false;
 	}
 
@@ -93,7 +98,7 @@ bool UInvSpecialSlotComponent::MoveItemToInventory(UItemBase* item, TScriptInter
 		return true;
 	}
 
-	OnInventoryUpdated.Broadcast(); 
+	OnInventoryUpdated.Broadcast(this);
 
 	return false;
 }
@@ -154,7 +159,7 @@ bool UInvSpecialSlotComponent::DropItemToWorld(UItemBase* item)
 		//can't spawn, do not delete from inventory
 		UKismetSystemLibrary::PrintString(owner_actor, "Drop to world is blocked", true, true, FLinearColor(130, 5, 255), 4);
 
-		OnInventoryUpdated.Broadcast(); //Update even if we fail since DragAndDrop operation already destroyed the widget
+		OnInventoryUpdated.Broadcast(this); //Update even if we fail since DragAndDrop operation already destroyed the widget
 		return false;
 	}
 

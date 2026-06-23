@@ -1,15 +1,18 @@
 // Nikita Belov, All rights reserved
 
 #include "Item/WeaponGun.h"
+#include "Item/WeaponGunActor.h"
 #include "Item/Projectile.h"
-#include "Character/GameCharacterBase.h"
 #include "ItemActor.h"
+
 #include "Item/WeaponAttachment.h"
 #include "Item/WeaponAttachmentMagazine.h"
 #include "Animation/GunAnimInstance.h"
+
 #include "Engine/World.h"
 #include "TimerManager.h"
-#include "Item/WeaponGunActor.h"
+#include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 
 #include "Kismet/GameplayStatics.h"
 
@@ -474,6 +477,12 @@ bool UWeaponGun::OnEquipped(AActor* caller, USceneComponent* attach_mesh, const 
 		return false;
 	}
 
+	if (WeaponGunActorCached.IsValid())
+	{
+		//There is already spawned ItemActor
+		return false;
+	}
+
 	FItemActorSpawnParameters spawn_params;
 	spawn_params.Interactible = false;
 	spawn_params.MoveOwnershipItemObject = false;
@@ -493,6 +502,16 @@ bool UWeaponGun::OnEquipped(AActor* caller, USceneComponent* attach_mesh, const 
 	}
 
 	return false;
+}
+
+bool UWeaponGun::OnUnEquipped()
+{
+	if (WeaponGunActorCached.IsValid())
+	{
+		WeaponGunActorCached->Destroy();
+	}
+
+	return true;
 }
 
 bool UWeaponGun::MoveItemToInventory(UItemBase* item, TScriptInterface<IInventoryInterface> destination, FIntPoint new_upper_left_cell)

@@ -45,7 +45,7 @@ public:
 	virtual bool DropItemToWorld(UItemBase* item) override;
 	//new_upper_left_cell is ignored
 	virtual bool ReceiveItem(UItemBase* item, FIntPoint new_upper_left_cell) override;
-	virtual void UpdateInventory() override { OnInventoryUpdated.Broadcast(); };
+	virtual void UpdateInventory() override { OnInventoryUpdated.Broadcast(this); };
 	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const override;
 	virtual UObject* GetInventoryOwner() override { return GetOuter(); };
 	//TODO: Implement

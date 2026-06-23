@@ -113,7 +113,7 @@ public:
 	//virtual bool ReceiveItem(UItemBase* item) override;
 	virtual bool ReceiveItem(UItemBase* item, FIntPoint new_upper_left_cell) override;
 	virtual void UpdateStackDependencies(UItemBase* item, int32 new_stack_size) override;
-	virtual void UpdateInventory() override { OnInventoryUpdated.Broadcast(); };
+	virtual void UpdateInventory() override { OnInventoryUpdated.Broadcast(this); };
 	//Since InventoryComponent is ActorComponent, it can only have Actors as Owner/Outer
 	//Thus you can't get hierarchy from InventoryComponent and there is no point it calling this method (at the moment at least)
 	virtual TScriptInterface<IInventoryInterface> GetOuterUpstreamInventory() const override { return nullptr; };

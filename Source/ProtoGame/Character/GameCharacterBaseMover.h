@@ -29,6 +29,7 @@ class UInvSpecialSlotComponent;
 class UItemBase;
 class UInventoryItem;
 class AItemActor;
+class UShapeComponent;
 
 //From GameCharacterBase
 enum class EMovementInputToggleFlags : uint8;
@@ -107,8 +108,8 @@ private:
 	//UInvSpecialSlotComponent* SecondaryGunSlot;
 
 	//what is currently in hands
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Inventory")
-	UInvSpecialSlotComponent* ActiveSlot;
+	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = "Inventory")
+	//UInvSpecialSlotComponent* ActiveSlot;
 
 public:
 	AGameCharacterBaseMover(const class FObjectInitializer& ObjectInitializer);

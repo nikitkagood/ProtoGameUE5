@@ -20,7 +20,7 @@ struct FInventoryGuid {
 
 //to be declared in each class individually with UPROPERTY(BlueprintAssignable) due to interface limitations
 //note that any inventory is responsible for refreshing UI
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnInventoryUpdated);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnInventoryUpdated, UObject*, inventory);
 
 UINTERFACE(MinimalAPI, meta = (CannotImplementInterfaceInBlueprint))
 class UInventoryInterface : public UInterface

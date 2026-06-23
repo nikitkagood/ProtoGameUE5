@@ -205,6 +205,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual bool OnEquipped(AActor* caller, USceneComponent* attach_mesh, const FName& socket_name) { return false; };
 
+	UFUNCTION(BlueprintCallable)
+	virtual bool OnUnEquipped() { return false; };
+
 	//Interfaces
 
 	UFUNCTION(BlueprintCallable)
