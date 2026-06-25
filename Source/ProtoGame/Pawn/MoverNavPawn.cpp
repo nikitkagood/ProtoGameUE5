@@ -44,8 +44,8 @@ void AMoverNavPawn::BeginPlay()
 
 	if (APlayerController* PC = Cast<APlayerController>(Controller))
 	{
-		PC->PlayerCameraManager->ViewPitchMax = 89.9;
-		PC->PlayerCameraManager->ViewPitchMin = -89.9;
+		PC->PlayerCameraManager->ViewPitchMax = 89.9f;
+		PC->PlayerCameraManager->ViewPitchMin = -89.9f;
 	}
 
 
@@ -141,7 +141,7 @@ void AMoverNavPawn::ProduceInput_Implementation(int32 SimTimeMs, FMoverInputCmdC
 
 
 
-	static float RotationMagMin(1e-3);
+	static float RotationMagMin(1e-3f);
 
 	const bool bHasAffirmativeMoveInput = (CharacterInputs.GetMoveInput().Size() >= RotationMagMin);
 

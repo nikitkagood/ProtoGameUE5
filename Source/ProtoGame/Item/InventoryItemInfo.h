@@ -73,7 +73,7 @@ struct PROTOGAME_API FInventoryItemInfo : public FTableRowBase
 	//SINGULAR, has to be multiplied by stack
 	//in kg, only MassMaxPrecision decimal places are relevant, everything else is rounded
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true", ClampMin = 0))
-	float Mass = 0.001;
+	float Mass = 0.001f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (AllowPrivateAccess = "true", ClampMin = 0))
 	float BasePrice = 0;

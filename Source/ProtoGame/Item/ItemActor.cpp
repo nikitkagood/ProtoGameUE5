@@ -6,6 +6,7 @@
 #include "Components/PrimitiveComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Animation/AnimInstance.h"
 
 #include "Kismet/GameplayStatics.h"
 
@@ -35,6 +36,7 @@ AItemActor::AItemActor()
 		SkeletalMeshComp->SetupAttachment(SceneComponent, {});
 
 		SkeletalMeshComp->bCollideWithAttachedChildren = false;
+		//SkeletalMeshComp->CollisionSources = ;
 
 		SkeletalMeshComp->SetEnableGravity(true);
 		SkeletalMeshComp->SetSimulatePhysics(true);

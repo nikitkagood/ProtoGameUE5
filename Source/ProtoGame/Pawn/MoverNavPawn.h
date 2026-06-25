@@ -124,7 +124,7 @@ public:
 	//VInterpTo: 0.002 is suitable for something on foot and almost instantly changes direction
 	//VInterpConstTO: more like 45 or so
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)
-	float MovementVelocityInterpSpd = 0.002;
+	float MovementVelocityInterpSpd = 0.002f;
 
 	// Whether or not we author our movement inputs relative to whatever base we're standing on, or leave them in world space
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Movement)

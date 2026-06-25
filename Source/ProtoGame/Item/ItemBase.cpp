@@ -336,7 +336,7 @@ bool UItemBase::SetOuterUpstreamInventory(TScriptInterface<IInventoryInterface> 
 
 bool UItemBase::SetOuterItemActor(AItemActor* item_actor)
 { 
-	return this->Rename(nullptr, item_actor->_getUObject()); 
+	return this->Rename(nullptr, Cast<UObject>(item_actor));
 }
 
 FItemThumbnailInfo UItemBase::GetItemThumbnailInfoFromDT()

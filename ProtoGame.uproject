@@ -1,6 +1,6 @@
 {
 	"FileVersion": 3,
-	"EngineAssociation": "5.7",
+	"EngineAssociation": "5.8",
 	"Category": "",
 	"Description": "",
 	"Modules": [
@@ -269,7 +269,7 @@
 		},
 		{
 			"Name": "StructUtils",
-			"Enabled": true
+			"Enabled": false
 		},
 		{
 			"Name": "MotionTrajectory",
@@ -289,7 +289,7 @@
 		},
 		{
 			"Name": "GizmoEdMode",
-			"Enabled": true
+			"Enabled": false
 		}
 	],
 	"TargetPlatforms": [

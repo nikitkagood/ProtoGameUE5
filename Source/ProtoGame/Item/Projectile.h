@@ -34,7 +34,7 @@ public:
 protected:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"))
-	float MassInKg = 0.004;
+	float MassInKg = 0.004f;
 };
 
 

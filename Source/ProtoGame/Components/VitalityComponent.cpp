@@ -76,12 +76,12 @@ void UVitalityComponent::SetupDefaults()
 
 	EnergyMax = 100;
 	Energy = EnergyMax;
-	EnergyDrainSpeed = 0.01;
+	EnergyDrainSpeed = 0.01f;
 	bEnergyRanOut = false;
 
 	HydrationMax = 100;
 	Hydration = HydrationMax;
-	HydrationDrainSpeed = 0.012;
+	HydrationDrainSpeed = 0.012f;
 	bHydrationRanOut = false;
 }
 
@@ -145,33 +145,33 @@ void UVitalityComponent::OnNoHealth()
 
 void UVitalityComponent::CalculateStamina(float DeltaTime)
 {
-	AGameCharacterBase* CharacterOwner = Cast<AGameCharacterBase>(GetOwner());
+	//AGameCharacterBase* CharacterOwner = Cast<AGameCharacterBase>(GetOwner());
 
-	if(bUsingStamina == true && 
-		(CharacterOwner->GetCharacterMovement()->IsMovingOnGround() && 
-		(CharacterOwner->GetInputAxisValue("MoveRight") != 0 || CharacterOwner->GetInputAxisValue("MoveForward") != 0)))
-	{
-		if(Stamina > 0)
-		{
-			Stamina -= StaminaDrainSpeed * DeltaTime;
-		}
-		else
-		{
-			Stamina = 0;
-			//NoStaminaEvent.Execute();
-		}
-	}
-	else //regen
-	{
-		if(Stamina < StaminaMax)
-		{
-			Stamina += StaminaDrainSpeed * DeltaTime;
-		}
-		else
-		{
-			Stamina = StaminaMax;
-		}
-	}
+	//if(bUsingStamina == true && 
+	//	(CharacterOwner->GetCharacterMovement()->IsMovingOnGround() && 
+	//	(CharacterOwner->GetInputAxisValue("MoveRight") != 0 || CharacterOwner->GetInputAxisValue("MoveForward") != 0)))
+	//{
+	//	if(Stamina > 0)
+	//	{
+	//		Stamina -= StaminaDrainSpeed * DeltaTime;
+	//	}
+	//	else
+	//	{
+	//		Stamina = 0;
+	//		//NoStaminaEvent.Execute();
+	//	}
+	//}
+	//else //regen
+	//{
+	//	if(Stamina < StaminaMax)
+	//	{
+	//		Stamina += StaminaDrainSpeed * DeltaTime;
+	//	}
+	//	else
+	//	{
+	//		Stamina = StaminaMax;
+	//	}
+	//}
 }
 
 void UVitalityComponent::OnNoStamina()
