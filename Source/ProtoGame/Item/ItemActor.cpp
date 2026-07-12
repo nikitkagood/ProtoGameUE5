@@ -43,6 +43,7 @@ AItemActor::AItemActor()
 		SkeletalMeshComp->CanCharacterStepUpOn = ECanBeCharacterBase::ECB_No;
 		SkeletalMeshComp->SetGenerateOverlapEvents(true);
 		SkeletalMeshComp->SetCollisionProfileName("Item");
+		SkeletalMeshComp->SetTickGroup(ETickingGroup::TG_PrePhysics);
 	}
 
 	SetRootComponent(SceneComponent);

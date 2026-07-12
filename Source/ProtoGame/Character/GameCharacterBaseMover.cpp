@@ -89,14 +89,6 @@ AGameCharacterBaseMover::AGameCharacterBaseMover(const class FObjectInitializer&
 	//[/Script/Engine.CollisionProfile]
 	//GetCharacterMesh()->SetCollisionResponseToChannel(ECollisionChannel::ECC_GameTraceChannel3, ECollisionResponse::ECR_Ignore);
 
-	InHandsSkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("InHands SkeletalMesh"));
-	InHandsSkeletalMesh->SetupAttachment(GetMesh(), TEXT("ik_hand_gun"));
-	InHandsSkeletalMesh->SetOnlyOwnerSee(false);
-
-	OnBackSkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("OnBack SkeletalMesh"));
-	OnBackSkeletalMesh->SetupAttachment(GetMesh(), TEXT("OnBack SkeletalMesh"));
-	OnBackSkeletalMesh->SetOnlyOwnerSee(false);
-
 	//BackpackMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Backpack Mesh"));
 	//BackpackMesh->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	//BackpackMesh->SetupAttachment(GetCharacterMesh(), TEXT("BackpackSocket"));
@@ -133,7 +125,7 @@ void AGameCharacterBaseMover::EndPlay(const EEndPlayReason::Type EndPlayReason)
 
 void AGameCharacterBaseMover::Tick(float DeltaTime)
 {
-
+	Super::Tick(DeltaTime);
 }
 
 
@@ -180,41 +172,41 @@ void AGameCharacterBaseMover::Tick(float DeltaTime)
 //}
 
 
-bool AGameCharacterBaseMover::EquipGun(UItemBase* item)
-{
-	if (!IsValid(GetMesh()))
-	{
-		checkf(false, TEXT("AGameCharacterBaseMover::EquipGun: Main Mesh not valid"));
-		return false;
-	}
-
-	if (item->IsA<UWeaponGun>() == false)
-	{
-		return false;
-	}
-
-	bool result = false;
-
-	if (item->GetOuterUpstreamInventory().GetObject()->IsA<UInvSpecialSlotComponent>())
-	{
-		//De-equip
-		//result = item->GetOuterUpstreamInventory()->MoveItemToInventory(item, InventoryComponent);
-		//result = InventoryManager->MoveItemToInventory(item, EManagerInventoryType::InventoryComponent);
-	}
-	else
-	{
-		//Equip (move to SpecialSlot)
-		//result = item->GetOuterUpstreamInventory()->MoveItemToInventory(item, PrimaryGunSlot);
-		if (result == false)
-		{
-			//result = item->GetOuterUpstreamInventory()->MoveItemToInventory(item, SecondaryGunSlot);
-		}
-	}
-
-	//UpdateAllWeaponSlots();
-
-	return result;
-}
+//bool AGameCharacterBaseMover::EquipGun(UItemBase* item)
+//{
+//	if (!IsValid(GetMesh()))
+//	{
+//		checkf(false, TEXT("AGameCharacterBaseMover::EquipGun: Main Mesh not valid"));
+//		return false;
+//	}
+//
+//	if (item->IsA<UWeaponGun>() == false)
+//	{
+//		return false;
+//	}
+//
+//	bool result = false;
+//
+//	if (item->GetOuterUpstreamInventory().GetObject()->IsA<UInvSpecialSlotComponent>())
+//	{
+//		//De-equip
+//		//result = item->GetOuterUpstreamInventory()->MoveItemToInventory(item, InventoryComponent);
+//		//result = InventoryManager->MoveItemToInventory(item, EManagerInventoryType::InventoryComponent);
+//	}
+//	else
+//	{
+//		//Equip (move to SpecialSlot)
+//		//result = item->GetOuterUpstreamInventory()->MoveItemToInventory(item, PrimaryGunSlot);
+//		if (result == false)
+//		{
+//			//result = item->GetOuterUpstreamInventory()->MoveItemToInventory(item, SecondaryGunSlot);
+//		}
+//	}
+//
+//	//UpdateAllWeaponSlots();
+//
+//	return result;
+//}
 
 void AGameCharacterBaseMover::UseItem(UItemBase* item)
 {

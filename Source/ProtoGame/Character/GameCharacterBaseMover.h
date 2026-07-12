@@ -53,12 +53,6 @@ private:
 	USkeletalMeshComponent* CharacterMesh;
 
 
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Mesh)
-	USkeletalMeshComponent* InHandsSkeletalMesh;
-
-	UPROPERTY(EditInstanceOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Mesh)
-	USkeletalMeshComponent* OnBackSkeletalMesh;
-
 	//Intended to be both Static or Skeletal but this has be decided in class constructor
 	//So in Editor there won't be option
 	//UPROPERTY(VisibleInstanceOnly, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Mesh)
@@ -135,8 +129,7 @@ public:
 
 	//also de-equips
 	//TODO: refactor into: set -> binded event 
-	bool EquipGun(UItemBase* item);
-
+	//bool EquipGun(UItemBase* item);
 
 	UFUNCTION(BlueprintCallable, Category = "Items")
 	void UseItem(UItemBase* item);

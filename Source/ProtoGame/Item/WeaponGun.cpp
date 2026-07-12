@@ -495,6 +495,8 @@ bool UWeaponGun::OnEquipped(AActor* caller, USceneComponent* attach_mesh, const 
 	if (spawned_actor)
 	{
 		auto attach_result = spawned_actor->AttachToComponent(attach_mesh, { EAttachmentRule::SnapToTarget, true }, socket_name);
+		attach_mesh->AddTickPrerequisiteComponent(spawned_actor->GetSkeletalMeshComp());
+		//spawned_actor->SetTickGroup(ETickingGroup::TG_PrePhysics);
 
 		WeaponGunActorCached = Cast<AWeaponGunActor>(spawned_actor);
 

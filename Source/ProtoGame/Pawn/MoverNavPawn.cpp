@@ -139,8 +139,6 @@ void AMoverNavPawn::ProduceInput_Implementation(int32 SimTimeMs, FMoverInputCmdC
 	ControlInputVector = FVector::ZeroVector;
 	CachedMoveInputVelocity = FVector::ZeroVector;
 
-
-
 	static float RotationMagMin(1e-3f);
 
 	const bool bHasAffirmativeMoveInput = (CharacterInputs.GetMoveInput().Size() >= RotationMagMin);

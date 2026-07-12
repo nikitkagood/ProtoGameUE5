@@ -84,6 +84,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Movement)
 	virtual void RequestMoveByVelocity(const FVector& DesiredVelocity) { CachedMoveInputVelocity = DesiredVelocity; }
 
+	UFUNCTION(BlueprintCallable)
 	UCharacterMoverComponent* GetCharacterMoverComponent() { return CharacterMoverComponent; }
 
 	//Finds Mover's properties - DefaultSyncState, mutable
