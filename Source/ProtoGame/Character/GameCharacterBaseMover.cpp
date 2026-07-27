@@ -66,8 +66,8 @@ AGameCharacterBaseMover::AGameCharacterBaseMover(const class FObjectInitializer&
 	FirstPersonCameraComponent->bUsePawnControlRotation = true;
 	//FirstPersonCameraComponent->AttachToComponent(GetCharacterMesh(), FAttachmentTransformRules(EAttachmentRule::KeepRelative, false));
 
-	SpringArm_FPCam = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm_FPCam"));
-	SpringArm_FPCam->SetupAttachment(GetMesh());
+	//SpringArm_FPCam = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm_FPCam"));
+	//SpringArm_FPCam->SetupAttachment(GetMesh());
 
 
 	VitalityComponent = CreateDefaultSubobject<UVitalityComponent>(TEXT("Vitality Component"));

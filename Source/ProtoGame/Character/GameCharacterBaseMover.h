@@ -68,8 +68,8 @@ private:
 	//UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = Inventory, meta = (AllowPrivateAccess = "true"))
 	//AItemActor* StowedOnBackActor;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Camera)
-	USpringArmComponent* SpringArm_FPCam;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Camera)
+	//USpringArmComponent* SpringArm_FPCam;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta = (AllowPrivateAccess = "true"), Category = Camera)
 	UCameraComponent* FirstPersonCameraComponent;
