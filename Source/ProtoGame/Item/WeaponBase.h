@@ -29,8 +29,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual TSubclassOf<UAnimInstance> GetAnimClass() const { check(false); return nullptr; };
 
-	UFUNCTION()
-	virtual void OnAttack() { check(false); };
+	//General API for all weapons: guns, melee - whatever
+	UFUNCTION(BlueprintCallable)
+	virtual void Attack() { check(false); };
+
+	UFUNCTION(BlueprintCallable)
+	virtual void EndAttack() { check(false); };
 
 	virtual TArray<EInteractionActions> GetInteractionActions() const override;
 

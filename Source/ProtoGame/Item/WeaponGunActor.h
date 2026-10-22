@@ -37,6 +37,8 @@ protected:
 	//It's a temporary solution
 	virtual bool SpawnProjectile(TSubclassOf<AProjectile> projectile_class, const FTransform& transform);
 
+	virtual void SpawnMassProjectile(TSubclassOf<AProjectile> projectile_class, const FTransform& transform);
+
 	const FWeaponGunActorInfo& GetWeaponGunActorInfo();
 
 	UPROPERTY(BlueprintReadWrite, EditDefaultsOnly, NoClear, Category = "WeaponGunActor", meta = (AllowPrivateAccess = true))

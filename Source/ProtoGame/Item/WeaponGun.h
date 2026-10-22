@@ -60,7 +60,8 @@ public:
 	FOnInventoryUpdated OnInventoryUpdated;
 
 public:
-	virtual void OnAttack() override { StartFire(); };
+	virtual void Attack() override { StartFire(); };
+	virtual void EndAttack() override { EndFire(); };
 
 	//Weapon controls
 
@@ -115,7 +116,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	virtual bool IsFunctional() { return weapon_gun_info.bFunctional; }
 
+	UFUNCTION(BlueprintCallable)
 	virtual void StartFire();
+
+	UFUNCTION(BlueprintCallable)
 	virtual void EndFire();
 
 	UFUNCTION(BlueprintCallable)
@@ -143,6 +147,7 @@ protected:
 	//TODO: make it DOD and FireManager or smth
 	//Should not be called directly, call StartFire
 	virtual void OnFire();
+
 
 	//void SpawnMuzzleFlash(USkeletalMeshComponent* sk_comp) const;
 

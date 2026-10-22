@@ -9,6 +9,7 @@
 #include "Item/WeaponAttachmentMagazine.h"
 
 #include "Kismet/GameplayStatics.h"
+#include "Components/SkeletalMeshComponent.h"
 
 
 TArray<EInteractionActions> UWeaponBase::GetInteractionActions() const

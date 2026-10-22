@@ -1,4 +1,4 @@
-// Nikita Belov, All rights reserved
+﻿// Nikita Belov, All rights reserved
 
 #include "WeaponGunActor.h"
 #include "Animation/GunAnimInstance.h"
@@ -6,8 +6,13 @@
 #include "Item/WeaponInfo.h"
 
 #include "Engine/World.h"
+#include "GameFramework/Pawn.h"
 #include "Kismet/GameplayStatics.h"
 #include "Components/SkeletalMeshComponent.h"
+
+#include "MassEntitty/FireSystem/FireSystemFragments.h"
+#include "MassEntityManager.h"
+#include "MassEntitty/FireSystem/FireSystemSubsystem.h"
 
 #include "Item/WeaponGun.h"
 
@@ -29,56 +34,49 @@ void AWeaponGunActor::OnFire()
 			return;
 		}
 
+		auto& weapon_gun_info = weapon_gun->GetWeaponInfoConst();
 
-		auto weapon_gun_info = weapon_gun->GetWeaponInfoConst();
-
-		if (weapon_gun_info.bHasChamber)
+		if (weapon_gun_info.bHasChamber && weapon_gun_info.Chamber != nullptr)
 		{
-			if (weapon_gun_info.Chamber != nullptr)
+			if (weapon_gun_info.Chamber->GetProjectileClass() == nullptr)
 			{
-				if (weapon_gun_info.Chamber->GetProjectileClass() == nullptr)
-				{
-					checkf(false, TEXT("Projectile isn't assigned, can't fire."));
-					return;
-				}
-
-				//Usually Rotation is simply relative X-forward, but not SocketRotation due to bones may be oriented wrong
-				SpawnProjectile(weapon_gun_info.Chamber->GetProjectileClass(), { sk_comp->GetComponentRotation(), sk_comp->GetSocketLocation(GetWeaponGunActorInfo().gun_bone_names.MuzzleEnd), {1,1,1} });
-
-				SpawnMuzzleFlash(GetWeaponGunActorInfo().MuzzleFlash, GetWeaponGunActorInfo().MuzzleLight);
-
-				if (GetWeaponGunActorInfo().FireSound != nullptr)
-				{
-					const FVector muzzle_sound_offset = { -5.f, 0.f, 0.f }; //play sound a bit behind the muzzle end
-					UGameplayStatics::PlaySoundAtLocation(this, GetWeaponGunActorInfo().FireSound, sk_comp->GetSocketLocation(GetWeaponGunActorInfo().gun_bone_names.MuzzleEnd) - muzzle_sound_offset);
-				}
-
-				//LoadAmmoIntoChamberFromMag();
+				checkf(false, TEXT("Projectile isn't assigned, can't fire."));
+				return;
 			}
-			else //dry fire sound
+
+			//Usually Rotation is simply relative X-forward, but not SocketRotation due to bones may be oriented wrong
+			//SpawnProjectile(weapon_gun_info.Chamber->GetProjectileClass(), { sk_comp->GetComponentRotation(), sk_comp->GetSocketLocation(GetWeaponGunActorInfo().gun_bone_names.MuzzleEnd), {1,1,1} });
+			SpawnMassProjectile(weapon_gun_info.Chamber->GetProjectileClass(), 
+				{ sk_comp->GetComponentRotation(), sk_comp->GetSocketLocation(GetWeaponGunActorInfo().gun_bone_names.MuzzleEnd), {1,1,1} });
+
+
+			SpawnMuzzleFlash(GetWeaponGunActorInfo().MuzzleFlash, GetWeaponGunActorInfo().MuzzleLight);
+
+			if (GetWeaponGunActorInfo().FireSound != nullptr)
 			{
-				UGameplayStatics::SpawnSoundAttached(GetWeaponGunActorInfo().DryFireSound, sk_comp, "root", {}, EAttachLocation::SnapToTarget);
+				const FVector muzzle_sound_offset = { -5.f, 0.f, 0.f }; //play sound a bit behind the muzzle end
+				UGameplayStatics::PlaySoundAtLocation(this, GetWeaponGunActorInfo().FireSound, sk_comp->GetSocketLocation(GetWeaponGunActorInfo().gun_bone_names.MuzzleEnd) - muzzle_sound_offset);
+			}
+
+			//LoadAmmoIntoChamberFromMag();
+			
+			//animation
+
+			return;
+
+		}
+		else //TODO: if no chamber 
+		{
+			//mag -> top round is valid
+			if (false)
+			{
+				return;
 			}
 		}
-		else //if no chamber 
-		{
-			//FActorSpawnParameters ActorSpawnParams;
-			//ActorSpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-			////TODO: Temporary
-			//World->SpawnActor<AProjectile>(weapon_gun_info.AmmoType, WeaponSkeletalMeshComp->GetSocketLocation("b_gun_muzzleflash"), WeaponSkeletalMeshComp->GetSocketRotation("b_gun_muzzleflash"), ActorSpawnParams);
-
-			//SpawnMuzzleFlash();
-
-			//if(weapon_gun_info.FireSound != nullptr)
-			//{
-			//	const FVector muzzle_sound_offset = {-5.f, 0.f, 0.f}; //play sound a bit behind the muzzle end
-			//	UGameplayStatics::PlaySoundAtLocation(this, weapon_gun_info.FireSound, WeaponSkeletalMeshComp->GetSocketLocation("b_gun_muzzleflash") - muzzle_sound_offset);
-			//}
-		}
+		//dry fire
+		UGameplayStatics::SpawnSoundAttached(GetWeaponGunActorInfo().DryFireSound, sk_comp, "root", {}, EAttachLocation::SnapToTarget);
 	}
-
-	
 	
 }
 
@@ -130,8 +128,14 @@ bool AWeaponGunActor::SpawnProjectile(TSubclassOf<AProjectile> projectile_class,
 	ActorSpawnParams.Instigator = Cast<APawn>(GetOwner()); //Simple attempt to get the Pawn as Instigator, may fail
 	ActorSpawnParams.bAllowDuringConstructionScript = false; //We should not be shooting at this point
 
-	//GetWorld()->SpawnActor<AProjectile>(weapon_gun_info.Chamber->GetProjectileClass(), sk_comp->GetSocketLocation("b_gun_muzzleflash"), sk_comp->GetComponentRotation(), ActorSpawnParams);
 	return GetWorld()->SpawnActor<AProjectile>(projectile_class, transform, ActorSpawnParams) != nullptr;
+}
+
+void AWeaponGunActor::SpawnMassProjectile(TSubclassOf<AProjectile> projectile_class, const FTransform& transform)
+{
+	check(UFireSystemSubsystem::Get());
+
+	UFireSystemSubsystem::Get()->SpawnEntity(transform);
 }
 
 const FWeaponGunActorInfo& AWeaponGunActor::GetWeaponGunActorInfo()
