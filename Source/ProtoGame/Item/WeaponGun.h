@@ -146,7 +146,7 @@ protected:
 
 	//TODO: make it DOD and FireManager or smth
 	//Should not be called directly, call StartFire
-	virtual void OnFire();
+	virtual void Fire();
 
 
 	//void SpawnMuzzleFlash(USkeletalMeshComponent* sk_comp) const;

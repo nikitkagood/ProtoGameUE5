@@ -16,6 +16,6 @@ class PROTOGAME_API AWeaponBaseActor : public AItemActor
 public:
 
 	UFUNCTION(BlueprintCallable)
-	virtual void OnAttack() { check(false); };
+	virtual void Attack() { check(false); };
 	
 };

@@ -21,7 +21,7 @@ AWeaponGunActor::AWeaponGunActor()
 
 }
 
-void AWeaponGunActor::OnFire()
+void AWeaponGunActor::Fire()
 {
 	if (item_actor_mesh_type == ItemActorMeshType::SkeletalMesh)
 	{
@@ -89,28 +89,37 @@ void AWeaponGunActor::BeginPlay()
 
 void AWeaponGunActor::SpawnMuzzleFlash(UParticleSystem* MuzzleFlash, TSubclassOf<AEffectBase> muzzle_light)
 {
+	//Order: light first, emitter second. Otherwise a weird bug will occur: emitter location will be slightly off (UE 4.27)
+	const FActorSpawnParameters actor_spawn_params;
+
+	//Adjust location to account for muzzle device
+	//hardcoded for now
+	const float MOVE_LIGHT_SPAWN_LOCATION = -1.f;
+
+	const auto LOCATION = GetSkeletalMeshComp()->GetSocketLocation(GetWeaponGunActorInfo().gun_bone_names.MuzzleEnd);
+
+	const auto ROTATION = GetSkeletalMeshComp()->GetComponentRotation(); //sometimes SocketRotation is wrong, most of the time it's x forward and that's it
+
+	ensureMsgf(!(LOCATION == GetSkeletalMeshComp()->GetComponentLocation()), TEXT("AWeaponGunActor::SpawnMuzzleFlash: Muzzle flash is in gun's root, check bone name"));
+
+	//TODO: refactor, spawning whole new Actor is overkill
+	if (IsValid(muzzle_light))
+	{
+		const auto LIGHT_LOCATION = LOCATION + ROTATION.Vector() * MOVE_LIGHT_SPAWN_LOCATION;
+
+		auto light_actor = GetWorld()->SpawnActor(muzzle_light.Get(), &LIGHT_LOCATION, &ROTATION, actor_spawn_params);
+
+		if (IsValid(light_actor))
+		{
+			light_actor->AttachToComponent(GetSkeletalMeshComp(), FAttachmentTransformRules::KeepWorldTransform, 
+				GetWeaponGunActorInfo().gun_bone_names.MuzzleEnd);
+		}
+	}
+
 	if (MuzzleFlash != nullptr)
 	{
-		//Order: light first, emitter second. Otherwise a weird bug will occur: emitter location will be slightly off (UE 4.27)
-		const FActorSpawnParameters actor_spawn_params;
-
-		//Adjust location to account for muzzle device
-		//hardcoded for now
-		const float MOVE_LIGHT_SPAWN_LOCATION = -1.f;
-
-		//const auto rotation = SK_WeaponRepresentation->GetSocketRotation("b_gun_muzzleflash");
-		const auto rotation = GetSkeletalMeshComp()->GetComponentRotation(); //sometimes SocketRotation is wrong, most of the time it's x forward and that's it
-
-		if (IsValid(muzzle_light))
-		{
-			const auto light_location = GetSkeletalMeshComp()->GetSocketLocation(GetWeaponGunActorInfo().gun_bone_names.MuzzleEnd) + rotation.Vector() * MOVE_LIGHT_SPAWN_LOCATION;
-
-			auto light_actor = GetWorld()->SpawnActor(muzzle_light.Get(), &light_location, &rotation, actor_spawn_params);
-			light_actor->AttachToComponent(GetSkeletalMeshComp(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, GetWeaponGunActorInfo().gun_bone_names.MuzzleEnd);
-		}
-
-		//auto* emitter = UGameplayStatics::SpawnEmitterAttached(weapon_gun_info.MuzzleFlash, SK_WeaponRepresentation, "b_gun_muzzleflash", SK_WeaponRepresentation->GetSocketLocation("b_gun_muzzleflash"), rotation, EAttachLocation::SnapToTarget);
-		auto* emitter = UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, GetSkeletalMeshComp(), GetWeaponGunActorInfo().gun_bone_names.MuzzleEnd, GetSkeletalMeshComp()->GetSocketLocation(GetWeaponGunActorInfo().gun_bone_names.MuzzleEnd), rotation, EAttachLocation::KeepWorldPosition);
+		auto* emitter = UGameplayStatics::SpawnEmitterAttached(MuzzleFlash, GetSkeletalMeshComp(), GetWeaponGunActorInfo().gun_bone_names.MuzzleEnd, 
+			LOCATION, ROTATION, EAttachLocation::KeepWorldPosition);
 
 		if (emitter == nullptr)
 		{
@@ -133,7 +142,7 @@ bool AWeaponGunActor::SpawnProjectile(TSubclassOf<AProjectile> projectile_class,
 
 void AWeaponGunActor::SpawnMassProjectile(TSubclassOf<AProjectile> projectile_class, const FTransform& transform)
 {
-	check(UFireSystemSubsystem::Get());
+	//check(UFireSystemSubsystem::Get());
 
 	UFireSystemSubsystem::Get()->SpawnEntity(transform);
 }

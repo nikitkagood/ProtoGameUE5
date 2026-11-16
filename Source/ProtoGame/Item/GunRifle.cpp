@@ -49,38 +49,38 @@ void UGunRifle::StartFire()
 		switch(weapon_gun_info.FireMode)
 		{
 		case EWeaponFireMode::Single:
-			OnFire();
+			Fire();
 			break;
 		case EWeaponFireMode::Auto:
-			GetWorld()->GetTimerManager().SetTimer(OnFireTimerHandle, this, &UGunRifle::OnFire, rate, true, 0.f);
+			GetWorld()->GetTimerManager().SetTimer(OnFireTimerHandle, this, &UGunRifle::Fire, rate, true, 0.f);
 			break;
 		case EWeaponFireMode::AutoSlow:
-			GetWorld()->GetTimerManager().SetTimer(OnFireTimerHandle, this, &UGunRifle::OnFire, rate / 2, true, 0.f);
+			GetWorld()->GetTimerManager().SetTimer(OnFireTimerHandle, this, &UGunRifle::Fire, rate / 2, true, 0.f);
 			break;
 		case EWeaponFireMode::TwoRoundBurst:
-			GetWorld()->GetTimerManager().SetTimer(OnFireTimerHandle, this, &UGunRifle::OnFire, rate, true, 0.f);
+			GetWorld()->GetTimerManager().SetTimer(OnFireTimerHandle, this, &UGunRifle::Fire, rate, true, 0.f);
 			GetWorld()->GetTimerManager().SetTimer(BurstFireTimerHandle, this, &UGunRifle::EndFire, rate, false, rate * 2);
 			break;
 		case EWeaponFireMode::ThreeRoundBurst:
-			GetWorld()->GetTimerManager().SetTimer(OnFireTimerHandle, this, &UGunRifle::OnFire, rate, true, 0.f);
+			GetWorld()->GetTimerManager().SetTimer(OnFireTimerHandle, this, &UGunRifle::Fire, rate, true, 0.f);
 			GetWorld()->GetTimerManager().SetTimer(BurstFireTimerHandle, this, &UGunRifle::EndFire, rate, false, rate * 3);
 			break;
 		case EWeaponFireMode::FourRoundBurst:
-			GetWorld()->GetTimerManager().SetTimer(OnFireTimerHandle, this, &UGunRifle::OnFire, rate, true, 0.f);
+			GetWorld()->GetTimerManager().SetTimer(OnFireTimerHandle, this, &UGunRifle::Fire, rate, true, 0.f);
 			GetWorld()->GetTimerManager().SetTimer(BurstFireTimerHandle, this, &UGunRifle::EndFire, rate, false, rate * 4);
 			break;
 		case EWeaponFireMode::FiveRoundBurst:
-			GetWorld()->GetTimerManager().SetTimer(OnFireTimerHandle, this, &UGunRifle::OnFire, rate, true, 0.f);
+			GetWorld()->GetTimerManager().SetTimer(OnFireTimerHandle, this, &UGunRifle::Fire, rate, true, 0.f);
 			GetWorld()->GetTimerManager().SetTimer(BurstFireTimerHandle, this, &UGunRifle::EndFire, rate, false, rate * 5);
 			break;
 		case EWeaponFireMode::SpecialMode1:
-			OnFire();
+			Fire();
 			break;
 		case EWeaponFireMode::SpecialMode2:
-			OnFire();
+			Fire();
 			break;
 		case EWeaponFireMode::SpecialMode3:
-			OnFire();
+			Fire();
 			break;
 		default:
 			//also Safe
@@ -105,9 +105,9 @@ void UGunRifle::PrintWeaponStats()
 	//UKismetSystemLibrary::PrintString(GetWorld(), msg, true, true, FLinearColor(206, 245, 66), 2);
 }
 
-void UGunRifle::OnFire()
+void UGunRifle::Fire()
 {
-	Super::OnFire();
+	Super::Fire();
 }
 
 bool UGunRifle::AddAttachment(UWeaponAttachment* attachment)

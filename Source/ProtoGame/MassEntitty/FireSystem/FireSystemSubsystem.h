@@ -15,6 +15,8 @@
 
 #include "FireSystemSubsystem.generated.h" 
 
+class UNiagaraDataChannel;
+
 
 UCLASS(BlueprintType, ClassGroup = FireSystem)
 class PROTOGAME_API UFireSystemSubsystem : public UMassSubsystemBase
@@ -26,6 +28,8 @@ public:
 
     FORCEINLINE static const UFireSystemSubsystem* Get() { return Instance; }
 
+    UNiagaraDataChannel* GetProjectileNDC() const { return ProjectileNDC; };
+
     //Fire system entity, a bullet, shell etc.
     void SpawnEntity(const FTransform& transform) const;
 
@@ -34,6 +38,10 @@ public:
 protected:
     virtual void Initialize(FSubsystemCollectionBase& Collection) override;
 
+    //Note that it's hardcoded path to asset
+    //The fields are mandatory aswell, but currently it's not checked until Write
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Niagara")
+    TObjectPtr<UNiagaraDataChannel> ProjectileNDC = nullptr;
 private:
     //Might be bugged if multiple worlds
     static UFireSystemSubsystem* Instance;

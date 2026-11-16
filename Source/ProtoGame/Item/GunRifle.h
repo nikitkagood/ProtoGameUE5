@@ -71,7 +71,7 @@ public:
 	//Debug
 	void PrintWeaponStats();
 protected:
-	virtual void OnFire();
+	virtual void Fire() override;
 private:
 	bool AddAttachment(UWeaponAttachment* attachment);
 

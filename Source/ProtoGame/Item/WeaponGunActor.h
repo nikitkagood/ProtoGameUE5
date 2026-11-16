@@ -23,14 +23,15 @@ class PROTOGAME_API AWeaponGunActor : public AWeaponBaseActor
 public:
 	AWeaponGunActor();
 
-	virtual void OnAttack() { OnFire(); };
+	virtual void Attack() override { Fire(); };
 
 	UFUNCTION(BlueprintCallable)
-	virtual void OnFire();
+	virtual void Fire();
 
 protected:
 	virtual void BeginPlay() override;
 
+	//TODO: refactor, spawning whole new Actor for light is overkill
 	virtual void SpawnMuzzleFlash(UParticleSystem* MuzzleFlash, TSubclassOf<AEffectBase> muzzle_light = nullptr);
 
 	//TODO: make it DOD

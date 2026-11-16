@@ -55,38 +55,38 @@ void UWeaponGun::StartFire()
 		switch(weapon_gun_info.FireMode)
 		{
 		case EWeaponFireMode::Single:
-			OnFire();
+			Fire();
 			break;
 		case EWeaponFireMode::Auto:
-			GetWorld()->GetTimerManager().SetTimer(OnFireTimerHandle, this, &UWeaponGun::OnFire, rate, true, 0.f);
+			GetWorld()->GetTimerManager().SetTimer(OnFireTimerHandle, this, &UWeaponGun::Fire, rate, true, 0.f);
 			break;
 		case EWeaponFireMode::AutoSlow:
-			GetWorld()->GetTimerManager().SetTimer(OnFireTimerHandle, this, &UWeaponGun::OnFire, rate / 2, true, 0.f);
+			GetWorld()->GetTimerManager().SetTimer(OnFireTimerHandle, this, &UWeaponGun::Fire, rate / 2, true, 0.f);
 			break;
 		case EWeaponFireMode::TwoRoundBurst:
-			GetWorld()->GetTimerManager().SetTimer(OnFireTimerHandle, this, &UWeaponGun::OnFire, rate, true, 0.f);
+			GetWorld()->GetTimerManager().SetTimer(OnFireTimerHandle, this, &UWeaponGun::Fire, rate, true, 0.f);
 			GetWorld()->GetTimerManager().SetTimer(BurstFireTimerHandle, this, &UWeaponGun::EndFire, rate, false, rate * 2);
 			break;
 		case EWeaponFireMode::ThreeRoundBurst:
-			GetWorld()->GetTimerManager().SetTimer(OnFireTimerHandle, this, &UWeaponGun::OnFire, rate, true, 0.f);
+			GetWorld()->GetTimerManager().SetTimer(OnFireTimerHandle, this, &UWeaponGun::Fire, rate, true, 0.f);
 			GetWorld()->GetTimerManager().SetTimer(BurstFireTimerHandle, this, &UWeaponGun::EndFire, rate, false, rate * 3);
 			break;
 		case EWeaponFireMode::FourRoundBurst:
-			GetWorld()->GetTimerManager().SetTimer(OnFireTimerHandle, this, &UWeaponGun::OnFire, rate, true, 0.f);
+			GetWorld()->GetTimerManager().SetTimer(OnFireTimerHandle, this, &UWeaponGun::Fire, rate, true, 0.f);
 			GetWorld()->GetTimerManager().SetTimer(BurstFireTimerHandle, this, &UWeaponGun::EndFire, rate, false, rate * 4);
 			break;
 		case EWeaponFireMode::FiveRoundBurst:
-			GetWorld()->GetTimerManager().SetTimer(OnFireTimerHandle, this, &UWeaponGun::OnFire, rate, true, 0.f);
+			GetWorld()->GetTimerManager().SetTimer(OnFireTimerHandle, this, &UWeaponGun::Fire, rate, true, 0.f);
 			GetWorld()->GetTimerManager().SetTimer(BurstFireTimerHandle, this, &UWeaponGun::EndFire, rate, false, rate * 5);
 			break;
 		case EWeaponFireMode::SpecialMode1:
-			OnFire();
+			Fire();
 			break;
 		case EWeaponFireMode::SpecialMode2:
-			OnFire();
+			Fire();
 			break;
 		case EWeaponFireMode::SpecialMode3:
-			OnFire();
+			Fire();
 			break;
 		default:
 			//also Safe
@@ -135,7 +135,7 @@ AWeaponGunActor* UWeaponGun::GetWeaponGunActor()
 	return WeaponGunActorCached.Get();
 }
 
-void UWeaponGun::OnFire()
+void UWeaponGun::Fire()
 {
 	USkeletalMeshComponent* sk_comp = nullptr;
 	auto gun_actor = GetWeaponGunActor();
@@ -160,7 +160,7 @@ void UWeaponGun::OnFire()
 				return;
 			}
 
-			gun_actor->OnFire();
+			gun_actor->Fire();
 
 			LoadAmmoIntoChamberFromMag();
 		}

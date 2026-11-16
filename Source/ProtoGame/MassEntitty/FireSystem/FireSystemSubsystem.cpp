@@ -4,16 +4,21 @@
 #include "MassCommandBuffer.h"
 #include "Engine/World.h"
 
+#include "NiagaraDataChannelAccessor.h"
+#include "NiagaraDataChannelAsset.h"
+
 UFireSystemSubsystem* UFireSystemSubsystem::Instance = nullptr; 
 
 void UFireSystemSubsystem::SpawnEntity(const FTransform& transform) const
 {
     FTransformFragment TransformFragment = transform;
 
-    const int32 MUZZLE_VELOCITY_PLACEHOLDER = 10;
+    const int32 MUZZLE_VELOCITY_PLACEHOLDER = 100;
 
     FMassVelocityFragment VelocityFragment;
     VelocityFragment.Value = transform.GetRotation().GetForwardVector() * MUZZLE_VELOCITY_PLACEHOLDER;
+
+    //volatile FVector VelocityDbg = transform.GetRotation().GetForwardVector() * MUZZLE_VELOCITY_PLACEHOLDER;
 
     // 3. Задаем начальную скорость полета снаряда
     //FMassVelocityFragment InitialVelocity;
@@ -54,4 +59,13 @@ void UFireSystemSubsystem::Initialize(FSubsystemCollectionBase& Collection)
     check(EntitySubsystem);
 
     CachedEntityManager = &EntitySubsystem->GetMutableEntityManager();
+   
+
+    //currently hardoded, unsure how to do it dynamically
+    UNiagaraDataChannelAsset* ProjectileChannelAsset = LoadObject<UNiagaraDataChannelAsset>(
+        nullptr, TEXT("/Game/Particles/NDC_MassProjectile.NDC_MassProjectile"));
+
+    ProjectileNDC = IsValid(ProjectileChannelAsset) ? ProjectileChannelAsset->Get() : nullptr;
+
+    checkf(ProjectileNDC, TEXT("Couldn't load /Game/Particles/NDC_MassProjectile.NDC_MassProjectile"));
 }

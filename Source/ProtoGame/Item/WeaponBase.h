@@ -69,13 +69,6 @@ public:
 	virtual FGameplayTagContainer GetInventoryTags() const override { return {}; };
 	//IInventoryInterface end
 
-public: 	
-	//Weapon controls
-
-	//virtual void StartFire() { check(false); return; };
-	//virtual void EndFire() { check(false); return; };
-
-	//class related
 protected:
 
 

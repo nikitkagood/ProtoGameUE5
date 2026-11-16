@@ -44,14 +44,16 @@ struct PROTOGAME_API FGunBoneNames : public FTableRowBase
 {
 	GENERATED_BODY()
 
+	//Absolute end, used for effects, might be used for bullets
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Bones")
 	FName MuzzleEnd = "muzzle_end";
 
+	//For example: muzzle breaks might have different location for effect, not muzzle end
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Bones")
 	FName MuzzleDevice = "muzzle_device";
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Bones")
-	FName GunBarrel = "muzzle_end";
+	FName GunBarrel = "gun_barrel";
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon Bones")
 	FName Magazine = "magazine";

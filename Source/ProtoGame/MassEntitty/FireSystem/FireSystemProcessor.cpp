@@ -50,83 +50,35 @@ void UFireSystemProcessor::ConfigureQueries(const TSharedRef<FMassEntityManager>
     //WeaponQuery.AddRequirement<FWeaponTransformFragment>(EMassFragmentAccess::ReadOnly);
 }
 
-void UFireSystemProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& Context)
+void UFireSystemProcessor::Execute(FMassEntityManager& EntityManager, FMassExecutionContext& GlobalContext)
 {
-    const float DeltaTime = Context.GetDeltaTimeSeconds();
+    const float DeltaTime = GlobalContext.GetDeltaTimeSeconds();
 
-    WeaponQuery.ForEachEntityChunk(Context, [DeltaTime](FMassExecutionContext& ChunkContext)
+    WeaponQuery.ForEachEntityChunk(GlobalContext, [DeltaTime](FMassExecutionContext& ChunkContext)
         {
-            // 1. Получаем ПЛОСКИЙ массив фрагментов из текущего чанка памяти
-            TArrayView<FFireTriggerFragment> BulletList = ChunkContext.GetMutableFragmentView<FFireTriggerFragment>();
             const int32 NumEntities = ChunkContext.GetNumEntities();
 
-            // 2. Линейный проход по массиву в кэше процессора (DOD в действии)
-            for (int32 i = 0; i < NumEntities; ++i)
+            if (NumEntities <= 0)
             {
+                return;
+            }
+
+            //TArrayView<FFireTriggerFragment> ProjectileList = ChunkContext.GetMutableFragmentView<FFireTriggerFragment>();
+
+            // 2. Линейный проход по массиву в кэше процессора (DOD в действии)
+            //for (int32 i = 0; i < NumEntities; ++i)
+            //{
                 //FBulletFragment& Bullet = BulletList[i];
 
-                //// Простая баллистика: добавляем гравитацию к скорости
                 //Bullet.Velocity += FVector(0.f, 0.f, -980.f) * DeltaTime;
 
-                //// Двигаем пулю вперед
                 //Bullet.Position += Bullet.Velocity * DeltaTime;
 
                 // ЗДЕСЬ ЖЕ можно делать быстрый Async Line Trace для коллизии
-            }
+            //}
         });
 
-    // 3. После этого кадра массив координат готов. 
+    //3. После этого кадра массив координат готов. 
     // Отдельная система соберет эти BulletList[i].Position и одной пачкой скинет в Niagara.
 }
 
-/*
-    WeaponQuery.ForEachEntityChunk(EntityManager, Context,
-
-        [this, &Context](FMassExecutionContext& ChunkContext)
-        {
-            TArrayView<FFireTriggerFragment> TriggerList = ChunkContext.GetMutableFragmentView<FFireTriggerFragment>();
-            TArrayView<FWeaponStatsFragment> StatsList = ChunkContext.GetMutableFragmentView<FWeaponStatsFragment>();
-            TConstArrayView<FWeaponTransformFragment> TransformList = ChunkContext.GetFragmentView<FWeaponTransformFragment>();
-
-            const int32 NumEntities = ChunkContext.GetNumEntities();
-            const float DeltaTime = ChunkContext.GetDeltaTimeSeconds();
-
-            FMassCommandBuffer& CommandBuffer = Context.Defer();
-
-            for (int32 i = 0; i < NumEntities; ++i)
-            {
-                FFireTriggerFragment& Trigger = TriggerList[i];
-                FWeaponStatsFragment& Stats = StatsList[i];
-                const FWeaponTransformFragment& WeaponTransform = TransformList[i];
-
-                Trigger.TimeSinceLastShot += DeltaTime;
-
-                if (Trigger.bIsTriggered && Trigger.TimeSinceLastShot >= Stats.FireRate && Stats.AmmoCount > 0)
-                {
-                    Trigger.TimeSinceLastShot = 0.f;
-
-                    //TODO: refactor
-                    Stats.AmmoCount--;
-
-                    //FMassEntityHandle NewBullet = CommandBuffer.CreateEntity(BulletArchetype);
-
-                    //FTransform BulletTransform;
-                    //BulletTransform.SetLocation(WeaponTransform.MuzzleLocation);
-                    //BulletTransform.SetRotation(WeaponTransform.FireDirection.ToOrientationQuat());
-
-                    //FTransformFragment BulletTransformFrag;
-                    //BulletTransformFrag.SetTransform(BulletTransform);
-                    //CommandBuffer.SetFragmentView(NewBullet, FConstStructView::Make(BulletTransformFrag));
-
-                    //FProjectileVelocityFragment BulletVelFrag;
-                    //BulletVelFrag.Velocity = WeaponTransform.FireDirection * Stats.MuzzleVelocity;
-                    //BulletVelFrag.GravityScale = 1.0f;
-                    //CommandBuffer.SetFragmentView(NewBullet, FConstStructView::Make(BulletVelFrag));
-
-                    //FBulletDamageFragment BulletDamageFrag;
-                    //BulletDamageFrag.Damage = Stats.BaseDamage;
-                    //BulletDamageFrag.InstigatorID = ChunkContext.GetEntity(i).Index;
-                    //CommandBuffer.SetFragmentView(NewBullet, FConstStructView::Make(BulletDamageFrag));
-                }
-            }
-        });*/

@@ -295,6 +295,22 @@
 		{
 			"Name": "GizmoEdMode",
 			"Enabled": false
+		},
+		{
+			"Name": "NetworkPredictionInsights",
+			"Enabled": true
+		},
+		{
+			"Name": "MessagingInsights",
+			"Enabled": true
+		},
+		{
+			"Name": "SlateInsights",
+			"Enabled": true
+		},
+		{
+			"Name": "WorldStreamingInsights",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [
